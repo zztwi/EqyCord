@@ -12,6 +12,7 @@ import { AddonCard } from "@components/settings/AddonCard";
 import { Plugin } from "@utils/types";
 import { ToastPosition } from "@vencord/discord-types/enums";
 import { React, showToast } from "@webpack/common";
+import { PluginMeta } from "~plugins";
 
 import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
@@ -25,6 +26,8 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
+    // Upstream plugins retain their Vencord attribution; local userplugins are EqyCord additions.
+    const origin = PluginMeta[plugin.name]?.userPlugin ? "EqyCord" : "Vencord";
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -80,6 +83,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         <AddonCard
             name={plugin.name}
             description={plugin.description}
+            author={<span className={cl("origin", { "origin-eqycord": origin === "EqyCord" })}>{origin}</span>}
             isNew={isNew}
             enabled={isEnabled()}
             setEnabled={toggleEnabled}
