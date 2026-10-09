@@ -30,11 +30,130 @@ const definePlugin = Object.assign(plugin => plugin, { OptionType: { BOOLEAN: 1,
 const definePluginSettings = def => ({ def, store: Object.fromEntries(Object.entries(def).map(([key, option]) => [key, option.default ?? option.options?.find(o => o.default)?.value])) });
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
+test("renamed plugin settings migrate without overriding current values", async () => {
+    const { migrateEqyPluginNames } = await load("src/shared/eqyPluginNames.ts");
+    const plugins = { EqyAutoTranslate: { enabled: true, targetLanguage: "it" }, EqyVoiceTools: { enabled: true }, AutoTranslate: { enabled: false }, Other: { enabled: true } };
+    migrateEqyPluginNames(plugins);
+    assert.deepEqual(plugins, { AutoTranslate: { enabled: false }, VoiceTool: { enabled: true }, Other: { enabled: true } });
+});
+
+test("message index searches all chats, respects scope/permissions, and updates/deletes old content", async () => {
+    const { MessageIndex } = await load("src/shared/messageSearch.ts");
+    const index = new MessageIndex(2);
+    const message = (id, channelId, content, timestamp = 1) => ({ id, channelId, content, timestamp, authorId: "me", author: "Me", attachments: [] });
+    index.upsert(message("1", "a", "Caffè con Marco"));
+    index.upsert(message("2", "b", "Caffè domani", 2));
+    assert.deepEqual(index.search({ query: "caffe" }).map(m => m.id), ["2", "1"]);
+    assert.deepEqual(index.search({ query: "caffe", channelId: "a" }).map(m => m.id), ["1"]);
+    assert.deepEqual(index.search({ query: "caffe" }, channel => channel === "a").map(m => m.id), ["1"]);
+    index.upsert(message("1", "a", "Modificato"));
+    assert.deepEqual(index.search({ query: "caffe" }).map(m => m.id), ["2"]);
+    index.upsert(message("3", "c", "nuovo"));
+    assert.equal(index.size, 2);
+    assert.deepEqual(index.search({ query: "caffe" }), []);
+    index.removeChannel("a"); assert.equal(index.size, 1);
+    index.clear(); assert.equal(index.size, 0);
+});
+
+test("related messages rank meaningful shared words and attachments retain only text for identical URLs", async () => {
+    const { MessageIndex, keywords, parseSearchResponse } = await load("src/shared/messageSearch.ts");
+    assert.deepEqual(keywords("Come stai? Ho perso il contratto contratto firmato"), ["contratto", "firmato", "perso", "stai"]);
+    const index = new MessageIndex();
+    const base = { channelId: "a", authorId: "me", author: "Me", timestamp: 1, attachments: [] };
+    index.upsert({ ...base, id: "1", content: "contratto firmato" });
+    index.upsert({ ...base, id: "2", content: "contratto" });
+    index.upsert({ ...base, id: "3", content: "ciao", attachments: [{ id: "f", filename: "documento.pdf", url: "url" }] });
+    assert.deepEqual(index.search({ query: "contratto firmato", mode: "related", excludeId: "3" }).map(m => m.id), ["1", "2"]);
+    index.setAttachmentText("3", "f", "fattura marzo");
+    assert.equal(index.search({ query: "fattura", mode: "attachments" })[0].id, "3");
+    index.upsert({ ...base, id: "3", content: "edited", attachments: [{ id: "f", filename: "documento.pdf", url: "url" }] });
+    assert.equal(index.search({ query: "fattura", mode: "attachments" }).length, 1);
+    index.upsert({ ...base, id: "3", content: "edited", attachments: [{ id: "f", filename: "documento.pdf", url: "new-url" }] });
+    assert.equal(index.search({ query: "fattura", mode: "attachments" }).length, 0);
+    assert.deepEqual(parseSearchResponse({ messages: [[{ id: "1", hit: true }, { id: "2", hit: false }]], total_results: 1 }).messages.map(m => m.id), ["1"]);
+    assert.throws(() => parseSearchResponse({ messages: "bad" }));
+});
+
+test("voice rolling buffer respects duration, byte bounds, clear and produces PCM WAV", async () => {
+    const { RollingAudio, pcmWav } = await load("src/plugins/voiceReplay/buffer.ts");
+    const buffer = new RollingAudio(30, 5);
+    buffer.push({ bytes: new Uint8Array(3), timestamp: 1000, mime: "audio/webm" });
+    buffer.push({ bytes: new Uint8Array(3), timestamp: 2000, mime: "audio/webm" });
+    assert.equal(buffer.count, 1);
+    assert.equal(buffer.snapshot(30, 33000).length, 0);
+    buffer.push({ bytes: new Uint8Array(1), timestamp: 34000, mime: "audio/webm" });
+    assert.equal(buffer.snapshot(1, 34000).length, 1);
+    buffer.clear(); assert.equal(buffer.count, 0);
+    const wav = Buffer.from(pcmWav(new Float32Array([-2, 0, 2])));
+    assert.equal(wav.toString("ascii", 0, 4), "RIFF"); assert.equal(wav.readUInt32LE(24), 16000);
+    assert.equal(wav.readInt16LE(44), -32768); assert.equal(wav.readInt16LE(48), 32767);
+});
+
+async function searchSetup(get) {
+    let account = "me";
+    const subscriptions = new Map();
+    const common = {
+        UserStore: { getCurrentUser: () => account ? { id: account } : undefined, getUser: () => ({ username: "person" }) },
+        ChannelStore: { getChannel: id => id === "dm" ? { isPrivate: () => true, isDM: () => true, recipients: ["person"] } : undefined, getMutablePrivateChannels: () => ({ dm: {} }), getMutableGuildChannelsForGuild: () => ({}) },
+        GuildStore: { getGuilds: () => ({}) }, MessageStore: { getMessage: () => undefined, getMessages: () => ({ _array: [] }) },
+        SelectedChannelStore: { getChannelId: () => "dm" }, PrivateChannelSortStore: { getPrivateChannelIds: () => ["dm"] },
+        PermissionStore: {}, PermissionsBits: {}, RestAPI: { get },
+        FluxDispatcher: { subscribe: (event, callback) => subscriptions.set(event, callback), unsubscribe: event => subscriptions.delete(event) }
+    };
+    const service = await load("src/utils/messageSearchService.ts", { "@webpack/common": common });
+    service.acquireSearch("test");
+    return { service, subscriptions, switchAccount() { account = "other"; } };
+}
+
+test("history search uses DM endpoint, advances pages, and drops results after cancellation/account switch", async () => {
+    const calls = [];
+    const s = await searchSetup(async args => { calls.push(args); return { status: 200, body: { messages: [[{ id: "1", hit: true, channel_id: "dm", content: "caffe", author: { id: "me", username: "me" }, attachments: [] }]] } }; });
+    const offsets = new Map(), controller = new AbortController();
+    await s.service.searchHistory({ query: "caffe" }, () => {}, controller.signal, offsets);
+    await s.service.searchHistory({ query: "caffe" }, () => {}, controller.signal, offsets);
+    assert.equal(calls[0].url, "/channels/dm/messages/search"); assert.equal(calls[1].query.offset, 25);
+    assert.equal(s.service.cachedSearch({ query: "caffe" }).length, 1);
+    s.switchAccount(); assert.equal(s.service.cachedSearch({ query: "caffe" }).length, 0);
+    controller.abort(); await assert.rejects(s.service.searchHistory({ query: "caffe" }, () => {}, controller.signal), /annullata/);
+    s.service.releaseSearch("test"); assert.equal(s.subscriptions.size, 0);
+    let resolve;
+    const pending = await searchSetup(() => new Promise(done => { resolve = done; }));
+    const run = pending.service.searchHistory({ query: "private" }, () => {}, new AbortController().signal);
+    pending.switchAccount();
+    resolve({ status: 200, body: { messages: [[{ id: "2", channel_id: "dm", content: "private", author: { id: "me" }, attachments: [] }]] } });
+    await assert.rejects(run, /annullata/);
+    assert.equal(pending.service.cachedSearch({ query: "private" }).length, 0);
+    pending.service.releaseSearch("test");
+});
+
+test("history search stops on rate limits and reports indexing without advancing pages", async () => {
+    const s = await searchSetup(async () => { throw { status: 429 }; });
+    await assert.rejects(s.service.searchHistory({ query: "hello" }, () => {}, new AbortController().signal), /limitato/);
+    s.service.releaseSearch("test");
+    const indexing = await searchSetup(async () => ({ status: 202 }));
+    const offsets = new Map();
+    const result = await indexing.service.searchHistory({ query: "hello" }, () => {}, new AbortController().signal, offsets);
+    assert.equal(result.indexing, 1); assert.equal(offsets.size, 0); indexing.service.releaseSearch("test");
+});
+
+test("conversation search patch leaves people results and appends message results once", async () => {
+    const plugin = (await load("src/plugins/messageSearch/index.tsx", {
+        "@api/Settings": { definePluginSettings }, "@components/MessageSearch": {}, "@utils/messageSearchService": {}, "@utils/types": definePlugin
+    })).default;
+    const root = process.env.EQYCORD_DISCORD_ASSETS;
+    const source = root ? readFileSync(`${root}/quickSwitcher.txt`, "utf8") : 'class Quick{render(){return [this.renderInput(),this.renderResults(),this.renderProtip()]}};const key="QUICK_SWITCHER_MODAL_KEY";';
+    const { match, replace } = plugin.patches[0].replacement;
+    assert.equal([...source.matchAll(new RegExp(match.source, "g"))].length, 1);
+    const patched = source.replace(match, replace.replaceAll("$self", "searchPlugin"));
+    assert.ok(patched.includes("this.renderResults(),searchPlugin.renderMessages(this.state.query),"));
+    new Function(root ? "return ({" + patched.slice(1) + "});" : patched);
+});
+
 async function autoSetup(provider = async () => ({ text: "ciao" })) {
     let modal, options, closed = 0;
     const providerSettings = { store: { autoTranslate: false, service: "google" } };
     const plugin = (await load("src/plugins/eqyAutoTranslate/index.tsx", {
-        "@api/Settings": { definePluginSettings },
+        "@api/Settings": { definePluginSettings, migratePluginSettings() {} },
         "@utils/types": definePlugin,
         "@plugins/translate/settings": { settings: providerSettings },
         "@plugins/translate/utils": { translate: provider },
@@ -165,7 +284,10 @@ test("upstream Translate defers to EqyAutoTranslate independently of listener or
 test("Vencord backup parser preserves unknown plugin data and rejects malformed/unsafe data", async () => {
     const { parseSettingsBackup } = await load("src/shared/eqySettingsBackup.ts");
     const fixture = JSON.parse(readFileSync("scripts/eqycord/backup.fixture.json", "utf8"));
-    assert.deepEqual(parseSettingsBackup(JSON.stringify(fixture)), fixture);
+    const expected = structuredClone(fixture);
+    expected.settings.plugins.AutoTranslate = expected.settings.plugins.EqyAutoTranslate;
+    delete expected.settings.plugins.EqyAutoTranslate;
+    assert.deepEqual(parseSettingsBackup(JSON.stringify(fixture)), expected);
     for (const data of ["null", "[]", "{}", '{"settings":[],"quickCss":""}', '{"settings":{"plugins":[]},"quickCss":""}', '{"settings":{"nested":{"__proto__":{}}},"quickCss":""}', '{"settings":{},"quickCss":false}']) {
         assert.throws(() => parseSettingsBackup(data));
     }
@@ -189,7 +311,9 @@ test("real backup import/export round trips and rolls back a failed CSS write", 
     assert.equal(css, "old-css");
     await offline.importSettings(data);
     const exported = JSON.parse(await offline.exportSettings());
-    assert.deepEqual(exported.settings.plugins, JSON.parse(data).settings.plugins);
+    const expected = JSON.parse(data).settings.plugins;
+    expected.AutoTranslate = expected.EqyAutoTranslate; delete expected.EqyAutoTranslate;
+    assert.deepEqual(exported.settings.plugins, expected);
     assert.equal(exported.quickCss, JSON.parse(data).quickCss);
     assert.deepEqual(PlainSettings, stored);
 });
@@ -199,6 +323,7 @@ async function ghostSetup() {
     const errors = [], sends = [];
     const React = { createElement: (type, props, ...children) => ({ type, props: { ...props, children } }), useSyncExternalStore: (_subscribe, snapshot) => snapshot() };
     const plugin = (await load("src/plugins/eqyVoiceTools/index.tsx", {
+        "@api/Settings": { migratePluginSettings() {} },
         "./styles.css": {},
         "@utils/types": definePlugin,
         "@components/ErrorBoundary": { wrap: component => component },
@@ -215,7 +340,7 @@ async function ghostSetup() {
     socket.voiceStateUpdate(local);
     const button = () => {
         const node = plugin.renderGhostButton();
-        return node.type().props.children[0]({});
+        return node.type().props.children[0]({}).props.children[0];
     };
     const acknowledge = (extra = {}) => plugin.flux.VOICE_STATE_UPDATES({ voiceStates: [{ userId: "me", sessionId: "current-session", channelId: channel, selfMute: true, selfDeaf: true, ...extra }] });
     return { plugin, socket, local, errors, sends, button, acknowledge, disconnect() { channel = null; plugin.flux.VOICE_CHANNEL_SELECT({ channelId: null }); } };

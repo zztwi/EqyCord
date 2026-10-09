@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const EQYCORD_PLUGINS = new Set(["EqyAutoTranslate", "EqyVoiceTools"]);
+export const EQYCORD_PLUGINS = new Set(["AutoTranslate", "VoiceTool", "MessageSearch", "RelatedMessages", "AttachmentSearch", "VoiceReplay", "EqyAutoTranslate", "EqyVoiceTools"]);
 
 export type PluginOrigin = "EqyCord" | "Vencord" | "Community";
 

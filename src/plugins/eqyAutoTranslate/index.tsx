@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { settings as vencordTranslateSettings } from "@plugins/translate/settings";
 import { translate } from "@plugins/translate/utils";
 import definePlugin, { OptionType } from "@utils/types";
@@ -32,6 +32,8 @@ const settings = definePluginSettings({
         ] as const
     }
 });
+
+migratePluginSettings("AutoTranslate", "EqyAutoTranslate");
 
 let running = false;
 let generation = 0;
@@ -81,7 +83,7 @@ function confirmTranslation(original: string, translated: string, language: stri
 }
 
 export default definePlugin({
-    name: "EqyAutoTranslate",
+    name: "AutoTranslate",
     description: "EqyCord: choose a language, preview outgoing translations, and approve before sending. Provider by Vencord Translate.",
     tags: ["Chat", "Utility"],
     // Owner-supplied display name; no Discord account ID is inferred. Upstream authors remain on Translate.
@@ -106,7 +108,7 @@ export default definePlugin({
         // cannot accidentally let an unapproved message through.
         try {
             if (vencordTranslateSettings.store.autoTranslate) {
-                showToast("EqyCord: turn off Auto Translate in Translate before using EqyAutoTranslate.", "failure");
+                showToast("EqyCord: turn off Auto Translate in Translate before using AutoTranslate.", "failure");
                 return { cancel: true };
             }
             const currentGeneration = generation;

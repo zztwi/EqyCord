@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+.eqycord-ghost-wrapper {
+    display: inline-flex;
+}
+
 .eqycord-ghost-button {
     display: inline-flex;
     flex-shrink: 0;
@@ -16,12 +20,12 @@
     border: 0;
     border-radius: 8px;
     background: transparent;
-    color: var(--interactive-normal);
+    color: var(--icon-primary, var(--text-primary, #dbdee1));
     cursor: pointer;
 
     &:hover {
         background: var(--background-modifier-hover);
-        color: var(--interactive-hover);
+        color: var(--icon-primary, var(--text-primary, #fff));
     }
 
     &[data-active="true"] {
@@ -32,7 +36,7 @@
     &[data-pending="true"] { opacity: 0.6; }
 
     &:disabled {
-        opacity: 0.4;
+        opacity: 0.65;
         cursor: default;
     }
 

@@ -9,7 +9,11 @@ Environment: Windows, Node.js 24.19.0, pnpm 11.25.0. package.json retains upstre
 - pnpm test after the corrections: passed (desktop standalone builds, TypeScript, ESLint, CSS lint, plugin metadata generation and EqyCord tests).
 - pnpm build: passed (regular Windows desktop build). Installer fixture tests also passed again against this desktop build.
 - pnpm buildWeb: passed; browser bundle, userscript, Chromium and Firefox extension packages generated.
-- pnpm testEqyCord: 23 tests passed, zero failures/skips on Windows, including Ghost lifecycle coverage.
+- pnpm testEqyCord with `EQYCORD_NATIVE_SMOKE=1` and the public Canary fixture: 34 tests passed, zero failures/skips on Windows. This includes DM-history API mocks, account/permission handling, QuickSwitcher patch parsing, Ghost lifecycle, local PNG and six-page PDF OCR, and real CPU Whisper transcription.
+- `pnpm install --frozen-lockfile`: passed after adding the new plugins; lockfile unchanged.
+- Windows OCR smoke test generated a local PNG (“EqyCord Search test 123”) and a six-page PDF. OCR found the image text and PDF pages 1–5, leaving out page 6 as configured.
+- Pinned Whisper CPU runtime: CLI help ran successfully; the multilingual tiny model transcribed an official JFK speech sample locally. This does not verify capture or transcription of real Discord voice audio.
+- Search patch: one unique QuickSwitcher insertion point in the public Canary Webpack module, patched module parses. Search and pagination tests use a mock REST response; no authenticated Discord DM search was made.
 - Live Google provider smoke test using the actual upstream Translate utility and a generic test string: Hello, world! -> Italian Ciao mondo! passed. Discord/native boundaries were mocked; this does not validate a live send or DeepL/Kagi.
 - Automated plugin preservation: all 418 files and 185 original definitions retained; original copyright and authors checked against upstream base 718c867256a9d181edc7a534afb296b9bb41ab58.
 - Actual plugin hooks executed with mocked Discord boundaries: approval, cancel, close, modal-manager close callback, plugin stop, changed draft, provider failure, conflicting translators, Ghost outgoing flags, current-user/current-session acknowledgement, native-state preservation, cancellation, channel/connection change, stop, timeout and failed socket.
@@ -26,8 +30,10 @@ The user confirmed continuing with a Vencord-style inject after the ToS discussi
 
 ## Required before a public release
 
-- Real Discord UI: all six sidebar panels, toggle/settings cards, responsive origin/status/tag combinations and author/source/license links.
+- Real Discord UI: all six sidebar panels, toggle/settings cards, responsive origin/status/tag combinations and author/source/license links. Check QuickSwitcher results, context menus and OCR controls in live Canary.
+- Authenticated Discord history search: verify the DM history route against the current account on Canary. Mocks validate URL, pagination, abort and rate-limit behavior; public Discord search docs describe guild search.
 - AutoTranslate in two accounts: actual provider success/failure, every modal dismissal, timeout, plugin disable, attachments/mentions, limits, other transforming plugins, repeated sends and retention of the composer draft on cancel.
+- VoiceReplay in actual Discord voice: loopback capture, gaps, replay, transcription speed/accuracy and cleanup on each event. The sample audio run and generated OCR fixtures validate the engines, not a real call.
 - Ghost in two accounts: observer's mute/deaf icons, audio reception/transmission, real native mute/deafen, Ghost off, channel change, reconnect and server restrictions. Hidden-audio behavior is not certified by the mocked/static tests.
 - Real clean Windows install/launch/uninstall and Discord update/repair on each available Stable/PTB/Canary channel; unsupported layouts must fail clearly.
 - Actual private Vencord backup, theme files and cloud integration with an explicitly authorized account/backend.

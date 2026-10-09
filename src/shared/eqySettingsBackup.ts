@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { migrateEqyPluginNames } from "./eqyPluginNames";
+
 function isRecord(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -25,6 +27,7 @@ export function parseSettingsBackup(data: string): { settings: Record<string, an
             pending.push(child);
         }
     }
+    if (isRecord(parsed.settings.plugins)) migrateEqyPluginNames(parsed.settings.plugins);
     // Preserve unknown upstream/plugin keys for migration and round trips.
     return { settings: parsed.settings, quickCss: parsed.quickCss };
 }

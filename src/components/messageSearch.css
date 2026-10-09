@@ -1,0 +1,55 @@
+/*
+ * EqyCord, a Discord client mod based on Vencord
+ * Copyright (c) 2026 EqyCord contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.eqy-search-panel, .eqy-search-quick {
+    color: var(--text-primary, #dbdee1);
+    padding: 12px;
+}
+
+.eqy-search-panel input:not([type="checkbox"]), .eqy-search-panel select {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--background-secondary, #232428);
+    color: inherit;
+    border: 1px solid var(--border-subtle, #555);
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+.eqy-search-panel button, .eqy-search-quick button {
+    color: inherit;
+    background: var(--background-secondary, #232428);
+    border: 1px solid var(--border-subtle, #555);
+    border-radius: 6px;
+    padding: 8px;
+    margin: 4px 0;
+    cursor: pointer;
+}
+
+.eqy-search-results {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.eqy-search-quick .eqy-search-results {
+    max-height: 160px;
+}
+
+.eqy-search-result {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: left;
+    gap: 4px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.eqy-search-panel button:disabled {
+    cursor: default;
+    opacity: 0.5;
+}

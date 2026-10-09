@@ -87,7 +87,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             description={plugin.description}
             author={(
                 <span title={origin === "Community" ? "See plugin source for license" : "GPL-3.0-or-later"}>
-                    <span className={cl("origin", { "origin-eqycord": origin === "EqyCord" })}>By {origin}</span>
+                    <span className={cl("origin", { "origin-eqycord": origin === "EqyCord" })}>{origin}</span>
                 </span>
             )}
             isNew={isNew}

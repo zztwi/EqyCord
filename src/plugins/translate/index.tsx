@@ -104,7 +104,8 @@ export default definePlugin({
     async onBeforeMessageSend(_, message) {
         // EqyCord's preview owns outgoing translation when opted in, regardless
         // of listener registration order. It handles conflicting auto modes.
-        if (Settings.plugins.EqyAutoTranslate?.enabled && Settings.plugins.EqyAutoTranslate?.translateOnSend) return;
+        const preview = Settings.plugins.AutoTranslate ?? Settings.plugins.EqyAutoTranslate;
+        if (preview?.enabled && preview?.translateOnSend) return;
         if (!settings.store.autoTranslate) return;
         if (!message.content) return;
 

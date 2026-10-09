@@ -6,6 +6,7 @@
 
 import "./styles.css";
 
+import { migratePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import definePlugin from "@utils/types";
 import { AuthenticationStore, MediaEngineStore, React, SelectedChannelStore, showToast, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
@@ -13,6 +14,7 @@ import { AuthenticationStore, MediaEngineStore, React, SelectedChannelStore, sho
 import { GhostController, VoiceSocket, VoiceState } from "./state";
 
 const ghost = new GhostController(() => SelectedChannelStore.getVoiceChannelId(), message => showToast(message, "failure"));
+migratePluginSettings("VoiceTool", "EqyVoiceTools");
 
 function GhostIcon() {
     return <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -35,8 +37,7 @@ const GhostButton = ErrorBoundary.wrap(() => {
             : ghost.pending ? "Ghost — waiting for confirmation; click to cancel"
                 : ghost.confirmed ? `Ghost active (experimental) · Microphone: ${muted ? "off" : "on"} · Audio: ${deafened ? "off" : "on"}`
                     : "Enable Ghost (experimental) — report muted and deafened without changing local audio";
-    return <Tooltip text={label}>{props => <button
-        {...props}
+    return <Tooltip text={label}>{props => <span {...props} className="eqycord-ghost-wrapper"><button
         className="eqycord-ghost-button"
         aria-label={label}
         aria-pressed={ghost.confirmed}
@@ -44,11 +45,11 @@ const GhostButton = ErrorBoundary.wrap(() => {
         data-pending={ghost.pending}
         disabled={!connected || !ghost.available}
         onClick={() => ghost.toggle()}
-    ><GhostIcon /></button>}</Tooltip>;
+    ><GhostIcon /></button></span>}</Tooltip>;
 }, { noop: true });
 
 export default definePlugin({
-    name: "EqyVoiceTools",
+    name: "VoiceTool",
     description: "EqyCord Ghost: an experimental voice-panel button that reports mute/deafen separately from local audio. Two-account audio verification required.",
     tags: ["Utility"],
     authors: [{ name: "0009cx0", id: 0n }],
