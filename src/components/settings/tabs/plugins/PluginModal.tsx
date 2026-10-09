@@ -24,8 +24,9 @@ import { useSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@shared/debounce";
-import { getPluginOrigin } from "@shared/eqyPluginOrigins";
+import { getPluginDisplayName, getPluginDisplayText, getPluginOrigin } from "@shared/eqyPluginOrigins";
 import { gitRemote } from "@shared/vencordUserAgent";
+import { EqyCordAuthors } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
@@ -83,6 +84,9 @@ function PluginTags({ tags }: { tags: PluginTag[]; }) {
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
     const pluginSettings = useSettings([`plugins.${plugin.name}.*`]).plugins[plugin.name];
     const hasSettings = hasAnyVisibleSettings(plugin);
+    const pluginMeta = PluginMeta[plugin.name];
+    const origin = getPluginOrigin(plugin.name, pluginMeta.userPlugin, pluginMeta.folderName);
+    const displayAuthors = origin === "EqyCord" ? EqyCordAuthors : plugin.authors;
 
     // avoid layout shift by showing dummy users while loading users
     const fallbackAuthors = useMemo(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })], []);
@@ -90,7 +94,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
     useEffect(() => {
         (async () => {
-            for (const user of plugin.authors.slice(0, 6)) {
+            for (const user of displayAuthors.slice(0, 6)) {
                 try {
                     const author = user.id
                         ? await UserUtils.getUser(String(user.id))
@@ -103,7 +107,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 }
             }
         })();
-    }, [plugin.authors]);
+    }, [displayAuthors]);
 
     function renderSettings() {
         const { settings } = plugin;
@@ -114,6 +118,21 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             if (setting.type === OptionType.CUSTOM) return null;
 
             if (isSettingHidden(settings, setting)) return null;
+
+            const displaySetting = origin === "EqyCord" && setting.type !== OptionType.COMPONENT
+                ? {
+                    ...setting,
+                    description: getPluginDisplayText(setting.description, origin),
+                    ...(setting.displayName && { displayName: getPluginDisplayText(setting.displayName, origin) }),
+                    ...(setting.placeholder && { placeholder: getPluginDisplayText(setting.placeholder, origin) }),
+                    ...(setting.type === OptionType.SELECT && {
+                        options: setting.options.map(option => ({
+                            ...option,
+                            label: getPluginDisplayText(option.label, origin)
+                        }))
+                    })
+                }
+                : setting;
 
             function onChange(newValue: any) {
                 const option = plugin.settings!.def[key];
@@ -129,7 +148,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <ErrorBoundary noop key={key}>
                     <Component
                         id={key}
-                        setting={setting}
+                        setting={displaySetting}
                         onChange={debounce(onChange)}
                         pluginSettings={pluginSettings}
                         definedSettings={settings}
@@ -147,12 +166,12 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     function renderMoreUsers(_label: string, count: number) {
-        const sliceCount = plugin.authors.length - count;
-        const sliceStart = plugin.authors.length - sliceCount;
-        const sliceEnd = sliceStart + plugin.authors.length - count;
+        const sliceCount = displayAuthors.length - count;
+        const sliceStart = displayAuthors.length - sliceCount;
+        const sliceEnd = sliceStart + displayAuthors.length - count;
 
         return (
-            <Tooltip text={plugin.authors.slice(sliceStart, sliceEnd).map(u => u.name).join(", ")}>
+            <Tooltip text={displayAuthors.slice(sliceStart, sliceEnd).map(u => u.name).join(", ")}>
                 {({ onMouseEnter, onMouseLeave }) => (
                     <div
                         className={AvatarStyles.moreUsers}
@@ -166,9 +185,6 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
         );
     }
 
-    const pluginMeta = PluginMeta[plugin.name];
-    const origin = getPluginOrigin(plugin.name, pluginMeta.userPlugin, pluginMeta.folderName);
-
     return (
         <Modal
             transitionState={transitionState}
@@ -176,7 +192,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             size="lg"
             title={
                 <div className={cl("header")}>
-                    <BaseText tag="h1" weight="semibold" size="lg">{plugin.name}</BaseText>
+            <BaseText tag="h1" weight="semibold" size="lg">{getPluginDisplayName(plugin.name, origin)}</BaseText>
                     {!pluginMeta.userPlugin && (
                         <div className="vc-settings-modal-links">
                             <FavoriteButton
@@ -198,7 +214,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             subtitle={
                 <div className={cl("info")}>
                     <div>
-                        <Forms.FormText>{plugin.description}</Forms.FormText>
+                        <Forms.FormText>{getPluginDisplayText(plugin.description, origin)}</Forms.FormText>
                         <Forms.FormText>{origin}{origin !== "Community" && " · GPL-3.0-or-later"}</Forms.FormText>
                         {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
                     </div>

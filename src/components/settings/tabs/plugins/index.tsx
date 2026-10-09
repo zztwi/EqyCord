@@ -27,7 +27,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
-import { matchesPluginOrigin, PluginOrigin } from "@shared/eqyPluginOrigins";
+import { getPluginDisplayName, getPluginDisplayText, getPluginOrigin, matchesPluginOrigin, PluginOrigin } from "@shared/eqyPluginOrigins";
 import { ChangeList } from "@utils/ChangeList";
 import { classNameFactory } from "@utils/css";
 import { isTruthy } from "@utils/guards";
@@ -187,6 +187,7 @@ function PluginSettings() {
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
         const { status, tags, origin } = searchValue;
+        const pluginOrigin = getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin, PluginMeta[plugin.name]?.folderName);
         if (!matchesPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin, origin, PluginMeta[plugin.name]?.folderName)) return false;
 
         switch (status) {
@@ -215,9 +216,9 @@ function PluginSettings() {
         if (!search.length) return true;
 
         return (
-            plugin.name.toLowerCase().includes(search) ||
-            plugin.name.match(/[A-Z]/g)?.join("").toLowerCase().includes(search) || // acronyms like BF for BetterFolders
-            plugin.description.toLowerCase().includes(search) ||
+            getPluginDisplayName(plugin.name, pluginOrigin).toLowerCase().includes(search) ||
+            getPluginDisplayName(plugin.name, pluginOrigin).match(/[A-Z]/g)?.join("").toLowerCase().includes(search) || // acronyms like BF for BetterFolders
+            getPluginDisplayText(plugin.description, pluginOrigin).toLowerCase().includes(search) ||
             plugin.searchTerms?.some(t => t.toLowerCase().includes(search))
         );
     };
