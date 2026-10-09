@@ -12,6 +12,18 @@ export function getPluginOrigin(_name: string, isUserPlugin?: boolean, folderNam
     return "Vencord";
 }
 
+export function getPluginDisplayText(text: string, origin: PluginOrigin): string {
+    if (origin !== "EqyCord") return text;
+
+    return text
+        .replace(/EquicordToolbox/gi, "EqyCord Toolbox")
+        .replace(/Equicord/gi, "EqyCord");
+}
+
+export function getPluginDisplayName(name: string, origin: PluginOrigin): string {
+    return getPluginDisplayText(name, origin);
+}
+
 export function matchesPluginOrigin(name: string, isUserPlugin: boolean | undefined, origin: PluginOrigin | "All", folderName?: string): boolean {
     return origin === "All" || getPluginOrigin(name, isUserPlugin, folderName) === origin;
 }

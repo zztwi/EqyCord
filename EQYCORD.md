@@ -6,7 +6,7 @@ EqyCord is an independent, unofficial Discord client modification. It is not aff
 
 EqyCord retains all 185 standard Vencord plugin definitions and imports all 200 Equicord plugin definitions from Equicord source commit `51eab49cce4566e51f65f29cc0eaae50efdd48d4`, together with the API modules they require. The imported plugin source has no duplicate plugin names in the retained Vencord inventory.
 
-The plugin origin filter has three first-party choices: **Vencord**, **EqyCord**, and **Community**. Imported Equicord modules are grouped under **EqyCord** in the plugin list. Their original authors, copyright notices, and GPL license headers are preserved in the source and plugin details; the EqyCord origin label does not change authorship.
+The plugin origin filter has three choices: **Vencord**, **EqyCord**, and **Community**. Imported Equicord modules are grouped under **EqyCord**. In plugin details, EqyCord-origin entries show the EqyCord profile `0009cx0` (Discord ID `380070146317877249`); Vencord plugin author displays are unchanged. Original copyright notices, source author metadata, and GPL license headers remain in the imported source. User-facing plugin names and descriptions replace the upstream Equicord brand with EqyCord while keeping internal plugin IDs stable.
 
 The earlier EqyCord prototype plugins have been removed, including the Ghost voice control, translation, search, and voice utility plugins. Standard Vencord plugins remain available. Platform-specific plugin exclusions still apply.
 

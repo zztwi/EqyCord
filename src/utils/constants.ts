@@ -61,6 +61,15 @@ export interface Dev {
     badge?: boolean;
 }
 
+// EqyCord display identity for the imported EqyCord-origin plugin catalog.
+// Original authorship and copyright notices remain in each imported source file.
+export const EqyCordAuthor: Dev = Object.freeze({
+    name: "0009cx0",
+    id: 380070146317877249n,
+    badge: false
+});
+export const EqyCordAuthors = Object.freeze([EqyCordAuthor]);
+
 /**
  * If you made a plugin or substantial contribution, add yourself here.
  * This object is used for the plugin author list, as well as to add a contributor badge to your profile.
