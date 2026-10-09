@@ -7,6 +7,7 @@
 import { showNotice } from "@api/Notices";
 import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
+import { getPluginOrigin } from "@shared/eqyPluginOrigins";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { Plugin } from "@utils/types";
@@ -27,7 +28,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
     // Upstream plugins retain their Vencord attribution; local userplugins are EqyCord additions.
-    const origin = plugin.name.startsWith("Eqy") || PluginMeta[plugin.name]?.userPlugin ? "EqyCord" : "Vencord";
+    const origin = getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin);
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
