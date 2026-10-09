@@ -194,27 +194,110 @@ test("real backup import/export round trips and rolls back a failed CSS write", 
     assert.deepEqual(PlainSettings, stored);
 });
 
-test("Voice Tools invokes normal Discord actions and does nothing while disconnected or stopped", async () => {
-    let connected = true, muted = false, deafened = false, calls = 0;
+async function ghostSetup() {
+    let channel = "voice", muted = false, deafened = false;
+    const errors = [], sends = [];
+    const React = { createElement: (type, props, ...children) => ({ type, props: { ...props, children } }), useSyncExternalStore: (_subscribe, snapshot) => snapshot() };
     const plugin = (await load("src/plugins/eqyVoiceTools/index.tsx", {
-        "@api/Settings": { definePluginSettings }, "@utils/types": definePlugin,
-        "@components/Button": { Button: "Button" }, "@components/Flex": { Flex: "Flex" }, "@components/Paragraph": { Paragraph: "Paragraph" },
-        "@webpack": { findByPropsLazy: () => ({ toggleSelfMute() { calls++; muted = !muted; }, toggleSelfDeaf() { calls++; deafened = !deafened; } }) },
-        "@webpack/common": { MediaEngineStore: { isSelfMute: () => muted, isSelfDeaf: () => deafened }, SelectedChannelStore: { getVoiceChannelId: () => connected ? "voice" : null }, useStateFromStores: (_stores, read) => read(), showToast() {} }
-    })).default;
+        "./styles.css": {},
+        "@utils/types": definePlugin,
+        "@components/ErrorBoundary": { wrap: component => component },
+        "@webpack/common": {
+            React, Tooltip: "Tooltip", MediaEngineStore: { isSelfMute: () => muted, isSelfDeaf: () => deafened },
+            SelectedChannelStore: { getVoiceChannelId: () => channel }, UserStore: { getCurrentUser: () => ({ id: "me" }) },
+            AuthenticationStore: { getSessionId: () => "current-session" },
+            useStateFromStores: (_stores, read) => read(), showToast: message => errors.push(message)
+        }
+    }, { React })).default;
+    const socket = { isSessionEstablished: () => true, voiceStateUpdate: state => sends.push(plugin.prepareVoiceState(state, socket)) };
     plugin.start();
-    const controls = plugin.settings.def.controls.component;
-    const buttons = () => controls().props.children[2].props.children;
-    buttons()[0].props.onClick();
-    buttons()[1].props.onClick();
-    assert.equal(muted, true);
-    assert.equal(deafened, true);
-    assert.equal(calls, 2);
-    connected = false;
-    assert.equal(buttons()[0].props.disabled, true);
-    buttons()[0].props.onClick();
-    connected = true;
-    plugin.stop();
-    buttons()[1].props.onClick();
-    assert.equal(calls, 2);
+    const local = { channelId: channel, guildId: "guild", selfMute: muted, selfDeaf: deafened, selfVideo: true, flags: 8 };
+    socket.voiceStateUpdate(local);
+    const button = () => {
+        const node = plugin.renderGhostButton();
+        return node.type().props.children[0]({});
+    };
+    const acknowledge = (extra = {}) => plugin.flux.VOICE_STATE_UPDATES({ voiceStates: [{ userId: "me", sessionId: "current-session", channelId: channel, selfMute: true, selfDeaf: true, ...extra }] });
+    return { plugin, socket, local, errors, sends, button, acknowledge, disconnect() { channel = null; plugin.flux.VOICE_CHANNEL_SELECT({ channelId: null }); } };
+}
+
+test("Ghost changes only reported flags, waits for own session acknowledgement and restores current local state", async () => {
+    const s = await ghostSetup();
+    assert.equal(s.button().props.disabled, false);
+    s.button().props.onClick();
+    assert.equal(s.button().props["aria-pressed"], false);
+    assert.deepEqual(s.sends.at(-1), { ...s.local, selfMute: true, selfDeaf: true });
+    assert.equal(s.local.selfMute, false);
+    assert.equal(s.local.selfDeaf, false);
+    s.acknowledge({ userId: "other" });
+    s.acknowledge({ sessionId: "other-session" });
+    assert.equal(s.button().props["aria-pressed"], false);
+    s.acknowledge();
+    assert.equal(s.button().props["aria-pressed"], true);
+    assert.equal(s.plugin.displayedVoiceFlag(false), true);
+    s.socket.voiceStateUpdate({ ...s.local, selfMute: true });
+    s.button().props.onClick();
+    assert.equal(s.sends.at(-1).selfMute, true);
+    assert.equal(s.sends.at(-1).selfDeaf, false);
+    assert.equal(s.plugin.displayedVoiceFlag(false), false);
+    s.plugin.stop();
+});
+
+test("Ghost resets on channel change, connection loss and plugin stop; never activates while disconnected", async () => {
+    const s = await ghostSetup();
+    s.button().props.onClick(); s.acknowledge();
+    s.plugin.stop();
+    assert.equal(s.sends.at(-1).selfDeaf, false);
+    assert.equal(s.button().props.disabled, true);
+    s.plugin.start(); s.socket.voiceStateUpdate(s.local);
+    s.button().props.onClick(); s.acknowledge();
+    s.plugin.flux.CONNECTION_CLOSED();
+    assert.equal(s.button().props.disabled, true);
+    s.socket.voiceStateUpdate(s.local);
+    s.button().props.onClick(); s.acknowledge();
+    s.disconnect();
+    assert.equal(s.button().props.disabled, true);
+    assert.equal(s.plugin.prepareVoiceState({ ...s.local, channelId: "new" }, s.socket).selfDeaf, false);
+    s.plugin.stop();
+});
+
+test("Ghost confirmation timeout and failed socket restore normal status without persisting Ghost", async () => {
+    const { GhostController } = await load("src/plugins/eqyVoiceTools/state.ts");
+    const errors = [], sends = [];
+    const ghost = new GhostController(() => "voice", message => errors.push(message), 5);
+    const socket = { isSessionEstablished: () => true, voiceStateUpdate: state => sends.push(ghost.prepare(state, socket)) };
+    const local = { channelId: "voice", selfMute: false, selfDeaf: false };
+    ghost.start(); socket.voiceStateUpdate(local); ghost.toggle();
+    await new Promise(resolve => setTimeout(resolve, 20));
+    assert.equal(ghost.pending, false); assert.equal(ghost.confirmed, false);
+    assert.deepEqual(sends.at(-1), local); assert.equal(errors.length, 1);
+    socket.voiceStateUpdate = () => { throw Error("disconnected"); };
+    ghost.toggle(); assert.equal(ghost.pending, false); assert.equal(errors.length, 2);
+    ghost.stop();
+});
+
+test("Ghost patches insert one adjacent button and visual flags without replacing native voice handlers", async () => {
+    const s = await ghostSetup();
+    const { canonicalizeMatch, canonicalizeReplace } = await load("src/utils/patches.ts", { "./intlHash": { runtimeHashMessageKey: key => key } });
+    const root = process.env.EQYCORD_DISCORD_ASSETS;
+    const examples = [
+        'class Gateway{voiceStateUpdate(e){const payload={self_mute:e.selfMute,self_deaf:e.selfDeaf};this.send(4,payload)}voiceServerPing(){}}',
+        'function controls(p){let{selfDeaf:d,selfMute:m}=p;return jsx("div",{children:[jsx(Mic,{accountContainerRef:ref,selfMute:m,serverMute:s}),jsx(Deaf,{selfDeaf:d,serverDeaf:s,onClick:deaf,dismissTooltips:done}),null!=lazy.Component?jsx(lazy.Component,{}):settings()]})}obj.handleOpenSettingsContextMenu=fn;'
+    ];
+    for (const [index, patch] of s.plugin.patches.entries()) {
+        let source = root ? readFileSync(`${root}/${index ? "panel" : "gateway"}.txt`, "utf8") : examples[index];
+        assert.ok(canonicalizeMatch(patch.find) instanceof RegExp ? canonicalizeMatch(patch.find).test(source) : source.includes(patch.find));
+        for (const replacement of [patch.replacement].flat()) {
+            const regex = canonicalizeMatch(replacement.match);
+            assert.equal([...source.matchAll(new RegExp(regex.source, "g"))].length, 1, replacement.match.toString());
+            source = source.replace(regex, canonicalizeReplace(replacement.replace, "ghost"));
+        }
+        new Function(root ? "return ({" + source.slice(1) + "});" : source);
+        if (index) {
+            assert.ok(source.includes("ghost.renderGhostButton(),null!="));
+            assert.ok(source.includes("onClick:deaf") || source.includes("handleToggleSelfDeaf:this.handleToggleSelfDeaf"));
+        }
+    }
+    assert.ok(s.plugin.patches.length); // Upstream manager requests restart for patched plugins.
+    s.plugin.stop();
 });

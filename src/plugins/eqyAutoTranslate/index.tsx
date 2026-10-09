@@ -84,8 +84,8 @@ export default definePlugin({
     name: "EqyAutoTranslate",
     description: "EqyCord: choose a language, preview outgoing translations, and approve before sending. Provider by Vencord Translate.",
     tags: ["Chat", "Utility"],
-    // A collective credit, not a fabricated Discord account. Upstream authors remain on Translate.
-    authors: [{ name: "EqyCord contributors", id: 0n }],
+    // Owner-supplied display name; no Discord account ID is inferred. Upstream authors remain on Translate.
+    authors: [{ name: "0009cx0", id: 0n }],
     dependencies: ["Translate"],
     settings,
 

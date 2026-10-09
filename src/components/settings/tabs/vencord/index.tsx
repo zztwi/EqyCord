@@ -125,14 +125,7 @@ function VencordSettings() {
             <section className={Margins.bottom20}>
                 <Forms.FormTitle tag="h3">EqyCord</Forms.FormTitle>
                 <Forms.FormText>
-                    Your independent Discord client customization, with original EqyCord plugins alongside the Vencord plugin collection.
-                    EqyCord is based on the GPL-licensed Vencord project by Vendicated and contributors.
-                </Forms.FormText>
-                <Forms.FormText>
-                    Vencord's original credits and license remain part of this project.{" "}
-                    <a onClick={() => VencordNative.native.openExternal("https://github.com/Vendicated/Vencord")}>
-                        View original Vencord source
-                    </a>
+                    Customize your Discord experience with plugins, themes and EqyCord settings.
                 </Forms.FormText>
             </section>
 

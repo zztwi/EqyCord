@@ -28,7 +28,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
-    // Preserve authorship independently from the project's origin badge.
+    // Individual authors remain in plugin details and original sources.
     const origin = getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin);
 
     const isEnabled = () => isPluginEnabled(plugin.name);
@@ -87,8 +87,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             description={plugin.description}
             author={(
                 <span title={origin === "Community" ? "See plugin source for license" : "GPL-3.0-or-later"}>
-                    <span className={cl("origin", { "origin-eqycord": origin === "EqyCord" })}>{origin}</span>
-                    {" · "}{plugin.authors.map(author => author.name).join(", ")}
+                    <span className={cl("origin", { "origin-eqycord": origin === "EqyCord" })}>By {origin}</span>
                 </span>
             )}
             isNew={isNew}

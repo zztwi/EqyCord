@@ -1,0 +1,43 @@
+/*
+ * EqyCord, a Discord client mod based on Vencord
+ * Copyright (c) 2026 EqyCord contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.eqycord-ghost-button {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: 0 2px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--interactive-normal);
+    cursor: pointer;
+
+    &:hover {
+        background: var(--background-modifier-hover);
+        color: var(--interactive-hover);
+    }
+
+    &[data-active="true"] {
+        background: var(--brand-500);
+        color: white;
+    }
+
+    &[data-pending="true"] { opacity: 0.6; }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: default;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--text-link);
+        outline-offset: 2px;
+    }
+}

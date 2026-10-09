@@ -188,7 +188,7 @@ export function parseArguments(argv) {
 async function menu() {
     const prompt = createInterface({ input: process.stdin, output: process.stdout });
     try {
-        console.log("EqyCord — Vencord-based Windows injector\nRequires Node.js 22+. Close Discord before install/uninstall. Existing mods are not overwritten.");
+        console.log("EqyCord — Windows injector\nRequires Node.js 22+. Close Discord before install/uninstall. Existing mods are not overwritten.");
         const branch = (await prompt.question("Channel [stable / ptb / canary] (stable): ")).trim() || "stable";
         const action = (await prompt.question("Action [status / install / verify / uninstall] (status): ")).trim() || "status";
         return parseArguments([action, "--branch", branch]);

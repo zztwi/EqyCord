@@ -9,26 +9,28 @@ Environment: Windows, Node.js 24.19.0, pnpm 11.25.0. package.json retains upstre
 - pnpm test after the corrections: passed (desktop standalone builds, TypeScript, ESLint, CSS lint, plugin metadata generation and EqyCord tests).
 - pnpm build: passed (regular Windows desktop build). Installer fixture tests also passed again against this desktop build.
 - pnpm buildWeb: passed; browser bundle, userscript, Chromium and Firefox extension packages generated.
-- pnpm testEqyCord: 20 tests passed, zero failures/skips on Windows after adding upstream-preservation coverage.
+- pnpm testEqyCord: 23 tests passed, zero failures/skips on Windows, including Ghost lifecycle coverage.
 - Live Google provider smoke test using the actual upstream Translate utility and a generic test string: Hello, world! -> Italian Ciao mondo! passed. Discord/native boundaries were mocked; this does not validate a live send or DeepL/Kagi.
 - Automated plugin preservation: all 418 files and 185 original definitions retained; original copyright and authors checked against upstream base 718c867256a9d181edc7a534afb296b9bb41ab58.
-- Actual plugin hooks executed with mocked Discord boundaries: approval, cancel, close, modal-manager close callback, plugin stop, changed draft, provider failure, conflicting translators, ordinary voice actions and disconnected/stopped controls.
+- Actual plugin hooks executed with mocked Discord boundaries: approval, cancel, close, modal-manager close callback, plugin stop, changed draft, provider failure, conflicting translators, Ghost outgoing flags, current-user/current-session acknowledgement, native-state preservation, cancellation, channel/connection change, stop, timeout and failed socket.
+- Ghost account-panel and gateway patches checked against the public Canary web.460ec5f2eb74e503.js fetched on 9 October 2026: each match is unique; patched factories parse as JavaScript. This is a static compatibility check, not a live voice test. Repeat with EQYCORD_DISCORD_ASSETS pointing to locally extracted gateway.txt and panel.txt; default CI uses authored synthetic fixtures and does not fetch Discord code.
 - Translation workflow: identical output still previews; timeout, empty output, rejected modal, stale approval, DeepL English/Portuguese mapping tested.
 - Real offline import/export functions executed with mocked storage: unknown-plugin round trip and restoration after a failing CSS write passed. The previous user's JSON was unavailable; a synthetic fixture was used.
 - Pinned VencordInstallerCli.exe v1.4.2 executed on a synthetic legacy Windows installation. Install, loader verification, backup hash, foreign-mod refusal, tamper refusal and uninstall/byte-for-byte restoration passed. Original fixture SHA256: 64b08e60c59ba183a22c53b4a5b240ead62783370be4bc5c8ae03afc1aa59d98. The fixture is not a running Discord installation.
-- Read-only preflight on installed Stable app-1.0.9261: recognized, already patched by an existing mod, left unchanged. Canary app-1.0.1217: recognized and unpatched, left unchanged. PTB is not installed here.
+- Installed Stable app-1.0.9261: recognized, already patched by an existing mod, left unchanged. Canary app-1.0.1217: EqyCord f32ee8fd installed and loader/build hashes verified during the user-requested live trial. PTB is not installed here.
+- User reported that AutoTranslate's confirmation preview works in the running client after enabling translateOnSend and disabling upstream autoTranslate. No observer account was used; this is user-reported UI validation, not a full two-account send test. User subsequently preferred immediate translation.
 
 ## Installer follow-up
 
-The user confirmed continuing with a Vencord-style inject after the ToS discussion. No Discord credentials or token are required. Added an interactive Windows launcher and strict argument validation. Added a simulated Discord update test: restore the owned old archive while preserving the newer archive. All 20 local tests pass; no live client installation is claimed.
+The user confirmed continuing with a Vencord-style inject after the ToS discussion. No Discord credentials or token are required. Added an interactive Windows launcher and strict argument validation. Added a simulated Discord update test: restore the owned old archive while preserving the newer archive. The f32ee8fd package was then installed on Canary with the user's authorization; Stable was not patched by this session.
 
 ## Required before a public release
 
 - Real Discord UI: all six sidebar panels, toggle/settings cards, responsive origin/status/tag combinations and author/source/license links.
 - AutoTranslate in two accounts: actual provider success/failure, every modal dismissal, timeout, plugin disable, attachments/mentions, limits, other transforming plugins, repeated sends and retention of the composer draft on cancel.
-- Voice Tools in two accounts: normal mute/deafen and server restrictions. No hidden-audio behavior is implemented or certified.
+- Ghost in two accounts: observer's mute/deaf icons, audio reception/transmission, real native mute/deafen, Ghost off, channel change, reconnect and server restrictions. Hidden-audio behavior is not certified by the mocked/static tests.
 - Real clean Windows install/launch/uninstall and Discord update/repair on each available Stable/PTB/Canary channel; unsupported layouts must fail clearly.
 - Actual private Vencord backup, theme files and cloud integration with an explicitly authorized account/backend.
 - Remote GitHub Actions status must be checked separately; local success does not imply that remote CI ran.
 
-No messages were sent to Discord users, no voice call was made, no live client was patched, and no cloud account was connected. Runtime compatibility remains unverified. The PR remains draft; no merge is performed.
+The agent sent no Discord messages, made no voice call and connected no cloud account. The agent installed the earlier EqyCord build on Canary; the user tested its translator UI. Ghost audio compatibility remains unverified. The PR remains draft; no merge is performed. UI slogans were removed, card bylines shortened and first-party author display names changed to 0009cx0; original GPL notices/authorship remain intact.

@@ -5,10 +5,10 @@ EqyCord is an independent, unofficial Discord client modification based on [Venc
 ## What is implemented
 
 - EqyCord settings identity across Plugins, Themes, Updater, Cloud and Backup & Restore. Internal Vencord keys and APIs remain compatible.
-- Plugin cards show origin and original authors. Details retain the authors, source link and GPL-3.0-or-later credit for included plugins. Local userplugins are Community, with their own source/license.
+- Plugin cards show only By Vencord / By EqyCord / By Community. Individual original authors, source and license remain in plugin details and source headers. First-party plugin author display name is 0009cx0, as supplied by the owner; id 0 avoids inventing a Discord account ID.
 - Independent Origin: All/Vencord/EqyCord/Community filter, combinable with Show All/Enabled/Disabled/Favorites/New/API/UserPlugins, search and Tags. Toggle, dependency and settings cards remain upstream implementations.
 - Every one of the 418 upstream plugin files at base commit 718c867256a9d181edc7a534afb296b9bb41ab58 is retained. The regression test checks 185 upstream plugin definitions and their original author/copyright declarations. Platform-specific exclusions are unchanged: a desktop-only plugin cannot run in a browser.
-- Two opt-in first-party plugins: EqyAutoTranslate and EqyVoiceTools. Neither is enabled by default.
+- Two opt-in first-party plugins: EqyAutoTranslate and EqyVoiceTools (experimental Ghost). Neither is enabled by default. AutoTranslate preview was confirmed working by the user; the user prefers the upstream immediate Translate mode and can disable EqyAutoTranslate.
 - Automatic updating is disabled in all fork builds until an EqyCord release channel is validated. The Updater page explains how to rebuild from source. It will not download a Vencord release over this fork, including after importing autoUpdate=true from a backup.
 
 ## AutoTranslate
@@ -21,11 +21,19 @@ EqyCord is an independent, unofficial Discord client modification based on [Venc
 
 The provider receives text before the local preview; cancellation does not undo that disclosure. Google is used on web. Desktop also retains upstream DeepL/Kagi with their original credential settings and fallback behavior. English/Portuguese codes are mapped for DeepL. A live Google request with a generic test string passed. DeepL/Kagi integration, live Discord modal behavior, attachments, mentions, server limits, other text-transforming plugins and two-account sending still require runtime validation. Other plugins can transform text after this hook: the preview approves this plugin's output, not a guarantee against every later transformation.
 
-## Voice Tools
+## Ghost (EqyVoiceTools, experimental)
 
-Enable EqyVoiceTools and open its settings. Join a voice channel, then use Mute/Unmute and Deafen/Undeafen. The buttons call Discord's normal toggleSelfMute/toggleSelfDeaf actions and display MediaEngineStore state. They are disabled while disconnected or when this plugin is stopped. Server restrictions still apply.
+Enable EqyVoiceTools, accept the restart prompt, then join a voice channel. One ghost button appears after the headset control and before Settings in the account panel. There is no arrow or extra menu. Click to request Ghost; click again to restore the current normal voice flags. Actual microphone and headset controls remain native Discord controls. Ghost does not automatically unmute or undeafen local audio.
 
-This does not patch voice transport or fake mute/deafen state. No claim is made that microphone audio passes while others see you muted. Real Discord action discovery and a two-account voice call have not been tested.
+The outgoing gateway voice-state copy reports selfMute=true and selfDeaf=true while Ghost is requested; media-engine state and server permissions are unchanged. The account-panel mute/headset icons display the reported flags after a matching current-user/current-session server acknowledgement. The Ghost tooltip reports actual local microphone/audio state. Pending requests time out after five seconds. Disconnects, channel/socket changes, logout and plugin stop clear Ghost; stop and normal deactivation attempt restoration using the latest local flags. Ghost is never saved as active in settings.
+
+This is a requested experimental client modification, not certified hidden-audio behavior. The patches were checked against Discord Canary's public web.460ec5f2eb74e503.js on 9 October 2026. Mocked lifecycle/gateway tests verify that outgoing flags and local state are separated; they cannot prove how the current voice server transports audio. [Discord's gateway documentation](https://docs.discord.com/developers/events/gateway-events#update-voice-state) documents mute/deaf flags for applications, not compatibility certification for modified desktop clients.
+
+Before claiming success, use two accounts in a private test channel: check both visible icons on the observer, audio reception and transmission, real native mute/deafen, Ghost off, channel change, reconnect and server mute/deafen. If the server prevents audio, stop the test; no permission bypass is implemented. Do not label this feature working until that test passes.
+
+## Restart behavior
+
+Upstream's plugin manager applies plugins without source patches immediately. Plugins with patches, including Ghost, require a restart; the plugin page shows a restart banner and prompts when leaving. Settings marked restartNeeded also prompt. There is no blanket forced restart for every live setting.
 
 ## Backup compatibility and Cloud
 

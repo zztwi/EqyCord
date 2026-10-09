@@ -27,8 +27,8 @@ import type { ComponentType, PropsWithChildren } from "react";
 export function SettingsTab({ children }: PropsWithChildren) {
     return (
         <section className="vc-settings-tab eqycord-settings-tab">
-            <div className="eqycord-settings-brand" aria-label="EqyCord, based on Vencord">
-                <strong>EqyCord</strong><span>Based on Vencord</span>
+            <div className="eqycord-settings-brand" aria-label="EqyCord">
+                <strong>EqyCord</strong>
             </div>
             {children}
         </section>
