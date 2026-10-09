@@ -1,6 +1,6 @@
 # Plugin audit — 2026-10-10
 
-Scope: complete generated catalog, static checks, desktop/web builds, automatic tests, provider HTTP probes, and existing Canary logs. Startup is not proof that every feature works. Disabled plugins were not enabled in bulk. No visual UI inspection or two-account voice test was performed.
+Scope: complete generated catalog, static checks, desktop/web builds, automatic tests, provider HTTP probes, and existing Canary logs. Startup is not proof that every feature works. Disabled plugins were not enabled in bulk. No visual UI inspection or two-account voice test was performed. The updated Canary startup requested Ghost successfully; this does not prove button interaction or audio behavior.
 
 ## Corrected failures
 
@@ -14,7 +14,8 @@ Scope: complete generated catalog, static checks, desktop/web builds, automatic 
 
 - ShowHiddenChannels: historical no-effect patch warnings. Some features may be incompatible with Canary; no current module capture was available to validate a correction.
 - RPC: port 6463 occupied while another Discord instance runs; environment conflict.
-- Audio asset_404 and invalid spellchecker locale: logged, but no responsible plugin was identified. Unresolved.
+- KeyboardSounds audio asset_404 was traced during restart to CSP blocking GitHub sound assets. Both the exact sound repository URL prefix and its raw redirect now have media-only permissions. The sample asset returned HTTP 200 audio/mpeg. Audible playback still requires a manual check.
+- Invalid spellchecker locale remains an environment/configuration issue.
 - Google classic returned HTTP 200 for ciao; upstream Translate returned HTTP 200 for come stai → How are you. Toki Pona POST returned HTTP 200. These service probes do not establish browser/UI functionality. DeepL and Kagi need credentials and remain untested.
 - Ghost modifies only the outgoing voice-state copy; it does not change media-engine flags. Discord audio delivery remains unverified. Server confirmation alone proves neither remote appearance nor audio behavior.
 - Canary app-1.0.1218 has a migrated loader pointing to Desktop/EqyCord/dist but no installer ownership metadata. Formal installer verification remains unavailable; fixture install/restore tests pass.
@@ -192,7 +193,7 @@ Scope: complete generated catalog, static checks, desktop/web builds, automatic 
 | JumpTo | Universal | Registered and statically checked; feature behavior untested |
 | KeepCurrentChannel | Universal | Registered and statically checked; feature behavior untested |
 | KeyboardNavigation | Universal | Startup requested in historical logs; feature behavior untested |
-| KeyboardSounds | Universal | Startup requested in historical logs; feature behavior untested |
+| KeyboardSounds | Universal | GitHub media CSP failure corrected; sample asset HTTP 200; audible playback untested |
 | KeywordNotify | Universal | Registered and statically checked; feature behavior untested |
 | LastActive | Universal | Registered and statically checked; feature behavior untested |
 | LimitlessScreenshare | Universal | Registered and statically checked; feature behavior untested |
