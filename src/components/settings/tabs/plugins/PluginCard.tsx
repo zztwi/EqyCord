@@ -27,7 +27,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
     // Upstream plugins retain their Vencord attribution; local userplugins are EqyCord additions.
-    const origin = PluginMeta[plugin.name]?.userPlugin ? "EqyCord" : "Vencord";
+    const origin = plugin.name.startsWith("Eqy") || PluginMeta[plugin.name]?.userPlugin ? "EqyCord" : "Vencord";
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
