@@ -66,7 +66,7 @@ export const getLanguages = () => {
     }
 };
 
-export async function translate(kind: "received" | "sent", text: string, targetLanguage?: string): Promise<TranslationValue> {
+export async function translate(kind: "received" | "sent", text: string): Promise<TranslationValue> {
     const translate = IS_WEB ? googleTranslate : (() => {
         switch (settings.store.service) {
             case "google":
@@ -82,7 +82,7 @@ export async function translate(kind: "received" | "sent", text: string, targetL
         return await translate(
             text,
             settings.store[`${kind}Input`],
-            targetLanguage ?? settings.store[`${kind}Output`]
+            settings.store[`${kind}Output`]
         );
     } catch (e) {
         const userMessage = typeof e === "string"

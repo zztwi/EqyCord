@@ -19,7 +19,6 @@
 import "./styles.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
@@ -102,10 +101,6 @@ export default definePlugin({
     },
 
     async onBeforeMessageSend(_, message) {
-        // EqyCord's preview owns outgoing translation when opted in, regardless
-        // of listener registration order. It handles conflicting auto modes.
-        const preview = Settings.plugins.AutoTranslate ?? Settings.plugins.EqyAutoTranslate;
-        if (preview?.enabled && preview?.translateOnSend) return;
         if (!settings.store.autoTranslate) return;
         if (!message.content) return;
 

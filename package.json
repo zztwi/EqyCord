@@ -30,7 +30,7 @@
     "lint": "eslint",
     "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
     "lint:fix": "pnpm lint --fix",
-    "test": "pnpm buildStandalone && pnpm testTsc && pnpm lint && pnpm lint-styles && pnpm generatePluginJson && pnpm testEqyCord",
+      "test": "pnpm buildStandalone && pnpm testTsc && pnpm lint && pnpm lint-styles && pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json && pnpm testEqyCord",
     "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
     "testTsc": "tsc --noEmit",
     "testEqyCord": "node --test scripts/eqycord/*.test.mjs",
