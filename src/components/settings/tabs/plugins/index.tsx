@@ -80,7 +80,9 @@ const enum SearchStatus {
     DISABLED,
     NEW,
     USER_PLUGINS,
-    API_PLUGINS
+    API_PLUGINS,
+    VENCORD_PLUGINS,
+    EQYCORD_PLUGINS
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -195,6 +197,12 @@ function PluginSettings() {
             case SearchStatus.API_PLUGINS:
                 if (!plugin.name.endsWith("API")) return false;
                 break;
+            case SearchStatus.VENCORD_PLUGINS:
+                if (PluginMeta[plugin.name]?.userPlugin) return false;
+                break;
+            case SearchStatus.EQYCORD_PLUGINS:
+                if (!PluginMeta[plugin.name]?.userPlugin) return false;
+                break;
         }
 
         if (tags.length && tags.some(t => !plugin.tags?.includes(t))) return false;
@@ -301,6 +309,8 @@ function PluginSettings() {
                             { label: "Show New", value: SearchStatus.NEW },
                             hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
                             { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
+                            { label: "Show Vencord Plugins", value: SearchStatus.VENCORD_PLUGINS },
+                            hasUserPlugins && { label: "Show EqyCord Plugins", value: SearchStatus.EQYCORD_PLUGINS },
                         ].filter(isTruthy)}
                         serialize={String}
                         select={status => setSearchValue(prev => ({ ...prev, status }))}
