@@ -20,6 +20,7 @@ import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
+import { getPluginOrigin } from "@shared/eqyPluginOrigins";
 import { useSettings } from "@api/Settings";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
@@ -168,7 +169,7 @@ function PluginSettings() {
     )
         .toSorted((a, b) => Number(settings.plugins[b.name]?.isFavorite ?? false) - Number(settings.plugins[a.name]?.isFavorite ?? false));
 
-    const hasEqyCordPlugins = useMemo(() => Object.keys(Plugins).some(name => name.startsWith("Eqy")) || (!IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin)), []);
+    const hasEqyCordPlugins = useMemo(() => Object.keys(Plugins).some(name => getPluginOrigin(name, PluginMeta[name]?.userPlugin) === "EqyCord"), []);
 
     const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL });
 
@@ -192,13 +193,13 @@ function PluginSettings() {
                 if (!newPlugins?.includes(plugin.name)) return false;
                 break;
             case SearchStatus.USER_PLUGINS:
-                if (!plugin.name.startsWith("Eqy") && !PluginMeta[plugin.name]?.userPlugin) return false;
+                if (getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin) !== "EqyCord") return false;
                 break;
             case SearchStatus.API_PLUGINS:
                 if (!plugin.name.endsWith("API")) return false;
                 break;
             case SearchStatus.VENCORD_PLUGINS:
-                if (plugin.name.startsWith("Eqy") || PluginMeta[plugin.name]?.userPlugin) return false;
+                if (getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin) !== "Vencord") return false;
                 break;
             case SearchStatus.EQYCORD_PLUGINS:
                 if (!PluginMeta[plugin.name]?.userPlugin) return false;
