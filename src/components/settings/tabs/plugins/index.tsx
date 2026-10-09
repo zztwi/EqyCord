@@ -20,7 +20,6 @@ import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
 import { isPluginEnabled } from "@api/PluginManager";
-import { getPluginOrigin } from "@shared/eqyPluginOrigins";
 import { useSettings } from "@api/Settings";
 import { Card } from "@components/Card";
 import { Divider } from "@components/Divider";
@@ -28,6 +27,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { HeadingTertiary } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { matchesPluginOrigin, PluginOrigin } from "@shared/eqyPluginOrigins";
 import { ChangeList } from "@utils/ChangeList";
 import { classNameFactory } from "@utils/css";
 import { isTruthy } from "@utils/guards";
@@ -81,9 +81,7 @@ const enum SearchStatus {
     DISABLED,
     NEW,
     USER_PLUGINS,
-    API_PLUGINS,
-    VENCORD_PLUGINS,
-    EQYCORD_PLUGINS
+    API_PLUGINS
 }
 
 function ExcludedPluginsList({ search }: { search: string; }) {
@@ -169,15 +167,16 @@ function PluginSettings() {
     )
         .toSorted((a, b) => Number(settings.plugins[b.name]?.isFavorite ?? false) - Number(settings.plugins[a.name]?.isFavorite ?? false));
 
-    const hasEqyCordPlugins = useMemo(() => Object.keys(Plugins).some(name => getPluginOrigin(name, PluginMeta[name]?.userPlugin) === "EqyCord"), []);
+    const hasUserPlugins = useMemo(() => Object.values(PluginMeta).some(m => m.userPlugin), []);
 
-    const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL });
+    const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL, origin: "All" as PluginOrigin | "All" });
 
     const search = searchValue.value.toLowerCase();
     const onSearch = (query: string) => setSearchValue(prev => ({ ...prev, value: query }));
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
-        const { status, tags } = searchValue;
+        const { status, tags, origin } = searchValue;
+        if (!matchesPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin, origin)) return false;
 
         switch (status) {
             case SearchStatus.FAVORITES:
@@ -193,16 +192,10 @@ function PluginSettings() {
                 if (!newPlugins?.includes(plugin.name)) return false;
                 break;
             case SearchStatus.USER_PLUGINS:
-                if (getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin) !== "EqyCord") return false;
+                if (!PluginMeta[plugin.name]?.userPlugin) return false;
                 break;
             case SearchStatus.API_PLUGINS:
                 if (!plugin.name.endsWith("API")) return false;
-                break;
-            case SearchStatus.VENCORD_PLUGINS:
-                if (getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin) !== "Vencord") return false;
-                break;
-            case SearchStatus.EQYCORD_PLUGINS:
-                if (!PluginMeta[plugin.name]?.userPlugin) return false;
                 break;
         }
 
@@ -249,7 +242,7 @@ function PluginSettings() {
 
         if (isRequired) {
             const tooltipText = p.required || !depMap[p.name]
-                ? "This plugin is required for Vencord to function."
+                ? "This plugin is required for EqyCord's Vencord core to function."
                 : makeDependencyList(depMap[p.name]?.filter(d => settings.plugins[d].enabled));
 
             requiredPlugins.push(
@@ -308,10 +301,8 @@ function PluginSettings() {
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
                             { label: "Show New", value: SearchStatus.NEW },
-                            !IS_STANDALONE && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
+                            hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
                             { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
-                            { label: "Show Vencord Plugins", value: SearchStatus.VENCORD_PLUGINS },
-                            hasEqyCordPlugins && { label: "Show EqyCord Plugins", value: SearchStatus.EQYCORD_PLUGINS },
                         ].filter(isTruthy)}
                         serialize={String}
                         select={status => setSearchValue(prev => ({ ...prev, status }))}
@@ -326,6 +317,17 @@ function PluginSettings() {
                         closeOnSelect={false}
                         placeholder="Filter by Tags"
                         multi
+                    />
+                    <Select
+                        options={(["All", "Vencord", "EqyCord", "Community"] as const).map(origin => ({
+                            label: origin === "All" ? "Origin: All" : `Origin: ${origin}`,
+                            value: origin
+                        }))}
+                        serialize={String}
+                        select={origin => setSearchValue(prev => ({ ...prev, origin }))}
+                        isSelected={origin => origin === searchValue.origin}
+                        closeOnSelect
+                        placeholder="Filter by Origin"
                     />
                 </div>
             </ErrorBoundary>

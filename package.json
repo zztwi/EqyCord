@@ -25,14 +25,16 @@
         "watchWeb": "pnpm buildWeb --watch",
         "generatePluginJson": "tsx scripts/generatePluginList.ts",
         "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/vencord-types --allowJs false",
-        "inject": "node scripts/runInstaller.mjs -- --install",
-        "uninject": "node scripts/runInstaller.mjs -- --uninstall",
+        "inject": "node scripts/eqycord/installer.mjs install",
+        "uninject": "node scripts/eqycord/installer.mjs uninstall",
         "lint": "eslint",
         "lint-styles": "stylelint \"src/**/*.css\" --ignore-pattern src/userplugins",
         "lint:fix": "pnpm lint --fix",
-        "test": "pnpm buildStandalone && pnpm testTsc && pnpm lint && pnpm lint-styles && pnpm generatePluginJson",
+        "test": "pnpm buildStandalone && pnpm testTsc && pnpm lint && pnpm lint-styles && pnpm generatePluginJson && pnpm testEqyCord",
         "testWeb": "pnpm lint && pnpm buildWeb && pnpm testTsc",
-        "testTsc": "tsc --noEmit"
+        "testTsc": "tsc --noEmit",
+        "testEqyCord": "node --test scripts/eqycord/*.test.mjs",
+        "installer:windows": "node scripts/eqycord/installer.mjs"
     },
     "dependencies": {
         "@intrnl/xxhash64": "^0.1.2",

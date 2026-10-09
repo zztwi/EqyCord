@@ -94,7 +94,7 @@ export interface Settings {
 }
 
 const DefaultSettings: Settings = {
-    autoUpdate: true,
+    autoUpdate: false,
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],

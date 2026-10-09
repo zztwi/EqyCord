@@ -24,6 +24,7 @@ import { useSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@shared/debounce";
+import { getPluginOrigin } from "@shared/eqyPluginOrigins";
 import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
@@ -35,6 +36,7 @@ import { findCssClassesLazy } from "@webpack";
 import { Clickable, FluxDispatcher, Forms, Modal, openModal, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
+import gitHash from "~git-hash";
 import { PluginMeta } from "~plugins";
 
 import { OptionComponentMap } from "./components";
@@ -165,6 +167,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     const pluginMeta = PluginMeta[plugin.name];
+    const origin = getPluginOrigin(plugin.name, pluginMeta.userPlugin);
 
     return (
         <Modal
@@ -180,13 +183,13 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                 isFavorite={pluginSettings.isFavorite ?? false}
                                 onClick={() => pluginSettings.isFavorite = !pluginSettings.isFavorite}
                             />
-                            <WebsiteButton
+                            {origin === "Vencord" && <WebsiteButton
                                 text="View more info"
                                 href={`https://vencord.dev/plugins/${plugin.name}`}
-                            />
+                            />}
                             <GithubButton
                                 text="View source code"
-                                href={`https://github.com/${gitRemote}/tree/main/src/plugins/${pluginMeta.folderName}`}
+                                href={`https://github.com/${gitRemote}/tree/${gitHash}/src/plugins/${pluginMeta.folderName}`}
                             />
                         </div>
                     )}
@@ -196,6 +199,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                 <div className={cl("info")}>
                     <div>
                         <Forms.FormText>{plugin.description}</Forms.FormText>
+                        <Forms.FormText>{origin}{origin !== "Community" && " · GPL-3.0-or-later"}</Forms.FormText>
                         {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
                     </div>
                 </div>

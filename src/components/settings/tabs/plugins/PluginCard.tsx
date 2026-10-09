@@ -7,12 +7,13 @@
 import { showNotice } from "@api/Notices";
 import { hasAnyVisibleSettings, isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
-import { getPluginOrigin } from "@shared/eqyPluginOrigins";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
+import { getPluginOrigin } from "@shared/eqyPluginOrigins";
 import { Plugin } from "@utils/types";
 import { ToastPosition } from "@vencord/discord-types/enums";
 import { React, showToast } from "@webpack/common";
+
 import { PluginMeta } from "~plugins";
 
 import { cl, logger } from ".";
@@ -27,7 +28,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
-    // Upstream plugins retain their Vencord attribution; local userplugins are EqyCord additions.
+    // Preserve authorship independently from the project's origin badge.
     const origin = getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin);
 
     const isEnabled = () => isPluginEnabled(plugin.name);
@@ -84,7 +85,12 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         <AddonCard
             name={plugin.name}
             description={plugin.description}
-            author={<span className={cl("origin", { "origin-eqycord": origin === "EqyCord" })}>{origin}</span>}
+            author={(
+                <span title={origin === "Community" ? "See plugin source for license" : "GPL-3.0-or-later"}>
+                    <span className={cl("origin", { "origin-eqycord": origin === "EqyCord" })}>{origin}</span>
+                    {" · "}{plugin.authors.map(author => author.name).join(", ")}
+                </span>
+            )}
             isNew={isNew}
             enabled={isEnabled()}
             setEnabled={toggleEnabled}

@@ -146,6 +146,8 @@ async function loadDir(dir, basePath = "") {
  */
 async function buildExtension(target, files) {
     const entries = {
+        "LICENSE.txt": await readFile("LICENSE"),
+        "EQYCORD.md": await readFile("EQYCORD.md"),
         "dist/Vencord.js": await readFile("dist/extension.js"),
         "dist/Vencord.css": await readFile("dist/extension.css"),
         ...await loadDir("dist/vendor/monaco", "dist/"),

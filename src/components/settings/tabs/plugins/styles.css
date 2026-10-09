@@ -43,9 +43,8 @@
 
 .vc-plugins-filter-controls {
     display: grid;
-    height: 40px;
     gap: 10px;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     align-items: center;
 }
 
@@ -71,6 +70,9 @@
     font-weight: 600;
     letter-spacing: .025em;
     color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 2px 6px;
 }
 
 .vc-plugins-origin-eqycord {

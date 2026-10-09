@@ -1,27 +1,26 @@
 /*
- * EqyCord, a Discord client modification based on Vencord
+ * EqyCord, a Discord client mod based on Vencord
  * Copyright (c) 2026 EqyCord contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
- *
- * Uses Vencord's existing Translate plugin as its translation provider.
- * The upstream Vencord authors retain credit for their original code.
  */
 
 import { definePluginSettings } from "@api/Settings";
 import { settings as vencordTranslateSettings } from "@plugins/translate/settings";
 import { translate } from "@plugins/translate/utils";
 import definePlugin, { OptionType } from "@utils/types";
-import { ConfirmModal, openModal, React, showToast } from "@webpack/common";
+import { closeModal, ConfirmModal, openModal, showToast } from "@webpack/common";
+
+import { prepareTranslation, providerLanguage } from "./workflow";
 
 const settings = definePluginSettings({
     translateOnSend: {
         type: OptionType.BOOLEAN,
-        description: "Translate outgoing messages using the original Vencord Translate provider. Off until you opt in.",
+        description: "Translate outgoing text with Vencord Translate. Text is shared with the selected provider; every send requires your approval.",
         default: false
     },
     targetLanguage: {
         type: OptionType.SELECT,
-        description: "Language for your outgoing translations. Configure the provider in the Vencord Translate plugin.",
+        description: "Destination language. Configure the provider in Translate and keep its Auto Translate off.",
         options: [
             { label: "English", value: "en", default: true },
             { label: "Italiano", value: "it" },
@@ -31,80 +30,100 @@ const settings = definePluginSettings({
             { label: "Português", value: "pt" },
             { label: "日本語", value: "ja" }
         ] as const
-    },
-    previewBeforeSend: {
-        type: OptionType.BOOLEAN,
-        description: "Show the original and translated message and require approval before sending. Recommended.",
-        default: true
     }
 });
+
+let running = false;
+let generation = 0;
+const pendingPreviews = new Set<() => void>();
 
 function confirmTranslation(original: string, translated: string, language: string): Promise<boolean> {
     return new Promise(resolve => {
         let settled = false;
+        let modalKey: string | undefined;
         const finish = (approved: boolean) => {
             if (settled) return;
             settled = true;
+            pendingPreviews.delete(cancel);
             resolve(approved);
         };
+        const cancel = () => {
+            finish(false);
+            if (modalKey) closeModal(modalKey);
+        };
 
-        openModal(modalProps => (
-            <ConfirmModal
-                {...modalProps}
-                onClose={() => {
-                    finish(false);
-                    modalProps.onClose();
-                }}
-                title="EqyCord — Translation Preview"
-                subtitle={`Target language: ${language}`}
-                confirmText="Send translated message"
-                cancelText="Cancel sending"
-                onConfirm={() => finish(true)}
-                onCancel={() => finish(false)}
-                variant="primary"
-            >
-                <p><strong>Original:</strong> {original}</p>
-                <p><strong>Translated:</strong> {translated}</p>
-                <p>This translation is sent only if you approve it.</p>
-            </ConfirmModal>
-        ));
+        pendingPreviews.add(cancel);
+        try {
+            modalKey = openModal(modalProps => (
+                <ConfirmModal
+                    {...modalProps}
+                    title="EqyCord — Translation Preview"
+                    subtitle={"Target language: " + language}
+                    confirmText="Send translated message"
+                    cancelText="Cancel sending"
+                    onConfirm={() => finish(true)}
+                    onCancel={() => finish(false)}
+                    onClose={() => {
+                        finish(false);
+                        modalProps.onClose();
+                    }}
+                    variant="primary"
+                >
+                    <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}><strong>Original:</strong> {original}</p>
+                    <p style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}><strong>Translated:</strong> {translated}</p>
+                    <p>Approve to send this translation, or cancel to keep your draft.</p>
+                </ConfirmModal>
+            ), { onCloseCallback: () => finish(false) });
+        } catch {
+            finish(false);
+        }
     });
 }
 
 export default definePlugin({
     name: "EqyAutoTranslate",
-    description: "EqyCord: choose a language, preview outgoing translations, and approve before sending.",
+    description: "EqyCord: choose a language, preview outgoing translations, and approve before sending. Provider by Vencord Translate.",
     tags: ["Chat", "Utility"],
+    // A collective credit, not a fabricated Discord account. Upstream authors remain on Translate.
     authors: [{ name: "EqyCord contributors", id: 0n }],
     dependencies: ["Translate"],
     settings,
 
+    start() {
+        running = true;
+        generation++;
+    },
+    stop() {
+        running = false;
+        generation++;
+        for (const cancel of [...pendingPreviews]) cancel();
+    },
+
     async onBeforeMessageSend(_channelId, message) {
         if (!settings.store.translateOnSend || !message.content?.trim()) return;
 
-        // The upstream plugin can also modify outgoing messages. Never silently
-        // perform a second translation when its automatic mode is enabled.
-        if (vencordTranslateSettings.store.autoTranslate) {
-            showToast("EqyCord: disable Auto Translate in the original Vencord Translate plugin to use EqyAutoTranslate.", "failure");
-            return { cancel: true };
-        }
-
-        const original = message.content;
-        let translated: string;
+        // MessageEvents swallows listener errors. Catch every failure so it
+        // cannot accidentally let an unapproved message through.
         try {
-            translated = (await translate("sent", original, settings.store.targetLanguage)).text;
+            if (vencordTranslateSettings.store.autoTranslate) {
+                showToast("EqyCord: turn off Auto Translate in Translate before using EqyAutoTranslate.", "failure");
+                return { cancel: true };
+            }
+            const currentGeneration = generation;
+            const language = settings.store.targetLanguage ?? "en";
+            const target = providerLanguage(IS_WEB ? "google" : vencordTranslateSettings.store.service ?? "google", language);
+            const original = message.content;
+            const translated = await prepareTranslation(original, target, {
+                translate: (text, target) => translate("sent", text, target).then(result => result.text),
+                confirm: (original, translated) => confirmTranslation(original, translated, language),
+                isCurrent: () => running && generation === currentGeneration && settings.store.translateOnSend
+                    && message.content === original && !vencordTranslateSettings.store.autoTranslate
+            });
+
+            if (translated === null) return { cancel: true };
+            message.content = translated;
         } catch {
-            // Fail closed: a translation error must not unexpectedly send the original.
             return { cancel: true };
         }
-
-        if (translated === original) return;
-
-        if (settings.store.previewBeforeSend) {
-            const approved = await confirmTranslation(original, translated, settings.store.targetLanguage);
-            if (!approved) return { cancel: true };
-        }
-
-        message.content = translated;
     }
 });

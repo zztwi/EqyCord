@@ -1,0 +1,12 @@
+{
+    "settings": {
+        "autoUpdate": false,
+        "themeLinks": ["https://example.invalid/theme.css"],
+        "plugins": {
+            "Translate": { "enabled": true, "autoTranslate": false, "sentOutput": "it" },
+            "EqyAutoTranslate": { "enabled": true, "translateOnSend": true, "targetLanguage": "it" },
+            "UnknownOlderPlugin": { "enabled": false, "customOption": "preserve-me" }
+        }
+    },
+    "quickCss": "/* Backup compatibility fixture, not the user's private export. */"
+}

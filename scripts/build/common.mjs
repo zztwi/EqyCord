@@ -46,12 +46,14 @@ export const IS_REPORTER = process.argv.includes("--reporter");
 export const IS_ANTI_CRASH_TEST = process.argv.includes("--anti-crash-test");
 export const IS_STANDALONE = process.argv.includes("--standalone");
 
-export const IS_UPDATER_DISABLED = process.argv.includes("--disable-updater");
+// This fork has no validated release/update channel yet. Retain the updater
+// implementation for a future release, but never fetch upstream Vencord binaries.
+export const IS_UPDATER_DISABLED = true;
 export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
 
 export const banner = {
     js: `
-// Vencord ${gitHash}
+// EqyCord ${gitHash}, based on Vencord (GPL-3.0-or-later)
 // Standalone: ${IS_STANDALONE}
 // Platform: ${IS_STANDALONE === false ? process.platform : "Universal"}
 // Updater Disabled: ${IS_UPDATER_DISABLED}

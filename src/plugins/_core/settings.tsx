@@ -187,17 +187,17 @@ export default definePlugin({
                 Component: ThemesTab,
                 Icon: PaintbrushIcon
             }),
-            !IS_UPDATER_DISABLED && UpdaterTab && buildEntry({
+            UpdaterTab && buildEntry({
                 key: "vencord_updater",
                 title: "Updater",
-                panelTitle: "Updater (Vencord upstream)",
+                panelTitle: "EqyCord Updater",
                 Component: UpdaterTab,
                 Icon: UpdaterIcon
             }),
             buildEntry({
                 key: "vencord_cloud",
                 title: "Cloud",
-                panelTitle: "Cloud (Vencord upstream)",
+                panelTitle: "EqyCord Cloud",
                 Component: CloudTab,
                 Icon: CloudIcon
             }),
@@ -290,7 +290,7 @@ export default definePlugin({
     getInfoRows() {
         const { electronVersion, chromiumVersion, additionalInfo } = this;
 
-        const rows = [`EqyCord ${gitHash}${additionalInfo}`, `Based on Vencord (Vendicated and contributors)`];
+        const rows = [`EqyCord ${gitHash}${additionalInfo}`, "Based on Vencord (Vendicated and contributors)"];
 
         if (electronVersion) rows.push(`Electron ${electronVersion}`);
         if (chromiumVersion) rows.push(`Chromium ${chromiumVersion}`);

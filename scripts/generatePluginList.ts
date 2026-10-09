@@ -136,6 +136,14 @@ async function parseFile(fileName: string) {
                 case "authors":
                     if (!isArrayLiteralExpression(value)) throw fail("authors is not an array literal");
                     data.authors = value.elements.map(e => {
+                        // Collective credits need no fabricated Discord account.
+                        if (isObjectLiteralExpression(e)) {
+                            const name = getObjectProp(e, "name");
+                            const id = getObjectProp(e, "id");
+                            if (!name || !isStringLiteral(name) || !id || id.kind !== SyntaxKind.BigIntLiteral)
+                                throw fail("inline author must have a string name and bigint id");
+                            return { name: name.text, id: (id as BigIntLiteral).text.slice(0, -1) };
+                        }
                         if (!isPropertyAccessExpression(e)) throw fail("authors array contains non-property access expressions");
                         const d = devs[getName(e)!];
                         if (!d) throw fail(`couldn't look up author ${getName(e)}`);

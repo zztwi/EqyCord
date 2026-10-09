@@ -1,6 +1,6 @@
 # EqyCord
 
-> **Development preview — NOT a downloadable installer yet.**
+> **Compiled development preview — live Discord compatibility remains unverified.**
 >
 > EqyCord is an independent, unofficial Discord client modification built on
 > [Vencord](https://github.com/Vendicated/Vencord). This fork keeps Vencord's
