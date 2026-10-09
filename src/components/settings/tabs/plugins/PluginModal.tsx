@@ -26,7 +26,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { debounce } from "@shared/debounce";
 import { getPluginDisplayName, getPluginDisplayText, getPluginOrigin } from "@shared/eqyPluginOrigins";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { EqyCordAuthors } from "@utils/constants";
+import { EqyCordAuthor, EqyCordAuthors } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
@@ -35,6 +35,7 @@ import { OptionType, Plugin, PluginTag } from "@utils/types";
 import { RenderModalProps, User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
 import { Clickable, FluxDispatcher, Forms, Modal, openModal, React, Text, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import eqyCordAuthorAvatar from "file://./eqycord-author-0009cx0.png?base64";
 import { Constructor } from "type-fest";
 
 import gitHash from "~git-hash";
@@ -240,7 +241,9 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                     >
                                         <img
                                             className={AvatarStyles.avatar}
-                                            src={user.getAvatarURL(void 0, 80, true)}
+                                            src={user.id === String(EqyCordAuthor.id)
+                                                ? `data:image/png;base64,${eqyCordAuthorAvatar}`
+                                                : user.getAvatarURL(void 0, 80, true)}
                                             alt={user.username}
                                             title={user.username}
                                         />
