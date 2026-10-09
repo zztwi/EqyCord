@@ -6,6 +6,12 @@
 
 import { settings } from "@equicordplugins/translatePlus/settings";
 
+async function fetchJson(url: string, options?: RequestInit) {
+    const response = await fetch(url, { ...options, signal: AbortSignal.timeout(15000) });
+    if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+    return response.json();
+}
+
 function isTokiPona(text: string) {
     const dictionary = /\b(?:leko|weka|pan|lete|linja|lipu|suli|nimi|akesi|misikeke|selo|ike|sijelo|sona|lili|pimeja|ante|jo|loje|telo|walo|kijetesantakalu|kasi|waso|wile|utala|lukin|sina|lape|ma|pilin|jasima|la|olin|pipi|meso|lawa|pi|pakala|oko|tan|ken|jaki|unpa|esun|seme|sitelen|len|kule|soko|open|ala|tenpo|lon|sinpin|pini|kokosila|mama|musi|monsi|mewika|taso|ona|mun|kiwen|tomo|mute|mi|nena|palisa|meli|laso|wawa|ale|kipisi|kulupu|ilo|lupa|nanpa|en|mu|jelo|kili|tonsi|moku|ni|kama|pu|poki|monsuta|sin|lasina|poka|soweli|sewi|elena|epiku|moli|pona|lanpan|alasa|anu|kute|uta|luka|suno|sama|awen|namako|suwi|noka|seli|mije|sike|jan|pali|tawa|inli|nasa|mani|wan|insa|nijon|nasin|kalama|ijo|toki|anpa|kala|kepeken|ko|kon|pana|tu|supa|kin|usawi|yupekosi)\b/gm;
 
@@ -25,7 +31,7 @@ function isShavian(text: string) {
 }
 
 async function translateShavian(message: string) {
-    const dictionary = await (await fetch("https://raw.githubusercontent.com/ForkPrince/TranslatePlus/322199d5fdb1a9506591c9f4a2826338b5d67e38/shavian.json")).json();
+    const dictionary = await fetchJson("https://raw.githubusercontent.com/ForkPrince/TranslatePlus/322199d5fdb1a9506591c9f4a2826338b5d67e38/shavian.json");
 
     const punctuationMap = {
         '"': "\"",
@@ -72,7 +78,7 @@ async function translateShavian(message: string) {
 async function translateSitelen(message: string) {
     message = Array.from(message).join(" ");
 
-    const dictionary = await (await fetch("https://raw.githubusercontent.com/ForkPrince/TranslatePlus/5ca152b134ea11433971f21b2ef8d556d4306717/sitelen-pona.json")).json();
+    const dictionary = await fetchJson("https://raw.githubusercontent.com/ForkPrince/TranslatePlus/5ca152b134ea11433971f21b2ef8d556d4306717/sitelen-pona.json");
 
     const sorted = Object.keys(dictionary).sort((a, b) => b.length - a.length);
 
@@ -86,17 +92,18 @@ async function translateSitelen(message: string) {
 async function google(target: string, text: string) {
     if (!text) return { src: "", text: "" };
     try {
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?${new URLSearchParams({ client: "gtx", sl: "auto", tl: target, dt: "t", dj: "1", source: "input", q: text })}`);
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?${new URLSearchParams({ client: "gtx", sl: "auto", tl: target, dt: "t", dj: "1", source: "input", q: text })}`, { signal: AbortSignal.timeout(15000) });
         if (!res.ok) throw new Error(`Request failed with status ${res.status}`);
         const translate = await res.json();
+        if (typeof translate.src !== "string" || !Array.isArray(translate.sentences)) throw new Error("Invalid translation response");
 
         return {
             src: translate.src,
-            text: translate.sentences?.map(s => s.trans).filter(Boolean).join("\n")
+            text: translate.sentences.map(s => s.trans).filter(Boolean).join("")
         };
     } catch (error) {
         console.error("[TranslatePlus] Google Translate request failed:", error);
-        return { src: "en", text: "Translation failed due to an error." };
+        throw error;
     }
 }
 
@@ -108,9 +115,8 @@ export async function translate(text: string): Promise<any> {
     if ((isTokiPona(text) || isSitelen(text)) && (toki || sitelen)) {
         if (isSitelen(text) && sitelen) text = await translateSitelen(text);
 
-        console.log(text);
 
-        const translate = await (await fetch("https://aiapi.serversmp.xyz/toki", {
+        const translate = await fetchJson("https://aiapi.serversmp.xyz/toki", {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -121,9 +127,9 @@ export async function translate(text: string): Promise<any> {
                 src: "tl",
                 target: "en"
             })
-        })).json();
+        });
+        if (typeof translate.translation?.[0] !== "string") throw new Error("Invalid Toki Pona response");
 
-        console.log(translate);
 
         output.src = "tp";
         output.text = target === "en" ? translate.translation[0] : (await google(target, translate.translation[0])).text;

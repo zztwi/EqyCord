@@ -60,6 +60,8 @@ export const CspPolicies: PolicyMap = {
     "archive.org": ConnectSrc,
     "*.archive.org": ConnectSrc,
     "translate-pa.googleapis.com": ConnectSrc, // Google Translate API
+    "translate.googleapis.com": ConnectSrc, // MessageTranslate and Translate+
+    "aiapi.serversmp.xyz": ConnectSrc, // Optional Translate+ Toki Pona provider
     "*.vencord.dev": ImageSrc, // VenCloud (api.vencord.dev) and Badges (badges.vencord.dev)
     "manti.vendicated.dev": ImageSrc, // ReviewDB API
     "decor.fieryflames.dev": ConnectSrc, // Decor API

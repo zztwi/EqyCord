@@ -33,7 +33,8 @@ test("all imported Equicord plugins are registered without duplicate Vencord nam
     const plugins = JSON.parse(readFileSync("dist/plugins.json", "utf8"));
     const imported = plugins.filter(plugin => plugin.filePath.startsWith("src/equicordplugins/"));
     const upstream = plugins.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/"));
-    assert.equal(imported.length, 200);
+    assert.equal(imported.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/ghostVoice")).length, 200);
+    assert.equal(imported.some(plugin => plugin.name === "Ghost"), true);
 
     const upstreamNames = new Set(upstream.map(plugin => plugin.name));
     assert.deepEqual(imported.filter(plugin => upstreamNames.has(plugin.name)).map(plugin => plugin.name), []);
@@ -64,4 +65,54 @@ test("all original Vencord plugin sources and copyright notices remain intact", 
         const copyright = original.match(/\* Copyright[^\r\n]*/)?.[0];
         if (copyright) assert.ok(current.includes(copyright), path + " copyright changed");
     }
+});
+
+
+test("Ghost sends copied flags, restores local flags, and resets on channel changes", async () => {
+    const { GhostController } = await load("src/equicordplugins/ghostVoice/state.ts");
+    let channel = "voice";
+    const sent = [];
+    const failures = [];
+    const ghost = new GhostController(() => channel, message => failures.push(message));
+    const socket = { isSessionEstablished: () => true, voiceStateUpdate: state => sent.push(ghost.prepare(state, socket)) };
+    const local = { channelId: channel, selfMute: false, selfDeaf: false };
+    ghost.start();
+    ghost.prepare(local, socket);
+    ghost.toggle();
+    assert.equal(ghost.pending, true);
+    assert.deepEqual(sent[0], { ...local, selfMute: true, selfDeaf: true });
+    assert.deepEqual(local, { channelId: "voice", selfMute: false, selfDeaf: false });
+    ghost.acknowledge({ channelId: channel, selfMute: true, selfDeaf: true });
+    assert.equal(ghost.confirmed, true);
+    ghost.toggle();
+    assert.deepEqual(sent[1], local);
+    ghost.toggle();
+    channel = "other";
+    ghost.channelChanged(channel);
+    assert.equal(ghost.pending, false);
+    assert.equal(ghost.confirmed, false);
+    ghost.stop();
+    assert.deepEqual(failures, []);
+});
+
+test("Ghost restores normal status if the server does not confirm", async () => {
+    const { GhostController } = await load("src/equicordplugins/ghostVoice/state.ts");
+    const sent = [];
+    const failures = [];
+    const ghost = new GhostController(() => "voice", message => failures.push(message), 5);
+    const socket = { isSessionEstablished: () => true, voiceStateUpdate: state => sent.push(ghost.prepare(state, socket)) };
+    ghost.start();
+    ghost.prepare({ channelId: "voice", selfMute: true, selfDeaf: false }, socket);
+    ghost.toggle();
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(ghost.pending, false);
+    assert.deepEqual(sent.at(-1), { channelId: "voice", selfMute: true, selfDeaf: false });
+    assert.equal(failures.length, 1);
+    ghost.stop();
+});
+
+test("translation providers have connection-only CSP permissions", () => {
+    const csp = readFileSync("src/main/csp/index.ts", "utf8");
+    assert.match(csp, /"translate.googleapis.com": ConnectSrc/);
+    assert.match(csp, /"aiapi.serversmp.xyz": ConnectSrc/);
 });
