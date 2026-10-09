@@ -47,6 +47,14 @@ test("Whisper rejects invalid WAV and language before executing a child process"
     await assert.rejects(transcribeWav("unused", new Uint8Array(44), "it;evil"), /Lingua non supportata/);
 });
 
+test("every distributed Whisper binary and model matches the hashes pinned in source", async () => {
+    const { WHISPER_RUNTIME_HASHES } = await load("src/plugins/voiceReplay/runtimeHashes.ts");
+    const manifest = JSON.parse(await readFile("dist/vendor/voice-replay/runtime.json", "utf8"));
+    assert.equal(manifest.release, "b5454");
+    assert.deepEqual(manifest.hashes, WHISPER_RUNTIME_HASHES);
+    assert.equal(Object.keys(manifest.hashes).length, 17);
+});
+
 test("real Windows image/PDF OCR reads text and enforces the five-page limit", { skip: process.env.EQYCORD_NATIVE_SMOKE !== "1" }, async () => {
     assert.equal(process.platform, "win32");
     const { extractBytes } = await load("src/plugins/attachmentSearch/extract.ts");

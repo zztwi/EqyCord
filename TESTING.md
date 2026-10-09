@@ -9,7 +9,7 @@ Environment: Windows, Node.js 24.19.0, pnpm 11.25.0. package.json retains upstre
 - pnpm test after the corrections: passed (desktop standalone builds, TypeScript, ESLint, CSS lint, plugin metadata generation and EqyCord tests).
 - pnpm build: passed (regular Windows desktop build). Installer fixture tests also passed again against this desktop build.
 - pnpm buildWeb: passed; browser bundle, userscript, Chromium and Firefox extension packages generated.
-- pnpm testEqyCord with `EQYCORD_NATIVE_SMOKE=1` and the public Canary fixture: 34 tests passed, zero failures/skips on Windows. This includes DM-history API mocks, account/permission handling, QuickSwitcher patch parsing, Ghost lifecycle, local PNG and six-page PDF OCR, and real CPU Whisper transcription.
+- `pnpm testEqyCord` with `EQYCORD_NATIVE_SMOKE=1` and the public Canary fixture: 35 tests passed, zero failures/skips on Windows. This includes DM-history API mocks, account/permission handling, QuickSwitcher patch parsing, Ghost lifecycle, local PNG and six-page PDF OCR, and real CPU Whisper transcription.
 - `pnpm install --frozen-lockfile`: passed after adding the new plugins; lockfile unchanged.
 - Windows OCR smoke test generated a local PNG (“EqyCord Search test 123”) and a six-page PDF. OCR found the image text and PDF pages 1–5, leaving out page 6 as configured.
 - Pinned Whisper CPU runtime: CLI help ran successfully; the multilingual tiny model transcribed an official JFK speech sample locally. This does not verify capture or transcription of real Discord voice audio.

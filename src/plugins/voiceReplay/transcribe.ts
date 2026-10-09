@@ -11,6 +11,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 
+import { WHISPER_RUNTIME_HASHES } from "./runtimeHashes";
+
 const exec = promisify(execFile);
 let checkedDirectory: string | undefined;
 export async function transcribeWav(runtime: string, bytes: Uint8Array, language: string, signal?: AbortSignal) {
@@ -19,10 +21,11 @@ export async function transcribeWav(runtime: string, bytes: Uint8Array, language
     if (wav.length < 44 || wav.length > 9600044 || wav.toString("ascii", 0, 4) !== "RIFF" || wav.toString("ascii", 8, 12) !== "WAVE" || wav.readUInt16LE(20) !== 1 || wav.readUInt16LE(22) !== 1 || wav.readUInt32LE(24) !== 16000 || wav.readUInt16LE(34) !== 16) throw new Error("Audio non valido: richiesto WAV PCM mono 16 kHz, massimo 5 minuti.");
     if (checkedDirectory !== runtime) {
         const manifest = JSON.parse(await readFile(join(runtime, "runtime.json"), "utf8"));
-        if (manifest.hashes?.["ggml-tiny.bin"] !== "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21" || manifest.hashes?.["whisper-cli.exe"] !== "331dba46d6427105d2b802cdbc7eae916ea1c5abf9b0d3b5cfe460d8db8e4366") throw new Error("Runtime Whisper non riconosciuto.");
-        for (const [name, hash] of Object.entries(manifest.hashes as Record<string, string>)) {
-            if (!/^[\w.-]+$/.test(name)) throw new Error("Manifest runtime non valido.");
-            if (createHash("sha256").update(await readFile(join(runtime, name))).digest("hex") !== hash) throw new Error("Runtime trascrizione alterato: " + name);
+        if (manifest.release !== "b5454" || manifest.sourceCommit !== "d1be6fde11ac6e0407606b4e42fe72d34add8037") throw new Error("Release runtime Whisper non riconosciuta.");
+        const hashes = manifest.hashes as Record<string, string>;
+        if (!hashes || Object.keys(hashes).length !== Object.keys(WHISPER_RUNTIME_HASHES).length) throw new Error("Manifest runtime non valido.");
+        for (const [name, expectedHash] of Object.entries(WHISPER_RUNTIME_HASHES)) {
+            if (hashes[name] !== expectedHash || createHash("sha256").update(await readFile(join(runtime, name))).digest("hex") !== expectedHash) throw new Error("Runtime trascrizione alterato: " + name);
         }
         checkedDirectory = runtime;
     }
