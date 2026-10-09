@@ -31,7 +31,7 @@ const settings = definePluginSettings({
     watermark: {
         type: OptionType.STRING,
         description: "Custom watermark text (max 32 characters)",
-        default: "Made with Equicord"
+        default: "Made with EqyCord"
     },
     grayscale: {
         type: OptionType.BOOLEAN,
@@ -92,7 +92,7 @@ function QuoteModal({ message, ...props }: RenderModalProps & { message: Message
     const [gray, setGray] = useState(settings.store.grayscale);
     const [showWatermark, setShowWatermark] = useState(settings.store.showWatermark);
     const [saveAsGif, setSaveAsGif] = useState(settings.store.saveAsGif);
-    const [watermarkText, setWatermarkText] = useState(settings.store.watermark);
+    const [watermarkText, setWatermarkText] = useState(settings.store.watermark === "Made with Equicord" ? "Made with EqyCord" : settings.store.watermark);
     const [quoteImage, setQuoteImage] = useState<Blob | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const { quoteFont } = settings.store;

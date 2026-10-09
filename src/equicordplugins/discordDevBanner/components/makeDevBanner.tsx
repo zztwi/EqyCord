@@ -17,7 +17,7 @@ export function makeDevBanner(state?: string): string | JSX.Element {
     const buildChannel = names[RELEASE_CHANNEL] || RELEASE_CHANNEL.charAt(0).toUpperCase() + RELEASE_CHANNEL.slice(1);
     const { chromiumVersion, electronVersion, getVersionInfo } = SettingsPlugin;
     const format = settings.store.format ?? "{devbannerIcon} {buildChannel} {buildNumber} ({buildHash}) | {equicordIcon} {equicordName} {equicordVersion} ({equicordHash})";
-    const baseFormat = state ?? format;
+    const baseFormat = (state ?? format).replace(/\bEquicord\b/gi, "EqyCord");
 
     const clientInfo = detectClient();
 
@@ -25,6 +25,7 @@ export function makeDevBanner(state?: string): string | JSX.Element {
         .replace(/{buildChannel}/g, buildChannel)
         .replace(/{buildNumber}/g, BUILD_NUMBER)
         .replace(/{buildHash}/g, VERSION_HASH.slice(0, 9))
+        .replace(/{equicordName}/g, "EqyCord")
         .replace(/{equicordVersion}/g, VERSION)
         .replace(/{equicordHash}/g, gitHashShort)
         .replace(/{equicordPlatform}/g, getVersionInfo(false))

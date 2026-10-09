@@ -8,6 +8,7 @@ import { openNotificationLogModal } from "@api/Notifications/notificationLog";
 import { isPluginEnabled, isSettingDisabled, isSettingHidden, plugins } from "@api/PluginManager";
 import { Settings, useSettings } from "@api/Settings";
 import { openPluginModal, openSettingsTabModal, PluginsTab, ThemesTab } from "@components/settings";
+import { getPluginDisplayName, getPluginDisplayText } from "@shared/eqyPluginOrigins";
 import { useAwaiter } from "@utils/react";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { OptionType, Plugin } from "@utils/types";
@@ -53,7 +54,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
                 if (!isPluginEnabled(p.name)) return false;
                 if (p.name.endsWith("API")) return false;
 
-                const name = p.name.toLowerCase();
+                const name = getPluginDisplayName(p.name, "EqyCord").toLowerCase();
                 return name.includes(lowerSearch);
             }),
         [lowerSearch]
@@ -116,7 +117,7 @@ export function buildPluginMenuEntries(includeEmpty = false) {
                                                 group={`${p.name}-${key}`}
                                                 id={`${p.name}-${key}-${opt.value}`}
                                                 key={opt.label}
-                                                label={opt.label}
+                                                label={getPluginDisplayText(opt.label, "EqyCord")}
                                                 checked={s[key] === opt.value}
                                                 action={() => {
                                                     s[key] = opt.value;
@@ -158,12 +159,12 @@ export function buildPluginMenuEntries(includeEmpty = false) {
                         <Menu.MenuItem
                             id={`${p.name}-menu`}
                             key={p.name}
-                            label={p.name}
+                            label={getPluginDisplayName(p.name, "EqyCord")}
                             action={() => openPluginModal(p)}
                         >
                             {hasVisibleOptions && (
                                 <>
-                                    <Menu.MenuGroup label={p.name}>
+                                    <Menu.MenuGroup label={getPluginDisplayName(p.name, "EqyCord")}>
                                         {options}
                                     </Menu.MenuGroup>
 
@@ -268,7 +269,7 @@ function buildCustomPluginEntries() {
             pluginEntries.push({
                 plugin,
                 node:
-                    <Menu.MenuGroup label={plugin.name} key={`${plugin.name}-group`}>
+                    <Menu.MenuGroup label={getPluginDisplayName(plugin.name, "EqyCord")} key={`${plugin.name}-group`}>
                         {entries}
                     </Menu.MenuGroup>
             });
@@ -286,7 +287,7 @@ function buildCustomPluginEntries() {
         <Menu.MenuItem
             id={`${plugin.name}-menu`}
             key={`${plugin.name}-menu`}
-            label={plugin.name}
+            label={getPluginDisplayName(plugin.name, "EqyCord")}
             action={() => openPluginModal(plugin)}
         >
             {node}

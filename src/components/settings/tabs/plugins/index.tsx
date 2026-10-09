@@ -150,7 +150,7 @@ function PluginSettings() {
                         <div>{changes.map((s, i) => (
                             <React.Fragment key={s}>
                                 {i > 0 && ", "}
-                                {Parser.parse("`" + s.split(".")[0] + "`")}
+                                {Parser.parse("`" + getPluginDisplayName(s.split(".")[0], "EqyCord") + "`")}
                             </React.Fragment>
                         ))}</div>
                     </>
@@ -379,7 +379,7 @@ function makeDependencyList(deps: string[]) {
     return (
         <>
             <Paragraph>This plugin is required by:</Paragraph>
-            {deps.map((dep: string) => <Paragraph key={dep} className={cl("dep-text")}>{dep}</Paragraph>)}
+            {deps.map((dep: string) => <Paragraph key={dep} className={cl("dep-text")}>{getPluginDisplayName(dep, "EqyCord")}</Paragraph>)}
         </>
     );
 }

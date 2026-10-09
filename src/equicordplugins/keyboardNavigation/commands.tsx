@@ -27,16 +27,16 @@ export interface ButtonAction {
 }
 
 export const actions: ButtonAction[] = [
-    { id: "openEquicordSettings", label: "Open Equicord tab", callback: async () => await SettingsRouter.openUserSettings("equicord_main_panel"), registrar: "Equicord" },
-    { id: "openPluginSettings", label: "Open Plugin tab", callback: () => SettingsRouter.openUserSettings("equicord_plugins_panel"), registrar: "Equicord" },
-    { id: "openThemesSettings", label: "Open Themes tab", callback: () => SettingsRouter.openUserSettings("equicord_themes_panel"), registrar: "Equicord" },
-    { id: "openUpdaterSettings", label: "Open Updater tab", callback: () => SettingsRouter.openUserSettings("equicord_updater_panel"), registrar: "Equicord" },
-    { id: "openEquicordCloudSettings", label: "Open Cloud tab", callback: () => SettingsRouter.openUserSettings("equicord_cloud_panel"), registrar: "Equicord" },
-    { id: "openBackupSettings", label: "Open Backup & Restore tab", callback: () => SettingsRouter.openUserSettings("equicord_backup_restore_panel"), registrar: "Equicord" },
-    { id: "restartClient", label: "Restart Client", callback: () => relaunch(), registrar: "Equicord" },
-    { id: "openQuickCSSFile", label: "Open Quick CSS File", callback: () => VencordNative.quickCss.openEditor(), registrar: "Equicord" },
-    { id: "openSettingsFolder", label: "Open Settings Folder", callback: () => VencordNative.settings.openFolder(), registrar: "Equicord" },
-    { id: "openInGithub", label: "Open in Github", callback: async () => VencordNative.native.openExternal(await getRepo()), registrar: "Equicord" },
+    { id: "openEquicordSettings", label: "Open EqyCord tab", callback: async () => await SettingsRouter.openUserSettings("vencord_main_panel"), registrar: "EqyCord" },
+    { id: "openPluginSettings", label: "Open Plugin tab", callback: () => SettingsRouter.openUserSettings("vencord_plugins_panel"), registrar: "EqyCord" },
+    { id: "openThemesSettings", label: "Open Themes tab", callback: () => SettingsRouter.openUserSettings("vencord_themes_panel"), registrar: "EqyCord" },
+    { id: "openUpdaterSettings", label: "Open Updater tab", callback: () => SettingsRouter.openUserSettings("vencord_updater_panel"), registrar: "EqyCord" },
+    { id: "openEquicordCloudSettings", label: "Open Cloud tab", callback: () => SettingsRouter.openUserSettings("vencord_cloud_panel"), registrar: "EqyCord" },
+    { id: "openBackupSettings", label: "Open Backup & Restore tab", callback: () => SettingsRouter.openUserSettings("vencord_backup_restore_panel"), registrar: "EqyCord" },
+    { id: "restartClient", label: "Restart Client", callback: () => relaunch(), registrar: "EqyCord" },
+    { id: "openQuickCSSFile", label: "Open Quick CSS File", callback: () => VencordNative.quickCss.openEditor(), registrar: "EqyCord" },
+    { id: "openSettingsFolder", label: "Open Settings Folder", callback: () => VencordNative.settings.openFolder(), registrar: "EqyCord" },
+    { id: "openInGithub", label: "Open in Github", callback: async () => VencordNative.native.openExternal(await getRepo()), registrar: "EqyCord" },
 
     {
         id: "openInBrowser", label: "Open in Browser", callback: async () => {
@@ -51,7 +51,7 @@ export const actions: ButtonAction[] = [
                         position: ToastPosition.BOTTOM
                     });
             }
-        }, registrar: "Equicord"
+        }, registrar: "EqyCord"
     },
 
     {
@@ -76,7 +76,7 @@ export const actions: ButtonAction[] = [
             if (choice && enabled) {
                 return togglePlugin(choice, enabled.id === "enable");
             }
-        }, registrar: "Equicord"
+        }, registrar: "EqyCord"
     },
 
     {
@@ -97,7 +97,7 @@ export const actions: ButtonAction[] = [
                         position: ToastPosition.BOTTOM
                     });
             }
-        }, registrar: "Equicord"
+        }, registrar: "EqyCord"
     },
 
     {
@@ -107,7 +107,7 @@ export const actions: ButtonAction[] = [
             showToast("Copied git info to clipboard!", "success", {
                     position: ToastPosition.BOTTOM
                 });
-        }, registrar: "Equicord"
+        }, registrar: "EqyCord"
     },
 
     {
@@ -116,12 +116,12 @@ export const actions: ButtonAction[] = [
 
             if (isOutdated) {
                 setTimeout(() => showNotification({
-                    title: "A Equicord update is available!",
+                    title: "A EqyCord update is available!",
                     body: "Click here to view the update",
                     permanent: true,
                     noPersist: true,
                     onClick() {
-                        SettingsRouter.openUserSettings("equicord_updater_panel");
+                        SettingsRouter.openUserSettings("vencord_updater_panel");
                     }
                 }), 10_000);
             } else {
@@ -129,7 +129,7 @@ export const actions: ButtonAction[] = [
                         position: ToastPosition.BOTTOM
                     });
             }
-        }, registrar: "Equicord"
+        }, registrar: "EqyCord"
     },
 
     {
@@ -149,7 +149,7 @@ export const actions: ButtonAction[] = [
             if (choice) {
                 NavigationRouter.transitionToGuild(choice.id);
             }
-        }, registrar: "Equicord"
+        }, registrar: "EqyCord"
     }
 ];
 

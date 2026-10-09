@@ -8,19 +8,19 @@ import type { PaletteCommand } from "../api/types";
 import { BoltIcon, GearIcon, PaintIcon, RestartIcon } from "../ui/icons";
 import { openSettingsPage } from "./openSettings";
 
-const SECTION = "Equicord";
+const SECTION = "EqyCord";
 
 export const equicordCommands: PaletteCommand[] = [
     {
         id: "equicord.settings",
-        title: "Open Equicord Settings",
+        title: "Open EqyCord Settings",
         section: SECTION,
         keywords: ["equicord", "vencord", "settings"],
         icon: GearIcon,
         actions: [{
             id: "run",
-            label: "Open Equicord Settings",
-            run: () => void openSettingsPage("equicord_main")
+            label: "Open EqyCord Settings",
+            run: () => void openSettingsPage("vencord_main")
         }]
     },
     {
@@ -45,7 +45,7 @@ export const equicordCommands: PaletteCommand[] = [
         actions: [{
             id: "run",
             label: "Open Updater",
-            run: () => void openSettingsPage("equicord_updater")
+            run: () => void openSettingsPage("vencord_updater")
         }]
     },
     {
@@ -57,7 +57,7 @@ export const equicordCommands: PaletteCommand[] = [
         actions: [{
             id: "run",
             label: "Open Changelog",
-            run: () => void openSettingsPage("equicord_changelog")
+            run: () => void openSettingsPage("vencord_changelog")
         }]
     },
     {
