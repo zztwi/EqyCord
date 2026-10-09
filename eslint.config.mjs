@@ -145,5 +145,14 @@ export default tseslint.config(
             "unused-imports/no-unused-imports": "error",
             "path-alias/no-relative": "error"
         }
+    },
+    {
+        files: ["src/equicordplugins/**/*.{tsx,ts,mts,mjs,js,jsx}"],
+        rules: {
+            // Equicord keeps relative imports within each plugin; its upstream
+            // lint configuration intentionally allows this convention.
+            "path-alias/no-relative": "off",
+            "no-useless-escape": "off"
+        }
     }
 );

@@ -44,6 +44,8 @@ export const watch = process.argv.includes("--watch");
 export const IS_DEV = watch || process.argv.includes("--dev");
 export const IS_REPORTER = process.argv.includes("--reporter");
 export const IS_ANTI_CRASH_TEST = process.argv.includes("--anti-crash-test");
+export const IS_COMPANION_TEST = false;
+export const IS_EQUIBOP = false;
 export const IS_STANDALONE = process.argv.includes("--standalone");
 
 // This fork has no validated release/update channel yet. Retain the updater
@@ -147,7 +149,7 @@ export const globPlugins = kind => ({
         });
 
         build.onLoad({ filter, namespace: "import-plugins" }, async () => {
-            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "userplugins"];
+            const pluginDirs = ["plugins/_api", "plugins/_core", "plugins", "equicordplugins", "userplugins"];
             let code = "";
             let pluginsCode = "\n";
             let metaCode = "\n";
@@ -378,3 +380,4 @@ export const commonRendererPlugins = [
     // @ts-expect-error this is never undefined
     ...commonOpts.plugins
 ];
+

@@ -1,13 +1,14 @@
 # EqyCord development build
 
-EqyCord is an independent, unofficial Discord client modification based on [Vencord](https://github.com/Vendicated/Vencord). It is not affiliated with Discord or endorsed by Vencord's maintainers. Client modifications can violate [Discord's terms](https://discord.com/terms).
+EqyCord is an independent, unofficial Discord client modification. It is not affiliated with Discord, Vencord, or Equicord. Client modifications can violate [Discord's terms](https://discord.com/terms).
 
 ## What is implemented
 
 - EqyCord settings identity across Plugins, Themes, Updater, Cloud and Backup & Restore. Internal Vencord keys and APIs remain compatible.
-- Plugin cards show only By Vencord / By EqyCord / By Community. Individual original authors, source and license remain in plugin details and source headers. First-party plugin author display name is 0009cx0, as supplied by the owner; id 0 avoids inventing a Discord account ID.
-- Independent Origin: All/Vencord/EqyCord/Community filter, combinable with Show All/Enabled/Disabled/Favorites/New/API/UserPlugins, search and Tags. Toggle, dependency and settings cards remain upstream implementations.
+- Plugin cards show By Vencord / By Equicord / By EqyCord / By Community according to each module's source. Individual original authors, source and license remain in plugin details and source headers.
+- Independent Origin: All/Vencord/Equicord/EqyCord/Community filter, combinable with Show All/Enabled/Disabled/Favorites/New/API/UserPlugins, search and Tags. Toggle, dependency and settings cards remain upstream implementations.
 - Every one of the 418 upstream plugin files at base commit 718c867256a9d181edc7a534afb296b9bb41ab58 is retained. The regression test checks 185 upstream plugin definitions and their original author/copyright declarations. Platform-specific exclusions are unchanged: a desktop-only plugin cannot run in a browser.
+- All 200 Equicord plugin modules from source commit 51eab49cce4566e51f65f29cc0eaae50efdd48d4 are included, along with their plugin support APIs, Discord types, and required package dependencies. Their Equicord and Vencord author records and GPL headers remain intact; a small number of modules use compatibility adjustments for EqyCord's existing settings, backup and native APIs.
 - Ten first-party plugins: TranslationPeek, DuplicateFinder, SmartPaste, AttachmentPreview, VoiceFocus, QuietMode, VoiceTool, MessageSearch, RelatedMessages, and AttachmentSearch. All new plugins are opt-in. Existing Translate/AutoTranslate enablement and language preferences migrate to TranslationPeek; outgoing translation starts off. The retired Translate and AutoTranslate entries are disabled and hidden in the plugin UI; their source and original credits remain.
 
 - MessageSearch keeps people results in Find or Start a Conversation and adds matches from locally loaded conversations. Its button searches DM history on demand. RelatedMessages ranks cached/history messages by shared words, not AI semantics. AttachmentSearch locates files by name or extracted text; Windows reads text/images/PDFs locally.
@@ -86,7 +87,7 @@ Discord updates can create a new app directory: status then shows the current ve
 
 ## Credits and distribution
 
-- Vencord by Vendicated and contributors, with all original plugin authors and file headers retained; GPL-3.0-or-later. The original README follows the fork introduction unchanged.
+- Vencord by Vendicated and contributors, and Equicord by its maintainers and contributors, with original plugin authors, license headers and GPL-3.0-or-later terms retained. The original Vencord README follows this project introduction unchanged.
 - EqyCord contributions: provenance/filter UI, fork presentation, translation, search/context UI, chat utilities, Voice Tools, backup validation, Windows wrapper and regression tests. The collective author uses id 0 to avoid inventing a Discord account.
 - Translate providers and original Translate code remain credited to their Vencord authors. Existing dependency licenses and generated LEGAL files must accompany distributions.
 - Vencord Installer is a separate upstream project; its license/notices and corresponding v1.4.2 source must accompany a bundled binary. The wrapper is EqyCord GPL-3.0-or-later code.

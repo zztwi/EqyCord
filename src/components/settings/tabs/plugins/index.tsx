@@ -48,6 +48,16 @@ import { UIElementsButton } from "./UIElements";
 export const cl = classNameFactory("vc-plugins-");
 export const logger = new Logger("PluginSettings", "#a6d189");
 
+export const ExcludedReasons: Record<PluginTarget, string> = {
+    desktop: "Discord Desktop app or Vesktop",
+    discordDesktop: "Discord Desktop app",
+    vesktop: "Vesktop app",
+    equibop: "Equibop app",
+    web: "Vesktop app and the Web version of Discord",
+    dev: "Developer version of EqyCord",
+    browser: "Web Browser version of EqyCord"
+};
+
 function ReloadRequiredCard({ required }: { required: boolean; }) {
     return (
         <Card variant={required ? "warning" : "normal"} className={cl("info-card")}>
@@ -94,6 +104,7 @@ function ExcludedPluginsList({ search }: { search: string; }) {
         desktop: "Discord Desktop app or Vesktop",
         discordDesktop: "Discord Desktop app",
         vesktop: "Vesktop app",
+        equibop: "Equibop app",
         web: "Vesktop app and the Web version of Discord",
         dev: "Developer version of Vencord",
         browser: "Web Browser version of Vencord"
@@ -176,7 +187,7 @@ function PluginSettings() {
 
     const pluginFilter = (plugin: typeof Plugins[keyof typeof Plugins]) => {
         const { status, tags, origin } = searchValue;
-        if (!matchesPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin, origin)) return false;
+        if (!matchesPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin, origin, PluginMeta[plugin.name]?.folderName)) return false;
 
         switch (status) {
             case SearchStatus.FAVORITES:
@@ -319,7 +330,7 @@ function PluginSettings() {
                         multi
                     />
                     <Select
-                        options={(["All", "Vencord", "EqyCord", "Community"] as const).map(origin => ({
+                        options={(["All", "Vencord", "Equicord", "EqyCord", "Community"] as const).map(origin => ({
                             label: origin === "All" ? "Origin: All" : `Origin: ${origin}`,
                             value: origin
                         }))}
@@ -372,4 +383,9 @@ function makeDependencyList(deps: string[]) {
     );
 }
 
+export function PluginDependencyList({ deps }: { deps: string[]; }) {
+    return makeDependencyList(deps);
+}
+
 export default wrapTab(PluginSettings, "Plugins");
+

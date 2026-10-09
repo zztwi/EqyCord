@@ -156,6 +156,8 @@ async function autoSetup(provider = async () => ({ text: "ciao" })) {
 test("origins distinguish upstream, first-party and local community plugins", async () => {
     const { getPluginOrigin, matchesPluginOrigin } = await load("src/shared/eqyPluginOrigins.ts");
     assert.equal(getPluginOrigin("Translate"), "Vencord");
+    assert.equal(getPluginOrigin("Animalese", false, "src/equicordplugins/animalese"), "Equicord");
+    assert.equal(matchesPluginOrigin("Animalese", false, "Equicord", "src/equicordplugins/animalese"), true);
     for (const name of ["EqyAutoTranslate", "EqyVoiceTools"]) {
         assert.equal(getPluginOrigin(name), "EqyCord");
         assert.equal(matchesPluginOrigin(name, false, "EqyCord"), true);

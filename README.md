@@ -2,10 +2,10 @@
 
 > **Compiled development preview — live Discord compatibility remains unverified.**
 >
-> EqyCord is an independent, unofficial Discord client modification built on
-> [Vencord](https://github.com/Vendicated/Vencord). This fork keeps Vencord's
-> original plugin collection and adds EqyCord plugins, origin labels, and a
-> rebranded settings experience.
+> EqyCord is an independent, unofficial Discord client modification that keeps
+> Vencord's plugin collection and includes Equicord's plugin collection, with
+> original source and author credits preserved. See [EQYCORD.md](./EQYCORD.md)
+> for attribution, compatibility notes and development status.
 >
 > See [EQYCORD.md](./EQYCORD.md) for current features, limitations, source
 > attribution, and development status. **Do not use the upstream Vencord

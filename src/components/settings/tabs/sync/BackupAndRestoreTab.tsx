@@ -54,7 +54,7 @@ function BackupAndRestoreTab() {
                     <Button onClick={() => uploadSettingsBackup()}>
                         Import Settings
                     </Button>
-                    <Button onClick={downloadSettingsBackup}>
+                    <Button onClick={() => downloadSettingsBackup()}>
                         Export Settings
                     </Button>
                 </Flex>

@@ -167,7 +167,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     }
 
     const pluginMeta = PluginMeta[plugin.name];
-    const origin = getPluginOrigin(plugin.name, pluginMeta.userPlugin);
+    const origin = getPluginOrigin(plugin.name, pluginMeta.userPlugin, pluginMeta.folderName);
 
     return (
         <Modal

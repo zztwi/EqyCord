@@ -28,6 +28,15 @@ interface BaseIconProps extends IconProps {
 
 type IconProps = JSX.IntrinsicElements["svg"];
 
+export const DiscordIconSizes = {
+    xxs: 12,
+    xs: 16,
+    sm: 18,
+    md: 24,
+    lg: 32,
+    refresh_sm: 20
+} as const;
+
 function Icon({ height = 24, width = 24, className, children, viewBox, ...svgProps }: PropsWithChildren<BaseIconProps>) {
     return (
         <svg
@@ -105,7 +114,6 @@ export function CopyIdIcon(props: IconProps) {
     );
 }
 
-
 /**
  * Discord's open external icon, as seen in the user profile connections
  */
@@ -145,6 +153,23 @@ export function InfoIcon(props: IconProps) {
                 fill="currentColor"
                 fillRule="evenodd"
                 d="M23 12a11 11 0 1 1-22 0 11 11 0 0 1 22 0Zm-9.5-4.75a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Zm-.77 3.96a1 1 0 1 0-1.96-.42l-1.04 4.86a2.77 2.77 0 0 0 4.31 2.83l.24-.17a1 1 0 1 0-1.16-1.62l-.24.17a.77.77 0 0 1-1.2-.79l1.05-4.86Z" clipRule="evenodd"
+            />
+        </Icon>
+    );
+}
+
+export function WarningIcon({ height = 32, width = 32, className }: IconProps) {
+    return (
+        <Icon
+            height={height}
+            width={width}
+            className={classes(className, "vc-warning-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                fillRule="evenodd"
+                d="M10 3.1a2.37 2.37 0 0 1 4 0l8.71 14.75c.84 1.41-.26 3.15-2 3.15H3.29c-1.74 0-2.84-1.74-2-3.15L9.99 3.1Zm3.25 14.65a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0ZM13.06 14l.37-5.94a1 1 0 0 0-1-1.06h-.87a1 1 0 0 0-1 1.06l.38 5.94a1.06 1.06 0 0 0 2.12 0Z"
             />
         </Icon>
     );
@@ -275,6 +300,24 @@ export function DeleteIcon(props: IconProps) {
     );
 }
 
+/**
+ * A plugin icon, created by CorellanStoma. https://github.com/CreArts-Community/Settings-Icons
+ */
+export function PluginIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-plugin-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"
+            />
+        </Icon>
+    );
+}
+
 export function PlusIcon(props: IconProps) {
     return (
         <Icon
@@ -306,6 +349,43 @@ export function NoEntrySignIcon(props: IconProps) {
                 fill="currentColor"
                 d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 5.69C8.45 4.63 10.15 4 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9z"
             />
+        </Icon>
+    );
+}
+
+export function PasteIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-paste-icon")}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+        </Icon>
+    );
+}
+
+export function ResetIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
         </Icon>
     );
 }
@@ -344,6 +424,27 @@ export function NotesIcon(props: IconProps) {
                 clipRule="evenodd"
                 fill="currentColor"
                 d="M19 4.49996V4.99996C19 6.65681 17.6569 7.99996 16 7.99996H8C6.34315 7.99996 5 6.65681 5 4.99996V4.49996C5 4.22382 4.77446 3.99559 4.50209 4.04109C3.08221 4.27826 2 5.51273 2 6.99996V19C2 20.6568 3.34315 22 5 22H19C20.6569 22 22 20.6568 22 19V6.99996C22 5.51273 20.9178 4.27826 19.4979 4.04109C19.2255 3.99559 19 4.22382 19 4.49996ZM8 12C7.44772 12 7 12.4477 7 13C7 13.5522 7.44772 14 8 14H16C16.5523 14 17 13.5522 17 13C17 12.4477 16.5523 12 16 12H8ZM7 17C7 16.4477 7.44772 16 8 16H13C13.5523 16 14 16.4477 14 17C14 17.5522 13.5523 18 13 18H8C7.44772 18 7 17.5522 7 17Z"
+            />
+        </Icon>
+    );
+}
+
+export function IDIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            className={classes(props.className, "vc-id-icon")}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M15.3 14.48c-.46.45-1.08.67-1.86.67h-1.39V9.2h1.39c.78 0 1.4.22 1.86.67.46.45.68 1.22.68 2.31 0 1.1-.22 1.86-.68 2.31Z"
+            />
+            <path
+                fill="currentColor"
+                fillRule="evenodd"
+                d="M5 2a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3H5Zm1 15h2.04V7.34H6V17Zm4-9.66V17h3.44c1.46 0 2.6-.42 3.38-1.25.8-.83 1.2-2.02 1.2-3.58s-.4-2.75-1.2-3.58c-.79-.83-1.92-1.25-3.38-1.25H10Z"
+                clipRule="evenodd"
             />
         </Icon>
     );
@@ -568,6 +669,56 @@ export function VesktopSettingsIcon(props: IconProps) {
     );
 }
 
+export function EyeIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M15.56 11.77c.2-.1.44.02.44.23a4 4 0 1 1-4-4c.21 0 .33.25.23.44a2.5 2.5 0 0 0 3.32 3.32Z"
+            />
+            <path
+                clipRule="evenodd"
+                fillRule="evenodd"
+                fill={props.fill || "currentColor"}
+                d="M22.89 11.7c.07.2.07.4 0 .6C22.27 13.9 19.1 21 12 21c-7.11 0-10.27-7.11-10.89-8.7a.83.83 0 0 1 0-.6C1.73 10.1 4.9 3 12 3c7.11 0 10.27 7.11 10.89 8.7Zm-4.5-3.62A15.11 15.11 0 0 1 20.85 12c-.38.88-1.18 2.47-2.46 3.92C16.87 17.62 14.8 19 12 19c-2.8 0-4.87-1.38-6.39-3.08A15.11 15.11 0 0 1 3.15 12c.38-.88 1.18-2.47 2.46-3.92C7.13 6.38 9.2 5 12 5c2.8 0 4.87 1.38 6.39 3.08Z"
+            />
+        </Icon>
+    );
+}
+
+export function ColorPaletteIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M12.37 9.04c.25-.26.73-.2 1.06.13L15 10.7c.33.33.39.8.13 1.06L4.92 21.84c-.27.26-.74.2-1.07-.13l-1.56-1.54c-.33-.32-.39-.8-.13-1.05l10.2-10.08ZM16.09 5.16c.25-.26.73-.2 1.06.13l1.56 1.54c.33.32.39.8.13 1.05l-2.1 2.08c-.26.25-.74.2-1.07-.13l-1.56-1.54c-.33-.33-.38-.8-.13-1.05l2.1-2.08ZM17.48 14.36a.56.56 0 0 1 1.04 0l.85 2.27 2.27.85c.48.18.48.86 0 1.04l-2.27.85-.85 2.27a.56.56 0 0 1-1.04 0l-.85-2.27-2.27-.85a.56.56 0 0 1 0-1.04l2.27-.85.85-2.27ZM7.6 2.32a.5.5 0 0 1 .94 0L9.17 4l1.66.62a.5.5 0 0 1 0 .93l-1.66.63-.63 1.66a.5.5 0 0 1-.93 0l-.63-1.66-1.66-.63a.5.5 0 0 1 0-.93l1.66-.62.63-1.67Z"
+            />
+        </Icon>
+    );
+}
+
+export function MagnifyingGlassIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                clipRule="evenodd"
+                fillRule="evenodd"
+                fill={props.fill || "currentColor"}
+                d="M15.62 17.03a9 9 0 1 1 1.41-1.41l4.68 4.67a1 1 0 0 1-1.42 1.42l-4.67-4.68ZM17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+            />
+        </Icon>
+    );
+}
+
 export function CloudDownloadIcon(props: IconProps) {
     return (
         <Icon
@@ -612,6 +763,62 @@ export function ClockIcon(props: IconProps) {
     );
 }
 
+export function ChevronSmallDownIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M5.3 9.3a1 1 0 0 1 1.4 0l5.3 5.29 5.3-5.3a1 1 0 1 1 1.4 1.42l-6 6a1 1 0 0 1-1.4 0l-6-6a1 1 0 0 1 0-1.42Z"
+            />
+        </Icon>
+    );
+}
+
+export function ChevronSmallUpIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M5.3 14.7a1 1 0 0 0 1.4 0l5.3-5.29 5.3 5.3a1 1 0 1 0 1.4-1.42l-6-6a1 1 0 0 0-1.4 0l-6 6a1 1 0 0 0 0 1.42Z"
+            />
+        </Icon>
+    );
+}
+
+export function ChevronSmallLeftIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M14.7 5.3a1 1 0 0 1 0 1.4L9.41 12l5.3 5.3a1 1 0 0 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z"
+            />
+        </Icon>
+    );
+}
+
+export function ChevronSmallRightIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"
+            />
+        </Icon>
+    );
+}
+
 export function DownArrow(props: IconProps) {
     return (
         <Icon
@@ -640,21 +847,7 @@ export function RightArrow(props: IconProps) {
     );
 }
 
-export function UploadIcon(props: IconProps) {
-    return (
-        <Icon
-            {...props}
-            viewBox="0 0 24 24"
-        >
-            <path
-                fill="currentColor"
-                d="M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm0-17a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H7a1 1 0 1 1 0-2h4V7a1 1 0 0 1 1-1Z"
-            />
-        </Icon>
-    );
-}
-
-export function TopRightArrow(props: IconProps) {
+export const QrCodeIcon = (props?: any) => {
     return (
         <Icon
             {...props}
@@ -662,67 +855,141 @@ export function TopRightArrow(props: IconProps) {
         >
             <path
                 fill={props.fill || "currentColor"}
-                d="M8 5a1 1 0 0 0 0 2h7.59L5.29 17.3a1 1 0 1 0 1.42 1.4L17 8.42V16a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1H8Z"
+                d="M4 6c0-1.1.9-2 2-2h3a1 1 0 0 0 0-2H6a4 4 0 0 0-4 4v3a1 1 0 0 0 2 0V6ZM4 18c0 1.1.9 2 2 2h3a1 1 0 1 1 0 2H6a4 4 0 0 1-4-4v-3a1 1 0 1 1 2 0v3ZM20 6a2 2 0 0 0-2-2h-3a1 1 0 1 1 0-2h3a4 4 0 0 1 4 4v3a1 1 0 1 1-2 0V6Z"
             />
-        </Icon>
-    );
-}
-
-export function StarFilled(props: IconProps) {
-    return (
-        <Icon
-            {...props}
-            viewBox="0 0 24 24"
-        >
             <path
-                fill={props.fill || "currentColor"}
-                d="M10.81 2.86c.38-1.15 2-1.15 2.38 0l1.89 5.83h6.12c1.2 0 1.71 1.54.73 2.25l-4.95 3.6 1.9 5.82a1.25 1.25 0 0 1-1.93 1.4L12 18.16l-4.95 3.6c-.98.7-2.3-.25-1.92-1.4l1.89-5.82-4.95-3.6a1.25 1.25 0 0 1 .73-2.25h6.12l1.9-5.83Z"
-            />
-        </Icon>
-    );
-}
-
-export function StarOutlined(props: IconProps) {
-    return (
-        <Icon
-            {...props}
-            viewBox="0 0 24 24"
-        >
-            <path
-                fill={props.fill || "currentColor"}
                 fillRule="evenodd"
-                d="M2.07 10.94a1.25 1.25 0 0 1 .73-2.25h6.12l1.9-5.83c.37-1.15 2-1.15 2.37 0l1.89 5.83h6.12c1.2 0 1.71 1.54.73 2.25l-4.95 3.6 1.9 5.82a1.25 1.25 0 0 1-1.93 1.4L12 18.16l-4.95 3.6c-.98.7-2.3-.25-1.92-1.4l1.89-5.82-4.95-3.6Zm11.55-.25h5.26l-4.25 3.09 1.62 5-4.25-3.1-4.25 3.1 1.62-5-4.25-3.1h5.26l1.62-5 1.62 5Z" />
-        </Icon>
-    );
-}
-
-export function SearchIcon(props: IconProps) {
-    return (
-        <Icon
-            {...props}
-            viewBox="0 0 24 24"
-        >
-            <path
-                fill={props.fill || "currentColor"}
-                fillRule="evenodd"
-                d="M15.62 17.03a9 9 0 1 1 1.41-1.41l4.68 4.67a1 1 0 0 1-1.42 1.42l-4.67-4.68ZM17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
                 clipRule="evenodd"
+                fill={props.fill || "currentColor"}
+                d="M5 7c0-1.1.9-2 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7Zm2 0h2v2H7V7ZM5 15c0-1.1.9-2 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2Zm2 0h2v2H7v-2ZM13 7c0-1.1.9-2 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V7Zm2 0h2v2h-2V7ZM17.08 13a1.5 1.5 0 0 0-1.42 1.03c-.09.25-.3.47-.56.47H15a2 2 0 0 0-2 2V20c0 1.1.9 2 2 2h6a2 2 0 0 0 2-2v-3.5a2 2 0 0 0-2-2h-.1c-.26 0-.47-.22-.56-.47A1.5 1.5 0 0 0 18.92 13h-1.84ZM20 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"
             />
         </Icon>
     );
-}
+};
 
-export function EyeIcon(props: IconProps) {
+export const ComponentsIcon = (props?: any) => {
     return (
         <Icon
             {...props}
             viewBox="0 0 24 24"
-            fillRule="evenodd"
         >
             <path
                 fill={props.fill || "currentColor"}
-                d="M22.89 11.7c.07.2.07.4 0 .6C22.27 13.9 19.1 21 12 21c-7.11 0-10.27-7.11-10.89-8.7a.83.83 0 0 1 0-.6C1.73 10.1 4.9 3 12 3c7.11 0 10.27 7.11 10.89 8.7Zm-4.5-3.62A15.11 15.11 0 0 1 20.85 12c-.38.88-1.18 2.47-2.46 3.92C16.87 17.62 14.8 19 12 19c-2.8 0-4.87-1.38-6.39-3.08A15.11 15.11 0 0 1 3.15 12c.38-.88 1.18-2.47 2.46-3.92C7.13 6.38 9.2 5 12 5c2.8 0 4.87 1.38 6.39 3.08ZM15.56 11.77c.2-.1.44.02.44.23a4 4 0 1 1-4-4c.21 0 .33.25.23.44a2.5 2.5 0 0 0 3.32 3.32Z"
+                d="M3 15.5V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v.5a.5.5 0 0 1-.5.5H17a4 4 0 0 0-4 4v4.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5ZM12.5 18H2a1 1 0 1 0 0 2h10.48c.33 0 .57-.3.54-.63A4.08 4.08 0 0 1 13 19v-.5a.5.5 0 0 0-.5-.5Z"
+            />
+            <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                fill={props.fill || "currentColor"}
+                d="M15 11c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-8Zm2 1a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1Z"
             />
         </Icon>
     );
-}
+};
+
+export const LogsIcon = (props?: any) => {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                fill={props.fill || "currentColor"}
+                d="M21 21.93V2.07a1 1 0 0 0-1.27-.97l-2.5.7a3 3 0 0 1-1.46.04l-3.12-.7a3 3 0 0 0-1.3 0l-3.12.7a3 3 0 0 1-1.45-.04l-2.51-.7A1 1 0 0 0 3 2.07v19.86a1 1 0 0 0 1.27.97l2.5-.7a3 3 0 0 1 1.46-.04l3.12.7a3 3 0 0 0 1.3 0l3.12-.7a3 3 0 0 1 1.45.04l2.51.7a1 1 0 0 0 1.27-.97ZM7 8a1 1 0 0 1 1-1h8a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1Zm1 3a1 1 0 0 0 0 2h8a1 1 0 1 0 0-2H8Zm-1 5a1 1 0 0 1 1-1h3a1 1 0 0 1 0 2H8a1 1 0 0 1-1-1Zm8-1a1 1 0 0 0 0 2h1a1 1 0 1 0 0-2h-1Z"
+            />
+        </Icon>
+    );
+};
+
+export const BookmarkIcon = (props?: any) => {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M4 5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v16a1 1 0 0 1-1.67.74l-5.66-5.13a1 1 0 0 0-1.34 0l-5.66 5.13A1 1 0 0 1 4 20.99V5Z"
+            />
+        </Icon>
+    );
+};
+
+export function RobotIcon(props: IconProps) {
+    return (
+        <Icon
+            {...props}
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill={props.fill || "currentColor"}
+                d="M7.89 13.46a1 1 0 0 1-1.78-.9L7 13l-.9-.45.01-.01.01-.02a2.24 2.24 0 0 1 .14-.23c.1-.14.23-.31.4-.5.37-.36.98-.79 1.84-.79.86 0 1.47.43 1.83.8a3.28 3.28 0 0 1 .55.72v.02h.01v.01L10 13l.9-.45a1 1 0 0 1-1.79.9 1.28 1.28 0 0 0-.19-.25c-.14-.13-.28-.2-.42-.2-.14 0-.28.07-.42.2a1.28 1.28 0 0 0-.19.25ZM13.55 13.9a1 1 0 0 0 1.34-.44c0-.02.02-.04.04-.06.03-.05.08-.13.15-.2.14-.13.28-.2.42-.2.14 0 .28.07.42.2a1.28 1.28 0 0 1 .19.25 1 1 0 0 0 1.78-.9L17 13l.9-.45-.01-.01-.01-.02a2.1 2.1 0 0 0-.14-.23 3.28 3.28 0 0 0-.4-.5c-.37-.36-.98-.79-1.84-.79-.86 0-1.47.43-1.83.8a3.28 3.28 0 0 0-.55.72v.02h-.01v.01L14 13l-.9-.45a1 1 0 0 0 .45 1.34Z"
+            />
+            <path
+                fill={pro]8öÚ$z{-®éÜj×›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LLMÈŒXM‹ŽMÈ‹ŽMÈHKŽˆMMXM‹ŽNH‹ŽNHHKŽMËŒˆËŒØLHHKLK‹LK›ËŒËMËŒ˜MŽNHŽNHMËŒ“NHKØMŽMÈŽMÈMËŒˆNŒˆŒ˜LËŒËŒHNN‹ŒM‹ŒLKŒLˆKŒLˆLKNLKNLËHËXLHHKLK‹LK›ËKLËXLËŒLˆËŒLˆHHˆ›M‹Œ‹ŒMKŒKŒKMË‹MË›Œ‹NŒ–ˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÝXÚÙ\’XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“MˆšL˜MHËXKKHKKKRNXMHHMH]Œ‹XKKHKKKR˜MKMM˜MHM›KHLKHKHHLÈKHKHÖ“LNHXLKHKHHKLÈKHKHHÈ›KNKŽLH‹ŽMLHHLKˆKŒLˆKHKHKŒMHHLK‹LKŒLˆËHËHKMKŽˆˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LŒKˆM˜ËŒÈŒKŒËŒŒ˜LÈÈKKNŽ›MŒŒLÈÈKKŽ‹NŒŒKKŒ‹KŒŒNXLÈÈHËLÚ‹–ˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÚY’XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“MH˜LÈÈLÈÝŒMLÈÈÈÚMLÈÈËLÕXLÈÈLËLÒV›L‹ŒNLËŽØL‹ŽH‹ŽHKLK‹KHËŒNËŒNKLKŒL‹LKŒÍPMŽŽHL˜ÌKÍKŒMLK‹‹LˆŒŽKKNKËLKŒKŒLKŒÍØLËÈËÈHKŽMKKXËKŒŒKŒMKÌ‹KŒŽŽKÈKŒMHKŒM›LKŒŒ‹ŽLKÍˆKÍˆLKLKŒ˜ËKˆLKŒMËŒŒ‹LKL‹XL‹Í‹ÍKLÈKŽÌÎŒNKŒÎKLÈKŽKŒÍK‹Ž‹KL‹ŒÈMËKŒ‹ŽKKŒM‹ŒKKŒL‹KKŒËNKÝ‹KŽLÒËŒÝ‹LKËŒŒŒÒKŒÛKŒ‹KÌXËKËMËLKŒ‹Ž‹LKŽKŽ–›M‹ŒÍKŒMZLKMÕŽŒŽKMÝË›LKLHKMÝ‹L‹ŽÚ‹Í‹LK’M‹•ŽKÒŒŽŒŽMŽMÝËˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆšY[ÒXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“MLÈÈLÈÝŒLLÈÈÈÚLXLÈÈËLÝ‹L‹ŒL˜LHHMKŽ[ÈKXLHHKKKŽUËŒ˜LHHLKKKŽ[LÈKXLHHKMKŽUØLÈÈLËLÒˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÜ™Y]Ø\™XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“L˜ÌLKŒHKŒËLˆ‹LšNKŒ˜ÌKŒÌˆ‹ŽH‹ŒR–“L‹ŒÌKŒÈŒNKŒHN‹NŽÌKŒKLKŒ‹L‹’‹“LNL˜LHHHš˜LHHHLšL–“LÈLØLHHHKLZ˜LHHHH’LHHKLKLV›LØLHHHKLZLHHHH’LHHKLKLVˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ\ÒXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“L‹ŒˆËŒXËKŒKŽMKŒÌHKŽLˆKŒˆ‹ŒNŒÈKŒMXËŽMŒHKŽLKKŒÌH‹ŒMËLKŒ›KŒMKMŒØËŒKKŽMKŒÌKLKŽLKLKŒ‹L‹ŒMÛMŒËLKŒMXËKŽMKŒKLKŽLKŒÌKL‹ŒMÈKŒ›LKŒMHŒÖ“LL‹ŽNËŽØLˆˆKÍH‹ŽMRŒLˆˆKÍ‹L‹ŽM[L‹ŒËMŽØLˆˆLËLHL‹ŒÈŽÖ“MKŽˆLËŒØKŽKŽHHKŒŽÍKÍØKŽKŽHMŒ›KŒ‹ŒL˜ËKŒ‹ŽKL‹ŽKŒ›KŒLÈKŒËKŒ‹Œ‹ŒË‹ŒM›M‹ŽL˜ËŒËËŒMKKŒŽKŒ›KŽKNKŽL‹ŽLˆKŒÍËKŒÍˆKŒ˜KŽKŽHKLKŒMKMÛLKKŒÍ˜KŽKŽHKˆLHŒÍ˜KŽKŽHKLKŒMKKMÛKŒÍ‹LKŒ˜KŽL‹ŽLˆKŒÍËKKŽKKNKŽLËŽLÈKKŒŽLKŒ›M‹KŽLØËŒLKKŒMËŒM‹KŒÎŒMKN[KŒL‹LKŒËKŒ‹KKŒËKŽM‹ŽLKŒ›KŒKKŒL˜KŽKŽHMKŒ›ÍKKÍÖ“LNLˆLËÌXLKŒHKŒHL‹ŒKˆKŒËKŒNKKKMËŽLKŒÈKŒÛLKŒ˜LKŒHKŒH‹ŒKŒ˜ËKŒNKŽMÈKŒÈKŒÛˆKŒËŒÍKŽMHKËŽMH‹Œ‹LKŒËŒNKKKMËKŽKŒËLKŒÛKŒK˜LKŒHKŒHL‹ŒLKŒK˜LKŽKŽKLKŒËLKŒÛK‹LKŒˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ™[˜ÛÜ™XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒŒLNˆ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LŽÍMNÌŒ‹ŒMMÌˆÌŒÎKMÎMLËÌËŒMMNHŒÎŒŽÍËÌÌ‹ŒMÍMÌŒŒÍ‹ŽLLKÌÍËLMˆÌŒŒËŒLLKÌÎŽNLˆŒKŒÎLLÌÍŒÎLÍHNMKŒNKÍŽMŽLHÌN‹ŒÍÍŒŽ‹ÍKŒÍŒÎŒHMÍËŒÌŽÍKŽNMÍˆMËÎŒÌNÍKŽŽMÌŒÌMNKŽŒ‹ÍKÍÍÎMM‹ŒŒŒKÌÍKŽŒML‹ŽÍŒÌNKÌŽKLÎLŒMHÌLÎKŒŽŒËÌ‹ŒÌŽŒMÈLKÎMÍÌŽKŽËŒNNÍHLL‹L‹NKÍÌMŒˆÌLËŽLMËLKŽŒŒÈLËŒÍÍMËËÌÍMHNKŒÍNLÍ‹ŒÍKŒLÌŒMÌˆÌLL‹ŽLNŽKŒŒNNML‹ŒMŽLŽKNKŒÍÈLÎKŽLÌLÍMMKÌLÌÍHÌMKŽLÌÍKMŒNLÌÌÈMMŒMŒKLÌ‹ŽMNMLÌŽMÎÍ‹LËŽMHÎNŽLÍÌ‹LLKÍÍÍÎH‹ÌLÌËMKÌÍŽÍLM‹ÎKŒÌÎŽÌ‹ÎÎLKÍKŒNŒNKŒLÌMÌ‹ÌËŒŒLÌÌLLŽMÌÌÍKÎÌÎLMÈÌLMÌËÎKŒŽMHKÍMÎKÎŽLŒŽMNKŒMÌÌKÎŽNNÌÍÈÍ‹MÍÎL‹ÍKŽNŒLÎMÌ‹ŒÍŒMKŒÍMNËŽKŒŒŒÌÎHÌKŒŽMÍMMˆKŒŒŽMLLLˆKŒÍÎLNM‹LLÍKŒMŒLMKLËŒÍNMŒÍŽMÌKLKŒNÍNL‹ÍÍMËKŒÎNÌŒ‹ŒMÍŽLÍËËÍÍÎÈÌ‹ŒÍMÌËÎŽNKŽMLMŒ‹ÌËNNNÍMŽLMLKËŒŒNHËŒÍÌÌKŒÌŒŽŒÎLMÌMŽLŒMÍŒHÎËŽMÎKLKMMÍÍÈMÌŽM‹MŒNMNKŒÌŒKŒÌNMŽHÌL‹ŽMŽLÍ‹ËMÌL‹ŒMËÍLÍŒŒHLKLÌLLËKŒŒMÈÌLMËŽMŒM‹MËŒŒÌÌHL‹ŒÌÍŽLMÌËŽNLÌˆLÍŽŽMËKMŽHÌM‹ŽÌLŽNNHMLKŒŒÎMËLŒŒHMNKŒLŽMMËLÍKŒÌNLÈÌMÌŒÍMÍMM‹ŒŽLˆNKÌÎŒ‹MÍËŽNMNL‹ÌMÎMËNNKŒÌŽMÌNLËŽMŒÍNŒKŽLMÈNMKŒŽMLŒËŽŒÍÌNMËMŽMNMKŒ‹ŽMLHÌNNŽÌÌËŒÍÌLÍÈNNKŽŒÍÍŒËŒÍÎHŒŒÌMŒ‹ŒÌMÌLÈÌŒËLÌLLLËNLËŒLÌŒ‹ŽMŒL‹NŽMNLŒHŒKÍÌËMÍ‹ŒLÌˆÌŒM‹ŒLŽLÎMKMMKŽLMŒÈŒŒ‹ŒNLLÍKNMŽˆŒŽLŒLMKŒÍLŒÈÌŒÌËŽŒMËMËÍŒLMÈŒÎŽLÍ‹ŒŽMHÌÌÍLŒ‹ÌŒŽÌLKÌNL‹ŒMŒNMŒŒLÍËNKŽLÍÈ‹ŒKŒÌÌŽLKŒÍKŒÍÎLLKŒŽLÌÎÍKKŒHÌŽŒK‹ŒÌMÍMŽ‹ŽLMLŒÌÌLŽLŒLÎKŽMŒÎHÌŽNMÍËŒŒˆÌËŒŒMLMKKŒÌNÈÌMKLÍMÌËLKŽMÌŒÌÌMKŒŒŒŒŒLËŒÍˆÌMÎNNÍKMÌŒNÌMMÎNËMKŽLÌŒHÌÌKÎMŽŽLÎNMÌŒÎK‹ŒMÍMHŽNKŽNŒÍNKLKŒLŽHÌŽMËŽLÍMÍŒL‹ŒMÍMMHÌËŒLŒŒNL‹LL‹ŒLÍNMÌHÌL‹LŒÍÎLMŽŒŒLÍÈÌÌŒŒLÍKLMËŒMŒÎMŒÈÌŽÌÎÍ‹LNŒŽMMÍÈÌÍ‹ŽLŒÍLNKŽMŽˆÌÌÍKŒLNMÍËLËŒMÌÌLˆÌÌËÌNMKLÍLÌÌÌKMÎMKŒMNHÌÌËÎLÍMMŒÌMŒNÌŒËNŒL‹M‹ŽLÌNŽLLŒÍMMÎKŽMÌÌ‹ŽML‹MÍKŒŒÌŽËLNMÌLŽMÌKŽMMNNMMKŽLÍMÌ‹NMÌÌMŒÍŒNŒŽMÎL‹MŒ‹ŒÍŒMKMŒÍŒMŒ‹ŒŒÍHÌÍLÌMNKMŒËŒŒLMŽHŒÍMNËMÌŽNMLˆŒÍËŒMLLÎNNÍÌŒNÌŒ‹MÌLKŒM‹NHŒM‹ŒLŒLÍŽL‹NÌHŒMMMÍKŽŒLÌMMÈÌŒLLÌ‹ÌŒÌÌÌÈŒŒŒÍMMËÌL‹ÌNˆŒNLŒÌMKŒÌÍMÍMÌŒKŽMŒMNKÌMËŒÌÌMˆŒÌËŒÎLMMKÌNKÍÌŽÍMNÌŒ‹ŒMMÌžˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LŽMMMŒËÌŒKŒÌÍÎHÌŒÌËŒÎLMMKÌNKÍÌŒKŽMŒMNKÌMËŒÌÌMˆŒNLŒÌMKŒÌÍMÍMÌŒŒŒÍMMËÌL‹ÌNˆŒLLÌ‹ÌŒÌÌÌÈŒMMMÍKŽŒLÌMMÈÌŒM‹ŒLŒLÍŽL‹NÌHŒ‹MÌLKŒM‹NHŒÍËŒMLLÎNNÍÌŒNÌŒÍMNËMÌŽNMLˆÍLÌMNKMŒËŒŒLMŽHMKMŒÍŒMŒ‹ŒŒÍHÌŒŽMÎL‹MŒ‹ŒÍŒ‹NMÌÌMŒÍŒNÌKŽMMNNMMKŽLÍMÌŽËLNMÌLŽMÌ‹ŽML‹MÍKŒŒÌÌNNŽLKMÎKŽMNÌÌNÌŽNKN‹ŒÍŽHÌNMLMŒ‹NŒMLˆÌMËŽLÍÌËN‹ŒMLÌÌLËŒŒMËNNLŒÌMÈÌKŒÌMÎKŒLŽLMŒHÌKŒLÍNŒŒËÍLHÌŽNKŒŽMŒL‹ŒŽKŒNMHŽLËLNÌËŒÍŽÌLHŽËŽMÌMŒŽMÈÌŽKŽÍMK‹ŒNLÌÍŽŒŒÍL‹ŒÌŒLÍÈŽKŽÌ‹‹ÍÎMŒÈÌÍKŒNMNMKÎNMHŽKŒLŒLŒËŒËÌŽHŒËŒŒMËÌKŽMÍLÌˆÌMËŽŒÌKŽ‹ÌNÈL‹ŒÎËŽLËŒÌÌŒHËŒŽN‹ÌŒŒŽÎHÌLŒNMKÌKLMˆ‹ŽNNMLL‹ÌMKMMLÍNHŽMMMŒËÌŒKŒÌÍÎ^ˆLÌÍËŒÎL‹LNKŒŒŒLÈÌÌŽÌÎÍ‹LNŒŽMMÍÈÌŒŒLÍKLMËŒMŒÎMŒÈÌL‹LŒÍÎLMŽŒŒLÍÈÌÌËŒLŒŒNL‹LL‹ŒLÍNMÌHŽMËŽLÍMÍŒL‹ŒMÍMMHŽNKŽNŒÍNKLKŒLŽHÌÌŒÎK‹ŒMÍMHÌKÎMŽŽLÎNMÌMMÎNËMKŽLÌŒHÌÌMÎNNÍKMÌŒNÌMKŒŒŒŒŒLËŒÍˆÌMKŽÌL‹ŒŒLNÌÌËÎNLMŽLŒŒHÌÎŽMÌÌŽMËM‹ŽMŽÍÍLŒLÌÌ‹ŒLLNÌÍMŒMLŒŒKÌŒÍMËŒŽLNM‹KŽLŽMMÌHÍM‹ŽLÎŽLËÌKŒÎMÌÍM‹ÌŽLLËÍKŒNÍˆÍM‹LMÍŒÎKÎKŒÎŽÍMKŒŒÍŒËËŒÎŒLHÌÍLKŽÍŒŒMMŒLHÍËŽMNLL‹Í‹ŽLÌLHÍËŽMÌŒKLËMŒŒŽMÌÍKŽÍŒËL‹ŒNLLÍÈÌÎKÎMÌÍ‹LLÌŒNHÌÍËŒÎL‹LNKŒŒŒLÞˆNKŒÍMŒËÎKŒÍLLÍHÎKÍMÎKÎŽLŒŽMNLMÌËÎKŒŽMHLŽMÌÌÍKÎÌÎLMÈÌNKŒLÌMÌ‹ÌËŒŒLÌÌL‹ÎÎLKÍKŒNŒÍŽÍLM‹ÎKŒÌÎŽÍ‹ÌLÌËMKÌNŽLÍÌ‹LLKÍÍÍÎHLÌŽMÎÍ‹LËŽMHÌMMŒMŒKLÌ‹ŽMNMMKŽLÌÍKMŒNLÌÌÈLÎKŽLÌLÍMMKÌLÌÍHÌL‹ŒMŽLŽKNKŒÍÈLL‹ŽLNŽKŒŒNNMNKŒŒLNKŒÍŽŒÍŒÎMKŽÎLMËŒÌŒNÌHL‹ŒÎÌ‹ŒKMŒMLÈKŽŽMÎKŒŒÍLÎMÎŒŽLÍËŒËŒHÌMN‹MŽHŒŽMŽKLŒHÍL‹ŽLÌŽËMMKŽMŽLÌŽNNLÌŽKMKŽMLLNHÍËŒËLŽŒNLMÈÌŽKLŽKLMKŒLMÍHŒKŽLNŒNKLKŽÍÌMLHMŒÌŽLÌM‹ŒŽHÌL‹ŒŒÌLKKÌMLMˆLŽŒNK‹ŽLŒKŒÍMŒËÎKŒÍLLÍ^ˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LŽLËŽLMÍLÌKŒLLÌŽ‹ŒMÌMNLŒNLˆÌ‹ŒŒËLŒŒHŒNLÌNMKŒÎMŒÈÌŒËŒÌNMÍŒËLËŽNNNMŽHŒ‹ML‹ŽLLÍMÍŒ‹ŒŽNKLKŒÎMŽHÌŒËÍÍÍLËKŒNŽMLHKŒL‹ËMLÍÈKŽMÌŽM‹KŒNÌ‹ŒÍŒÍÍÌËŒŒÍ‹NÌNÎKŒMÌŒÈKŒLLLMKÎŒŒˆÌŒKŒMÎN‹ÍKLLÍMLM‹ŒÍNMËÍŒNNHLKŽÍŽÌ‹ŒMHÌLKŒŽËÌKLÍÌHLKÍ‹ÌKŒŒŒŽÈLKŒMÌÎMLÌKŒÌÌˆÌLŒNMÍKŽŽMÍÈKŒNMÍMM‹‹ŽÌÌLˆMÌŽLÍËŒÍÍÍMHÌLËŽLÍŒ‹ÍNLLŒNÌÌÈŒËŒMÌÍKNKŒÌMLHÌÍÍÌ‹M‹LÌLŽ‹ŽŽLŒNLÈŽ‹MËÎKŒÍLHÌŽ‹ŽLŒÍËŽLMÍˆŽËŽÌËÍ‹ŒÍÎMÈŽÌMŽNÍŽMŽNHÌŽL‹ŒÌLÍLËŽŽÌˆŽLKNL‹ŽLÎŽKŒŽÌÌŒËŒLÌŽÍÌÌ‹ÍÍŽL‹M‹ŒÎÍÈNKŽMÌÍMËKNÎH‹ŽLÌMK‹ŽNÌÌÍHÌ‹LÌŒÎKÌÍŒŽNŒÍËÌÍMÌËÎNKŒÍHŒÌËŒN‹ÎMËŒMÌˆÌŒÌ‹ŒÎÍKÍÎŒÌHŒÌËLŽLÍNÍŒŒÌŒMHŒÍ‹ŒÍÎËÍ‹ŒŽLÌÍˆÌŒÍ‹ŒNÌÌKÍŽNMÌŒŒÍ‹MŒŽKÌÎKŽLÎNHŒÍ‹ŽNŒKÌÎŒÌŒÎŒŽÍËÌÌ‹ŒMÍMÌŒŒÎKMÎMLËÌËŒMMNHŽMMMŒËÌŒKŒÌÍÎHÌ‹ŽNNMLL‹ÌMKMMLÍNHLŒNMKÌKLMˆËŒŽN‹ÌŒŒŽÎHÌL‹ŒÎËŽLËŒÌÌŒHMËŽŒÌKŽ‹ÌNÈŒËŒÍÌŒÎKÌ‹ŒLÌŽÍÌ‹ŒŒËÌËŽÍˆŽKMLMÍKŒÌLˆÌ‹LŽÎÍ‹ŽMMŒŽÌÍ‹ŽLMÌ‹ÎKŒMÎLHÎKŒMŽMËÎLMHŽKŽLŽLŒKÍŒMŽÌÌŽËÌMMŽKÌÎNÌHŽKŒÌNMŒLKËŒÌÍŒLŒHŽËŒLŒLKŒËŽMŒLÈÌŽLËŒÎÍŽKL‹ÌˆŽLËŒLÌLKL‹LŒMŽKŽMÎ‹ŒÍÌÎÌŽŒŒÍL‹ŒÌŒLÍÈŽKŽÍMK‹ŒNLÌÍŽËŽMÌMŒŽMÈÌŽLËLNÌËŒÍŽÌLHŽNKŒŽMŒL‹ŒŽKŒNMHÌKŒŽN‹ŒŒŒLÍMˆÌÌŒŒÍNLÍŒL‹ŽÍÈÌÍ‹MŽLÎŒËŒŒNNHÍMŒŽMKNM‹ŒÌLLNHÌÍMŽÌÎMŒ‹NM‹ŒMNMŒÈÍMKMLÌLKNM‹ŒMÌLÍM‹ŽNMÌNKNM‹ŒLŽˆÌÍŽKLÌNLŒKŒ‹ŒLÎKMŒMÍËŒNŒMHÎLËŒÍÍÍLÌËŒMŽÍˆÌÎMËŽMÌMËŒMËŒÎÍˆNMŽLŒM‹ŒÍHËŒŒÎNMKŒLKŽÍMÌÌˆÍKÌŒNÌ‹Œ‹ŽLMŒÍÌÌLÎŒKŽLÌÌŒLŽMLÌLKNM‹ŽLŒÌÍLËŒNÌÌNKNL‹NLŽMÈL‹ŒÌLNKŽÌNLËŽLLMM‹NËMŒMŒÍŽNÎMNKŽNLMÍŒKŽMÌM‹NŒŽMÎNŽNMÍNKNËŒMÎLŒHÍKŒMŽMŽNKÎLÌÈNKŒLNKMÎKŽLÍNLÈŽKŒNMÎKMÎKŒNNLŒÍÍÎŽMÍ‹MÎLLLÎÈŽNLÌLMÎKŒÌÍHNLŒLËMÎŽNNNMˆÍKŽLLÌÍ‹MÎŽLLŽLL‹ŒLŒNNÍŒŒLˆLÍËŒÌÎLNMMLˆÍMKŒÎËNMËLÍLÌHMLËŒÎŒLËŒ‹ŒMMMÎHMŒMMÌŒ‹ŒŽŒMÈÍM‹ŒÍLMKŒKNLLŽHMŽŽŽËŒMËŽMNÍM‹ŒÍLMŒŒKŒLÍLMˆÍMMËŽMÍMKŒÍNNHMKLÌMÎNKÌËŽLÍŽHMŽLŽLÌŒKŽMËŽNMÎÍLÎŒÍNMÍ‹ÌKŒMNŒLÌŒMÌÌËŽMÌÌÍÈLŒËŒLÍMMKÌŒMLÈÍLM‹MMÌKÌKMLÍMÈLKŽŽLŒ‹ŽNÌMŒHLËŒÌŒ‹ŽMKŒMMÌÈÍLËŒŒÍŒNKŽL‹ŽLÍÎNLLŽMÎNŽLŽMMÌÌHLMŽMÌKŽKŽMÍŒHÍLËŒÌŒLŽ‹ŽNLŽLˆLÍ‹ŒLMÌÌLŽÌNLLÎKŽMÌÎNNKŽŒŒNLÍMMNL‹ÌLLÈMKMÍMMŒ‹KŒÍNMM‹LNŒËŽLMMLÈÍMKŒMLÎKNKŒÍLNMNMLÍM‹ÍLÈLÎKŽŒMÌ‹LËŽNˆÍLŒËŒÍNLMKKŒMÌHL‹ÍÍLŒŒÍ‹ÌÍÌŽHLŒÍLŒŽŒLLŽÎHÍ‹MMÎ‹Œ‹ŒNŒÎHËŽLNŒËŒMÍNH‹ŒÌÌMKŒÌÎNNMˆÍÎKŒÍŒMŒÌËŒÍKŽMÍÎMˆÍ‹MŒËKŒÌŽÌÌËŽLÌLË‹ŒNLˆÍÌKLŒNKLŽNÍÈÌ‹ŒNLL‹ŽÌMˆÍ‹ŽNMÎKMKMMHÍKŒÎËMËÌŽMÈKŒNÌËNKÍLÍHKŽLNKŒKŽNŒMÍˆÍLŽMLËŒ‹LÍŽLˆLKŽÎŒŒËŒËŒÎLŒÈLËŒÌÌKLˆÍLKÌÎMLËKŒMˆLŽLMKKŽŽLMHLŒÎNK‹ŒLÎMÍÌHÍŒÍNÍKŽKÌÌÍÈÌÌŒ‹ÌËLÍLˆŒŽNKÍ‹ŽÌÌMÍMKMÌLÍKÎŽŒLÈL‹ÍÎKŽ‹ŒÌNŒÈL‹ŒLÍÎMŽËŽÍÌŒÍÍËŒÌNLKŽËŽNLŒŒ‹MNMŒKŽLŽLLŒŒÌHKŒMMM‹ŽMËLNNMNÌÎM‹ŒLÎMMMËÌËŽLÍMŽHÎKŒÍN‹ÌL‹ŽLÍŽLˆÍÍËŒLÌŒÎKÌKŽÍLÌÈÌÍNKÎMLLKÌM‹ÍMŽÍ‹ŽNMÎKÌËŽLŒMŽLˆÌ‹ŒNMMŽNKŒMLHÌÌŒ‹ÎLÌN‹ŽMËŒÌÌŒŒÌŒŒLNMŽMËŽMLMŒˆÌNŒMKÌKNNÌÌM‹MLÌÎLLÎˆÌMLLNÌŒLÎLÌL‹ÎLÍ‹ÌLKLLLLˆÌÌËLÎLËÌŒ‹ŒŒŽÎÌMMLMÌŒ‹LŒˆÌNŽŽNËÌŽKÎHÌÌŒ‹ŒŒÍÍ‹ÌÌKŒNLÎÈÌKŒMÌNÌÌ‹ŽÌŒˆÌŽKŒLËÌÍŒLMˆÌÌŽŽŽNM‹ÌÍKŒLÍNHÌŽÍMÍLÎÌÍKŒÎÌˆÌŽŒÌŒÌÍ‹ŒMLÌˆÌÌŒ‹ŒMMKÌÎŽMŽLÌÌMKŽMÍ‹ŒLÌÈÌKŒNMNÍËŒÌˆÌŽM‹ŽMÎMÌ‹Í‹MÌHŽËÍÎNNÍL‹ŒLÍMÍÈŽŒMLMKÍÌŒNMMÌŽËŒÍËÍ‹ŒLLLŒÍÈŽ‹M‹ÍËŒÌÍMŒÌˆŽKÌŽM‹ÍŽMÍLÌÎKŒLŽÎËÍÌ‹ŒÍˆŽÍL‹ÍÍKŒÍLHŽŒNNNMLKÍÍËŒŒŒÌMÈÌŽKŽLKÍÎKŽLŒÌÎHŽMKŒÍMËÎ‹ŽŒNLÌÌLÍÍŒÎKMŒÌLHÌÌL‹ŽÌNL‹ÎL‹ŒŒÌHÌKŒNL‹ÎNMÌÌŽÌÍËŒÍÍÍÌM‹ŽŽMLHÌÍ‹ŒMŽLLËËŒÍLÍMHÍŒ‹‹MÎÍÈÍËŒÌÎMKKŒŽNMÌÍKM‹ÎMËŒNLLÍÍˆÍLKÍÌÎL‹ŽLÌHÍLËÎMÍŽKÎŽÌˆÌÍMËMÍÍKÎ‹ŒŽNHÍMËŒNNÎŒMMNÍLŒÍMMLÍÍ‹ÌÎLNMÈÌÍŽMŒLÎKÍÌËŽNLLHÌÎKLŒMŒ‹ÍÌKŒMŒLHÌÍŒLLŒËÍŽLLMÌÈÌÌÍŒLÎNLKÍËŽNMLÌÌÍŒMLMKÍËÍÎNMÈÌÍŒMÍNÍ‹ŽMŒŽLÈÌÍŒÎÍLKÍŒËŒÍLHÍMNNNLMKÍNKNMÈÍŽLŒÍÎÍMKŽLÎÎHÌÍŒŒÎMÍËÍ‹ŒÍÈÍŒ‹ÌLÌÍÍ‹ŒÌLŽNÍŒËŒMŒÍÍMËÎ‹ÎLÌÍŒŽLKNÍÌÌŽHÎËŒŒÌÍËËNMLÈMŽMNLKŒŒÍLÍKŽŒMNKŒÌÍÎHÍ‹ÌÍLŒË‹ŒÌLÈŒŒMËŒLÎMÍŽÌÍŽŒÍÍŒÈËŽLMMMŒËŽÍŒMLHL‹ŒŒÌNMKŒÎLMHÍLŒËËLHLÎÌMŒËÍ‹ŽNMÍÎHMLKŒMŽÍ‹Œ‹ŽMÍÌHÍMM‹ŽLMLÎKM‹NÎˆMŽŒÍÍLLŒ‹MËŽNNMLLˆMÌ‹ŽÌKKŒÎLÍÍÍNKŒLML‹ÎKŽMMMNNŽLÌMKMMŒHNMËŒLMMKŽŽNLÌŽˆÍŒKÌÍLÌËÍ‹ŽLÍŒKŽMMŽNÍŒLÍLÈŒLÌŒKL‹ŒÌŒLNNÍŒLKŒM‹ŒÍMŽLÈŒLKŒLÌLÎˆŒLÍŒKLKŒŒNŽLˆÍŒŽNNNLLËŒÌLLÍˆŒËMÍÌ‹LŽLŒˆŒKŽNLÎLLÌLÍNLKLN‹LKŽMÈMÍKŽÌŒÍÍKLÎKŒÌÌÈMMËŽMNŒNMKÍMÌÍMM‹ŒÌÎMKMËÌÌMÈMMŽLÍNMKŒÍLMÈML‹ŽMMŒMÍËMŒMLLHÍMËNMMKŒNMMHMKLŒÍKLÎŒÌNŒLÍKŽMÌNNKLÍKÎLÍÈÍLÍ‹ŒÍÍKLÍŽMMŒLÍ‹ŒMŒÍMÍLÍŒLLLÍ‹ŒNLÌÎLÌËŽMÎMÈÍMKŽNLŒ‹LÌKŽÍNMÍÈMËŒŽÌËLŽKŒÍMMLËÍÍŒKLËÎMŒHÍMKŒLŽÍMËLÌŒHMÌËŽNŽKLNÍNˆMÍËÍÍKL‹ŽNMˆÍMÎŒÍŒLŽŒLMMÎKNM‹LËŒMÍMHNŽÎËLKŒÍŒŒÈÍNËŒLMKMËLŒMMN‹ŒMÌËMŒŽMÎŒŒÍMNL‹ŒŒMLÈÍMŒKNŒ‹ËŒÍÍŒˆMŒÌËÍŒÍÌÌŽHLËÍNLNKŽLÌLÈÍLLMŒŒLÌÎLŒKŽNLŒKKŒŒÌLLŒŒÌÌMŽŒÎMNLHÍLNŒŽNLÍÍËÌ‹ŒMŒMLˆLM‹ŒŒMŽNÍKŒLÌˆLMŒÍÌNÎKŒÍÌMLÍLKŒÍMNLŽLNÈL‹ŒLLËKMÌHLNKŽLŽMMKŽLÍLMLÍLŒËŒ‹MËÌÍLÈLËŒÌLÌËNKÌMLÌKŒLLL‹LKŒÍNMÍLÌŽLNŒËL‹ŒMLMŒLHLÌÎNLÌ‹L‹ÍMŒŽHLÌŽLŒÌŒ‹LËŒNNMŒMHÍLŒËNLÍŽKLKŽLÌMMHLM‹ÌM‹LKŒÍLÈLKŒÍMÌKLLKŒŒMÌŽHÍNÎLËLLËŽMLHLŒÌÌLNŒMLLLˆ‹ŽLÎM‹LŽKŽŒÌNÍ‹ŒÎŒLÌKÌŒÌÍÈŽLMÍ‹LÌËŒŽMŒHŒNLNLÍKŒMÌÍHÍKŒÌMMÌMŒŽÍMÈKÌMLÌ‹MKŽLÈËŒMLL‹MŽMˆÍLŽLŒÎËMLKŽMLHLMÍ‹MNŽNLLÈLËŽLÍŒÍKM‹ŒÍÌMÌˆÍLŒŒÍ‹MÍKÌŒÌÈËŒÌNMËN‹MÌHKŽMÍŒÌ‹NKŒMŒÍKŒŒÌÍNKNKŒMLLŒÍŒ‹N‹ŒÌÍNNNHŒNËŒÍKŒÌLÎKNËŒ‹ŒÎNËŒËŽŽKNËŒÍ‹ŒÍNMŒNKN‹ŒÌÍNNNHKÎMKNKŒMŽLÈKŒŽMÍŒËNKŒMÎÈÌÎŒLMÌM‹NËŒLÍÈÍÌKŽLMLËMÎŒNMNÍM‹ŒLŽMÌŽMÌÍHÌÍNŒŒLKMKÌŒMÈÍŒŒNLMMKMŒLLLMŽHÍŒ‹ŽNMKMMKŽÌŒLÌHÌÍ‹LŒËMKŒŒŒŽMŒHÍ‹ŒÍÍNNMËŒLÌÍÌŽÍNKŒÍNLNKMËÌÌŒMˆÌÍLËŽLÌÍLKMŽNÌMÍLMÍLMËLÎŒLLNHÍKŽMLÌKLÍŽNÍÈÌÍLMM‹LÌËŽŒÈÍKÍÎËLÌ‹ŽNNŒÌÍËŒMNMËLÌ‹LNLMHÌÍL‹ŒŒLŽLËLÌŒÌŒMHÍMËŒÌMMÍKLŽLŒÍŒ‹MÍŽNM‹LËŒŒÎHÌÍÌËŒNÌKLŒLŒÍˆÎÍŽŒNKLNMLMLÈÎŒŒÍÌKLËŽNMNÌÎŽNLÎLKŒŒLÎ‹Í‹LËÌÌLÌŒÈÎËLÍÍŒŽLKŽNÈÌÎKŽMLLËMËŒÍÍÎÎKMÌÍNMŽMMÈÎKŒÎMÍL‹ŒLMŽÌÍŽÍŒL‹ËŒÌMŽMHÍLKÌLMMÍŽMÎÍˆÌÍKŒÌMÌÎ‹ŒŒMÈÌÌÌKMNNL‹ŒŒMMÎLÌŽŽMÌÍŒËKŒMNMHÌËŒMÌÎŽMŽŒÌÌŒMŽÌËMMŽÌŒKŽMÌ‹ÎŒŒÍÌÍˆÌNKMÌ‹ËŒLNMÎHÌÌM‹ŒÌMKŒÍÌÌM‹ŽŒLLÎMˆÌŒËŒŒMKLËŽMÍMÍŽHÌÌŽŒLNLÌ‹M‹LMÍHÌÌ‹ŽNMMKNKŒŒLÍÌÎŽŒLŒËLKŽMMˆÌÌÍ‹ÌÍMNM‹LËŒMŒŒLÌÍKŽÌÎNLËŽMÌŒÌÍŽŒÍŒLŒŒŒŒÌÌËŒNLÍMËLËŒNMÌNKÍÌLL‹LLKŒLMŒÌLKLNKLL‹ŽNLMHÌÌKŒÎËLMKŒMŒŽˆŽM‹ÎMÍËLŒ‹ŒMMÎMNHŽLËŽLMÍLÌKŒLLˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LÍŽNMMŒKÍMKMŽNMˆÌÍMNNNLMKÍNKNMÈÍŒÎÍLKÍŒËŒÍLHÌÍŒMÍNÍ‹ŽMŒŽLÈÌÌÍŒMLMKÍËÍÎNMÈÌÍŒLÎNLKÍËŽNMLÌÌÍŒLLŒËÍŽLLMÌÈÌÌÎKLŒMŒ‹ÍÌKŒMŒLHÍŽMŒLÎKÍÌËŽNLLHÍLŒÍMMLÍÍ‹ÌÎLNMÈÌÍMËŒNNÎŒMMNÍMËMÍÍKÎ‹ŒŽNHÍLËÎMÍŽKÎŽÌˆÌÍLKÍÌÎL‹ŽLÌHÍKM‹ÎMËŒNLLÍÍˆÍËŒÌÎMKKŒŽNMÌÍŒ‹‹MÎÍÈÍ‹ŒMŽLLËËŒÍLÍMHÌÍËŒÍÍÍÌM‹ŽŽMLHÌÌKŒNL‹ÎNMÌÌŽÌL‹ŽÌNL‹ÎL‹ŒŒÌHÌLÍÍŒÎKMŒÌLHÌŽMKŒÍMËÎ‹ŽŒNLÌŽKŽLKÍÎKŽLŒÌÎHŽŒNNNMLKÍÍËŒŒŒÌMÈÌŽÍL‹ÍÍKŒÍLHÎKŒLŽÎËÍÌ‹ŒÍˆŽKÌŽM‹ÍŽMÍLÌŽ‹M‹ÍËŒÌÍMŒÌˆŽËŒÍËÍ‹ŒLLLŒÍÈŽŒMLMKÍÌŒNMMÌŽËÍÎNNÍL‹ŒLÍMÍÈŽM‹ŽMÎMÌ‹Í‹MÌHÌKŒNMNÍËŒÌˆÌÌMKŽMÍ‹ŒLÌÈÌŒ‹ŒMMKÌÎŽMŽLÌÌŽŒÌŒÌÍ‹ŒMLÌˆÌÌŽÍMÍLÎÌÍKŒÎÌˆÌŽŽŽNM‹ÌÍKŒLÍNHÌŽKŒLËÌÍŒLMˆÌÌKŒMÌNÌÌ‹ŽÌŒˆÌŒ‹ŒŒÍÍ‹ÌÌKŒNLÎÈÌNŽŽNËÌŽKÎHÌÌMMLMÌŒ‹LŒˆÌËLÎLËÌŒ‹ŒŒŽÎÌL‹ÎLÍ‹ÌLKLLLLˆÌÌMLLNÌŒLÎLÌM‹MLÌÎLLÎˆÌNŒMKÌKNNÌÌŒŒLNMŽMËŽMLMŒˆÌŒ‹ÎLÌN‹ŽMËŒÌÌŒŒÌ‹ŒNMMŽNKŒMLHÌÍ‹ŽNMÎKÌËŽLŒMŽLˆÍNKÎMLLKÌM‹ÍMŽÍÍ‹ŽMLÌÌKŽÍMMÌHÌÍÌËŒÌŽ‹ÌÍKŽLÍMŽÍŽKŒLÌLÌËÍKLLHÍŽNMMŒKÍMKMŽNMžˆML‹ÍŒŽŽËŽLÈÍL‹ÍÎKŽ‹ŒÌNŒÈMKMÌLÍKÎŽŒLÈŒŽNKÍ‹ŽÌÌMÍÌÌŒ‹ÌËLÍLˆŒÍNÍKŽKÌÌÍÈLŒÎNK‹ŒLÎMÍÌHÍLŽLMKKŽŽLMHLKÌÎMLËKŒMˆLËŒÌÌKLˆÍLKŽÎŒŒËŒËŒÎLŒÈLŽMLËŒ‹LÍŽLˆKŽLNKŒKŽNŒMÍˆÍKŒNÌËNKÍLÍHKŒÎËMËÌŽMÈÍ‹ŽNMÎKMKMMHÍÌ‹ŒNLL‹ŽÌMˆÌKLŒNKLŽNÍÈÌËŽLÌLË‹ŒNLˆÍÍ‹MŒËKŒÌŽÌÎKŒÍŒMŒÌËŒÍKŽMÍÎMˆ‹ŒÌÌMKŒÌÎNNMˆÍËŽLNŒËŒMÍNH‹MMÎ‹Œ‹ŒNŒÎHLŒÍLŒŽŒLLŽÎHÍL‹ÍÍLŒŒÍ‹ÌÍÌŽHLŒËŒÍNLMKKŒMÌHLÎKŽŒMÌ‹LËŽNˆÍMNMLÍM‹ÍLÈMKŒMLÎKNKŒÍLNM‹LNŒËŽLMMLÈÍMKMÍMMŒ‹KŒÍNMMMNL‹ÌLLÈLÎKŽMÌÎNNKŽŒŒNLÍLÍ‹ŒLMÌÌLŽÌNLLËŒÌŒLŽ‹ŽNLŽLˆLMŽMÌKŽKŽMÍŒHÍLLŽMÎNŽLŽMMÌÌHLËŒŒÍŒNKŽL‹ŽLÍÎNLËŒMÍLŽMÌÎLÌNHÍMKŒÍÌÌ‹ŽLËŒÌÌÈËŒŽMLŽLKŒNŒÍÌÈÎKŒŽMÎŒKŽLŒMHÍÌNKŽŽNMNŒKÌÌÍKŽŒˆL‹ÍŒŽŽËŽLÞˆLÎNŒLNNKNËŒŒŒHÍKŽMÌM‹NŒŽMŽNÎMNKŽNLMÍŒËŽLLMM‹NËMŒMŒÍL‹ŒÌLNKŽÌNLLËŒNÌÌNKNL‹NLŽMÈLŽMLÌLKNM‹ŽLŒÌÍŒÍÌÌLÎŒKŽLÌÌŒKÌŒNÌ‹Œ‹ŽLMËŒŒÎNMKŒLKŽÍMÌÌˆÍNMŽLŒM‹ŒÍHÎMËŽMÌMËŒMËŒÎÍˆÎLËŒÍÍÍLÌËŒMŽÍˆÌÎKMŒMÍËŒNŒMHÍŽKLÌNLŒKŒ‹ŒLÍMËŒŽLLM‹NM‹ŒÌMLHÌÍ‹ŽNMŒÌËNL‹ŒŒMŽHÍÍ‹ŽNMŒÎNKNKŒLMLˆÎËŒMLÍKN‹ŒÈÌÎLÌŒNŽLÌÍHÎMMŒ‹NŒNÍMÎNŒLNNKNËŒŒŒ^ˆLŽMŒŽÎLLÌKŒÎMLÈÌŽM‹ÎMÍËLŒ‹ŒMMÎMNHÌKŒÎËLMKŒMŒŽˆÌLKLNKLL‹ŽNLMHÌÌNKÍÌLL‹LLKŒLMŒÌËŒNLÍMËLËŒNMÌÍŽŒÍŒLŒŒŒŒÌÌÍKŽÌÎNLËŽMÌŒÌÍ‹ÌÍMNM‹LËŒMŒŒLÌÎŽŒLŒËLKŽMMˆÌÌÌ‹ŽNMMKNKŒŒLÍÌŽŒLNLÌ‹M‹LMÍHÌŒËŒŒMKLËŽMÍMÍŽHÌÌM‹ŽŒLLÎMˆÌM‹ŒÌMKŒÍÌÌNKMÌ‹ËŒLNMÎHÌÌŒKŽMÌ‹ÎŒŒÍÌÍˆÌŒMŽÌËMMŽÌËŒMÌÎŽMŽŒÌÌŽŽMÌÍŒËKŒMNMHÌÌKMNNL‹ŒŒMMÎLÌÍKŒÌMÌÎ‹ŒŒMÈÌÍLKÌLMMÍŽMÎÍˆÍŽÍŒL‹ËŒÌMŽMHÎKŒÎMÍL‹ŒLMŽÌÎKMÌÍNMŽMMÈÎKŽMLLËMËŒÍÍÎÎËLÍÍŒŽLKŽNÈÌÎ‹Í‹LËÌÌLÌŒÈÎŽNLÎLKŒŒLÎŒŒÍÌKLËŽNMNÌÎÍŽŒNKLNMLMLÈÍÌËŒNÌKLŒLŒÍˆÍŒ‹MÍŽNM‹LËŒŒÎHÌÍMËŒÌMMÍKLŽLŒÍL‹ŒŒLŽLËLÌŒÌŒMHÍËŒMNMËLÌ‹LNLMHÌÍKÍÎËLÌ‹ŽNNŒÌÍLMM‹LÌËŽŒÈÍKŽMLÌKLÍŽNÍÈÌÍLMÍLMËLÎŒLLNHÍLËŽLÌÍLKMŽNÌMÍNKŒÍNLNKMËÌÌŒMˆÌÍ‹ŒÍÍNNMËŒLÌÍÌŽÍ‹LŒËMKŒŒŒŽMŒHÍŒ‹ŽNMKMMKŽÌŒLÌHÌÍŒŒNLMMKMŒLLLMŽHÍNŒŒLKMKÌŒMÈÍMKŽLLMMŒMÌNNNMÌÍLKŒMLLÌKMŽKŒLŽLÈÍ‹ŒŒÍÍËMËŽMŒÍKÌLÌ‹MKŒMÌŽHÌÌŒÌNÎLMM‹ŒŒÎMNHÌLNÌËMKŒNˆŽMŒŽÎLLÌKŒÎMLÞˆLŒÌËŒLNÌKÎMËLŽMNÌŒÍËÌÍMÌËÎNKŒÍH‹LÌŒÎKÌÍŒŽN‹ŽLÌMK‹ŽNÌÌÍHÌNKŽMÌÍMËKNÎHÌ‹ÍÍŽL‹M‹ŒÎÍÈŽKŒŽÌÌŒËŒLÌŽÍÌŽLKNL‹ŽLÎŽL‹ŒÌLÍLËŽŽÌˆŽÌMŽNÍŽMŽNHÌŽËŽÌËÍ‹ŒÍÎMÈŽ‹ŽLŒÍËŽLMÍˆŽ‹MËÎKŒÍLHÌŽ‹ŽŽLŒNLÈÍÍÌ‹M‹LÌLŒËŒMÌÍKNKŒÌMLHÌNLLŒNÌÌÈLËŽLÍŒ‹ÍMLÎKŒNMHÌŒÎŽNNNMK‹ŽLÌMÍˆŒÍŽLKŒŽŒÈŒÌËŒLNÌKÎMËLŽMNˆMMMËŽMNŒNMKÍMÌÍMŒŒÎMKMMKŒŒMMˆLÎMŒŽKMŒNNÌŽLŽÎLM‹ŒMÌHÍLMÍ‹MNŽNLLÈLŽLŒÎËMLKŽMLHËŒMLL‹MŽMˆÍKÌMLÌ‹MKŽLÈKŒÌMMÌMŒŽÍMÈŒNLNLÍKŒMÌÍHÍŽLMÍ‹LÌËŒŽMŒH‹ŒÎŒLÌKÌŒÌÍÈ‹ŽLÎM‹LŽKŽŒÌNÍLŒÌÌLNŒMLLLˆNÎLËLLËŽMLHLKŒÍMÌKLLKŒŒMÌŽHÍLM‹ÌM‹LKŒÍLÈLŒËNLÍŽKLKŽLÌMMHLÌŽLŒÌŒ‹LËŒNNMŒMHÍLÌÎNLÌ‹L‹ÍMŒŽHLÌŽLNŒËL‹ŒMLMŒLHLÌKŒLLL‹LKŒÍNMÍLËŒÌLÌËNKÌMLŒËŒ‹MËÌÍLÈLNKŽLŽMMKŽLÍLMLÍL‹ŒLLËKMÌHLKŒÍMNLŽLNÈLMŒÍÌNÎKŒÍÌMLÍLM‹ŒŒMŽNÍKŒLÌˆLNŒŽNLÍÍËÌ‹ŒMŒMLˆLŒŒÌÌMŽŒÎMNLHÍLŒKŽNLŒKKŒŒÌLLLMŒŒLÌÎLËÍNLNKŽLÌLÈÍMŒÌËÍŒÍÌÌŽHMŒKNŒ‹ËŒÍÍŒˆMÎŒŒÍMNL‹ŒŒMLÈÍN‹ŒMÌËMŒŽNËŒLMKMËLŒMMNŽÎËLKŒÍŒŒÈÍMÎKNM‹LËŒMÍMHMÎŒÍŒLŽŒLMMÍËÍÍKL‹ŽNMˆÍMÌËŽNŽKLNÍNˆMKŒLŽÍMËLÌŒHMLËÍÍŒKLËÎMŒHÍMËŒŽÌËLŽKŒÍMMKŽNLŒ‹LÌKŽÍNMÍÈLÍ‹ŒNLÌÎLÌËŽMÎMÈÍLÍ‹ŒMŒÍMÍLÍŒLLLÍ‹ŒÍÍKLÍŽMMŒLÍKŽMÌNNKLÍKÎLÍÈÍMKLŒÍKLÎŒÌNŒMËNMMKŒNMMHML‹ŽMMŒMÍËMŒMLLHÍMMŽLÍNMKŒÍLMÈMM‹ŒÌÎMKMËÌÌMÈMMËŽMNŒNMKÍMÌˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LŒËŒÍÌŒKÌ‹ŒLÌŽÍÌŽKŒLŒLŒËŒËÌŽHÍKŒNMNMKÎNMHŽKLÍŒNMËŒŒÍHÌŽLËŒLÌLKL‹LŒMŽLËŒÎÍŽKL‹ÌˆŽËŒLŒLKŒËŽMŒLÈÌŽKŒÌNMŒLKËŒÌÍŒLŒHŽËÌMMŽKÌÎNÌHŽKŽLŽLŒKÍŒMŽÌÌÎKŒMŽMËÎLMHÍ‹ŽLMÌ‹ÎKŒMÎLHÌ‹LŽÎÍ‹ŽMMŒŽÌŽKMLMÍKŒÌLˆ‹ŒŒËÌËŽÍˆŒËŒÍÌŒKÌ‹ŒLÌŽÍˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LLKŽMNMKÌ‹LMNHÌM‹ŒÍNMËÍŒNNHŒKŒMÎN‹ÍKLLÍMLKŒLLLMKÎŒŒˆÌ‹NÌNÎKŒMÌŒÈ‹ŒÍŒÍÍÌËŒŒÍKŽMÌŽM‹KŒNÌKŒL‹ËMLÍÈŒËÍÍÍLËKŒNŽMLHŒ‹ŒMÍËLKŒÍNÌNŒNL‹KŒMNHMKŒÌLÎKÎŽLMŒˆLKŽMNMKÌ‹LMN^ˆLLKŒMNNÌKŒÌLÎÈÌLKÍ‹ÌKŒŒŒŽÈLKŒŽËÌKLÍÌHLKŽÌÌKŽLÌLÎMˆÌLKÌŒŒÍKÌKŽLÎÍLHLKÌŒÍËÌKÍMLLÈLKŒMNNÌKŒÌLÎÞˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆØ[YPÛÛ›Û\’XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“LŒŽMÈŒ˜ÌŒNŒŒÍKŒËMKŒŽŽKŽˆKŒK‹ŒÈKŒÍHËËÍHËŒ]ŽLXLËŒHËŒHKMKŽHKŒÎLKÍ‹LËLXLKŒHKŒHLKŒŒËKMXËKMËŒLËLKŒÍ‹ŒËL‹ŒM‹ŒÜËLK‹KŒML‹ŒM‹KŒØËKKKŒLKLHŒKLKŒŒËM[LKÍˆËLPLËŒHËŒHHHMËŽLUŒLØÌLËŒÎ‹MKŽKÍKMËŒKŒMKK‹KLKŒLÈKŒLKKËÈŒKÌKËLKŒÌˆKŒ‹LKÛ‹ŽLËKŒ˜ËKKŒHHŒˆKŒÍ‹ŒÍKŒÍÎÌHKŒŽŽM‹‹HËKŒËŽLËKŒÍKŒŽKŽKŒÍKKŒÌËŽ‹KHKŒÍ‹KŒÎ[‹ŽMŒ˜ËËŒMHKŒNKÎKŒNHKÖ“LŒËXLKHKHHKLÈKHKHHÈ“LMKHL˜LKHKHHLÈKHKHÖ“MHØLHHHˆŒZXLHHH’ÝŒXLHHHKLˆ‹LRLHHHHLšUÖˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ[[Y\[™Ú\Ù[XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LˆŒNUŒNKLHHHŒËKÛ‹L‹˜LHHHÌKKŒŽR›KNKKŽKKŽXLHHKKŒŒËKŒÍLKKLËÌØKKHHKK[ËÌÈKXLHHHŒÍŒŒ›LHHHKˆHXLHHHK›KNKNLHHHK›LKNKNLHHKLKˆMÈ[NH]‹NXLHHKKŒËÛL‹‹˜LHHKKÌKŒŽRËLHHKKËKŒÛK‹KLHHKKŒŽKKÌVˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“NŒŒÈLŒŒØËŒ‹Œ‹LKŒ‹ÈKŒËLKŒØKKHKÓ‹H[ŒËKŒØLHHLKKKKXËKŒ‹KŒ‹KKKŒËKËKŒŒ‹KËŒMLKŒMËKL‹ŒHK˜MKŒÍÈKŒÍÈLKˆ‹ŒXËKŒŒKŒËKŒŒKÛKXLHHKˆŒŽKKŒÈËÌÈËÌÖ“LLËÍÈMKŒ˜KKHÛKÌÈKÍK‹LHHŒMKŒN[KÌÈKÌØËŒKŒKŒ‹ŒKŒÍˆ‹L‹ËŒKKŒKŒKKŒˆKŒÍ“ŒŒHMËŒXLHHKŒ‹KŒMSMËHMK[LKÌËLKÌØKKHKÈLKŒÈKŒÖˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ\]ZXÛÜ™XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‹ŒÈ‹ˆ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LŒŒË‹˜ËMNŽMKLLMŒÍËLŒ‹ŽM‹LMM‹Œ‹MÌŒ‹ŽM‹ÌÍ‹ŒMŽÌKŒŒKÍ”ÌŒ‹ŽM‹LËŒÎKKÐÌL‹ŒÌËŒ‹MŒKÍKKŒ‹ŒŒËKŒœÌLMŒÍËŒ‹ŽM‹MM‹Œ‹MËŒLKMM‹Œ‹LŒ‹ŽM‹LMŒÍËMMM‹Œ˜ËMKŽKŽNMËŒLKLMM‹Œ‹“LŒŒËÎXËMÎŒKLM‹M‹ŒËŽMKLM‹M‹M‹MœÍŒËŽMKM‹M‹M‹M‹M‹M‹M‹M‹MŒËŽMKM‹M‹LM‹M‹MŒËŽMKLM‹M‹LM‹M‹LM‹M–ˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LÍŒËŒÍ‹Î˜ËMŒN‹LKŒLL‹ŒŒ‹LËŒ[LKŒÌËKØËLL‹ŒÌ‹M‹KLŒKŒMLMËŽL‹LŒNKLÌKLËŒKLLËÌ‹ŒËLŽŒMLÎKŒÌKNKŽ‹L‹ŒŒ‹ŽKŽKMMËLËŽMNLMKKŒŽKNKLKŒÍ‹LM‹ŽLËLËŒMËLKŒŒ[KŒKKŒM‹ŒŽKÌŽL]‹ŒL˜ËKŒÎËLKŽËMËMËŒKÌKLL‹ŽŽLËLÎL‹ŒÍËMŽKËŒÍËNŒKLM‹ŒLKŒÍLŒËÍKLËŽNLNKŒÍM‹KLÍKŒNLŒKŒNMËËLÎKŽ‹NËLNKNLËMŒ‹KŒŽMNKŒNKLKŒËLËŒ‹ÎŒ‹MËËŽMË‹ŽKLËÍŽNŒŒÍË‹ŽKLŒËËŒKŒŒ‹ŒÍ‹ŽËMKÛŒKŒKŒËNLŽKKKŒM‹KŒ˜ËL‹ŽNLÌËŽËMËŒMLËLLLŒMLËÎLKŒ˜ËMŒŒŽLLMŒLËÎŒŒKLLÌËŽNKMKŒKM‹‹NŽKLKÌK‹MŽL‹ÌK‹MKŒM‹LLŒËKŽËLMKŒ‹L‹ÛL‹ŽKŽXËLLËNML‹LŒK‹LNŽLËLNŒ‹LÌ‹ŽLKKMËÎŽ‹NLËÍËŒNLLŒKŒPÌLŒ‹MKM‹ËMÌŒŒËŒŒŽKÌM‹ŒKÌ‹ŒKKÌ‹ŒËKŒLKŽMËŽMMLŽKLËMŽŒM‹MŽKŒËMÍ‹Ì‹NKMKŒÌËM‹MMKŒL‹NMËÌËMŽKŒM‹LLKÌËŒL‹LNŽŒLšˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆ˜[œÙ›Ü›OH˜[œÛ]JÌNŽNLMKŽLŠH›Ý]JJH‚ˆH“LMÌKŽNML‹ŒÎZÌMË‹Ì‹MŒÍÌ‹ÌŒMM‹LMÌLMË‹MŒÍLÌ‹Ì‹LÌ–ˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ\Ù\’XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LLˆLMHN“LLKLÈLPNKLÈKLÈˆŒLØÌŽKˆKÈKÈKÚŒŒ˜ËŒKŒMËKKŒŽKLKŒL‹ŽL‹ŒMÈKŒÌ‹L‹ŽLKŒMKŒŒKËKŒKŒM[KŒˆ‹ŒXËKŒ‹ŒËŒ‹MKKMZLKØKKHKKM[KŒËL‹˜ËKŒ‹KŒ‹ŒËKŒÍËKKŒM‹ÍKŒÈKŽKŒÌˆ‹ŽKŒ‹ŒŒ‹KKZŒŒ˜ËŽHKËKˆKËLKÐNKLÈKLÈL‹ÈLZKŽMˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ[˜Ú[Ü\šÛRXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“M‹ŒÈ‹MXKŽKŽHLKˆKŒÍKŽMØLKKKKŽËŽÛKŽMËŒÍXKŽKŽHK›ŽMËŒÍXËŒÎŒMKŽKŽËŽÛŒÍKŽMØKŽKŽHKˆŒÍKKŽMØËŒMKKŒÎKKŽŽËKŽÛŽMËKŒÍXKŽKŽHLK›KŽMËKŒÍXLKKKKŽËKŽÛKŒÍKKŽMÖ“LLËŽMˆK›NNLHHKˆKŒÎLKŒÎLˆˆL‹Ž›LËŒNLËŒNLˆˆL‹ŽˆLKŒÎKŒÎLHHK–“L‹ŒLHŒŒM›ÌËMŒŒ˜LÈÈHŽËLKŒ[ËŽËMËŽØLHHHKˆNNLHHHK›MËŽÈËŽØLÈÈKLK‹ŽÛMŒŒËÌØLKHKHKLKÌËLKÌÖ“LNMKÌXLKŒHKŒHH‹ŒˆKŒËŒNKKMËŽKŒÈKŒÛKŒ˜ËŽMKŒÍKŽMHKÈ‹ŒLKŒ˜ËKKŒNKKŽMËLKŒÈKŒÛKˆKŒLKŒHKŒHKL‹ŒK‹LKŒLKŽKŽLKŒËLKŒÛLKŒK˜LKŒHKŒHHL‹ŒKŒK˜ËKKŒNKŽKMÈKŒËLKŒÛ‹LKŒˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ[[Y\’XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LKŒŒÈŒKŒLØLHHHLK[ËMËØËŒ‹KŒ‹LKKŒ‹È‹ŒLÈ‹ŒL˜ËŒ‹Œ‹Œ‹HÛMËËLHHKLKHLK‹LK–“MËÍˆËÍ›XLˆˆ‹ŽÈËMLËMLˆˆL‹ŽÛL‹ŽML‹ŽMKK˜LHHLKLKKLK˜LHHLKHK‹KL‹Ì‹L‹ÌXLˆˆL‹ŽÈËÍˆŽLØLˆˆ‹ŽÖˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆXÚY]™[Y[ÒXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LLËÍˆŽMØLHHKKÌËLKŒŒ[KL˜LHHHHKŽMKH˜LHHKLKŒŒKÌÖ“LNKŒˆËŽLHHHKLKHKXLHHHKLKLKKKLKXLHHHK“MËˆLKŒHKˆŒ˜LÈÈHŽ‹ŒM‹ŽKKŽËŽØLHHKLKˆKŒMËKŒMØLÈÈMŒKŒMËŒMØLHHKLKˆKŽËKŽÖ“M‹ŒHL‹È‹MËŽLˆˆŒZM˜LˆˆK‹LËŒ›LËŽKMKŒLËKŒËŒ˜LÈÈKMŒKŒMËKŒMØLHHLKˆKŒMËŒMØLÈÈKMŒKŒËKŒ–“MŽKŒ˜LHHHKLKKHKXLHHKLKKŽKŒ–“LŒKŽMÈŒ˜LHHKKÌÈKŒŒ[LˆXLHHHKKLKŽM‹KXLHHHKŒŒKÌÖ“L‹ÍˆKØLHHHHLKŽMˆXLHHHKKKŽML‹KV“LLŽMÈËÍ˜LHHKLKŽMKKL˜LHHHHKŽMKH–ˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÚÝ[XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH›LLËÈHŒËŒËKŒ‹ŽKŒHKŒÍKŒNŽMKŒMÈKŽˆ‹ÍKŽÎŒÍˆKKŽ‹ŒMK‹ÍËÈKŒÎKMHKŽ‹KŒËŽHKˆ‹ŒLÛŒK]ŒKŽËKŒËŒNKŒËŒÍKKŒKLØNŽHŽHKKH‹XËKŒMËKKŽKNKŒ‹KŒKŒNKKŒKŒÎM‹ŒKMˆKŒMKŒHK˜LËŽËŽKL‹Œˆ›K‹Œ˜KMMKŒØËŒKKKŒŽNKŒŽKØL‹N‹NKLKŒÍKŒŽËKŒ‹ŒKKKŒNKŒËŒXKŽŽKLKŒKKŽ]‹KŽZŒ‹KXKKHKŽKKŒÍ‹KHKŒMKŒÍŒKNKŽŽKKÎŽKXKŽŽKKŽKŽ‹LKNKKHKŽ‹KŒÍKKHKŒMŒÍ]ŒKŒØKŽŽKLKŒKŽËKŒÍ‹KŒKKËKŒ‹LKŒËK˜L‹Œˆ‹ŒˆKLKŒMËL‹Œ[KŒKNËKŒKKŒŽKKŒŒKKKKKMKLÈKLÈKLKŒËKŽËŒÈËŒÈKLKŒÎL‹ŒLˆKŒHKŒHHŒ‹LKŒ˜ËŒ‹KŒŒ‹KŒLKKŒÍ‹KŒ‹KLKKKÍ‹KËLKMËKŽKL‹LLÎHLÎHKKŒKLËŒØËŒ‹KŽNŒËLKŽMÌ‹L‹ŽØMËŒÍHËŒÍHHKŽ‹L‹HKHKHHL‹ŒØËËKŒˆK‹KŒÈ‹ŒMKŒÍKŒˆŒKŒËŒ‹KŒ‹–›KLKŒÍHLËŽLXKKŒÍŒM[KÍ‹ŽKŒÍKŽšKXK‹KŒËKŒKKL›KÍKKŽKKŒÍ‹KŒMV›MŒËM‹ŒL‹Žˆ‹ŽˆLËŒˆËH‹Žˆ‹ŽˆËH‹ŒŒXËŒHŒKKŒ‹ŒLËKŒÛŒKKŒZŒ›ŒM‹KŒËŒKŒ˜L‹Žˆ‹ŽˆËKŒÌ[ŒKŒØL‹ŽÈ‹ŽÈLËKNRNŒKŒËŒ‹KŒKŒKKŒŒKŒKŒKŒL‹Î‹ÎŒLKKŒŽ[ŒËKŒKŒËKŒLKŒKKŒËŒKKŒŒKKŒ˜L‹Žˆ‹ŽˆŒKK‹KŒKŒKKŒLËKŒKKŒXL‹ÍÈ‹ÍÈKŒKKŒÛKŒËKŒL˜L‹Žˆ‹ŽˆKŒKKŒŽKŒ‹KŒËKŒËKŒ˜L‹ŽÈ‹ŽÈK‹KÌ[KŒKŒKKŒKŒKKŒËKŒXL‹ŽÈ‹ŽÈKŒKKŒ[KŒËKŒXL‹Ž‹ŽKŒÍËKŒ[KŒKŒL‹Žˆ‹ŽˆKŒNKKŒSM‹Í[KŒKKŒ˜L‹Ž‹ŽKŒ‹KŒÚKŒXL‹Žˆ‹ŽˆKŒŒËKŒÚKŒ–›KM‹ŒŽŒŽL‹ŽH‹ŽHMŒHKŽN‹ŒÛKŒKŒ˜ËKŒ‹ŒKKŒ‹ŒŒKKŒËŒÌ‹ŒL‹Žˆ‹ŽˆŒŒ‹ŒL‹ŒŒËŒLÝ‹ŒÛŒKŒŒŒMÌŒŒ‹ŒËŒËŒL[Œ‹ŒL‹ŽH‹ŽHËŒŒHKŽŒKŒXL‹ŽMÈ‹ŽMÈŒNKKŒ›ŒKKŒØËŒŒËKŒ‹ŒLKKŒŒˆŒŒ‹KŒ›ŒËKŒXL‹Î‹ÎŒËKŒMŒKKŒKŒLËKŒŒËKŒØL‹ŽÈ‹ŽÈŒ‹KŒ›ŒËKŒËŒËKŒËŒ‹KŒ‹ŒKKŒKŒKŒKŒ‹KŒËŒ‹KŒKŒKŒKŒ‹KŒËŒKKŒKŒ‹KŒKŒËKŒ‹ŒËKŒLËŒ‹KŒØL‹ŽÈ‹ŽÈŒKŒ›ŒËKŒLKŒËKŒKŒ‹KŒKŒKKŒËŒKKŒ˜L‹Í‹ÍŒËKŒŒÝ‹KŒÛŒKKŒMÝ‹KŒL‹Ž‹ŽKŽLHKŒVˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÝX›PÚXÚÛX\šÒXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]š[H˜Ý\œ™[ÛÛÜˆ‚ˆH“LM‹ÈØLHHLKLKLËŒˆËŒLHHKˆK“M‹ÈÖ“LËÈLKŒØLHHLKKHXLHHKLKMKMVˆˆÏ‚ˆ]š[H˜Ý\œ™[ÛÛÜˆ‚ˆH“LŒKÈKØLHHLKLKLÈMKNLËŒËLËŒØLHHLKK›LHHKNˆˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÝ\‘š[Y
+›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LLŽH‹Ž˜ËŒÎLKŒMH‹LKŒMH‹ŒÎKŽHKŽÚ‹ŒL˜ÌKŒˆKÌHKMÌÈ‹Œ[MŽMHËˆKŽHKŽ˜LKŒHKŒHKLKŽLÈKLˆNŒM›MŽMHË˜ËKŽNËL‹ŒËKŒKLKŽL‹LKKŽKMKŽ‹MŽMKLË˜LKŒHKŒHHÌËL‹ŒZ‹ŒL›KŽKMKŽÖˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÝ\“Ý][™Y
+›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“L‹ŒÈLŽMLKŒHKŒHHÌËL‹ŒZ‹ŒL›KŽKMKŽØËŒÍËLKŒMH‹LKŒMH‹ŒÍÈKŽHKŽÚ‹ŒL˜ÌKŒˆKÌHKMÌÈ‹Œ[MŽMHËˆKŽHKŽ˜LKŒHKŒHKLKŽLÈKLˆNŒM›MŽMHË˜ËKŽNËL‹ŒËKŒKLKŽL‹LKKŽKMKŽ‹MŽMKLË–›LLKMKKŒZKŒ›MŒHËŒHKŒˆKMŒKLËŒKMŒHËŒHKŒ‹MKMŒKLËŒZKŒ›KŒ‹MHKŒˆVˆˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÙX\˜ÚXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“LMKŒˆMËŒØNHHHHKKLK[ŽØLHHKLKˆK›MËMŽ“LMÈLMÈÈHKLMÈÈHMˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÜšYÚ\œ›ÝÊ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“NXLHHšËNSKŒŽHMËŒØLHHHKˆKMÈ•ŒM˜LHHHˆ˜LHHLKLRˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÚXÚÛX\šÓ\™ÙP›ÛXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LŒKÈKŒØLHHHKLLˆL˜LHHKLKM‹M˜LHHHHKLKHM‹NLKŒËLLKŒØLHHHKˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ\™ÙP›ÛXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LNŽMŒKŒ˜LKHKHH‹ŒL‹L‹ŒL“MŒLˆL›‹ŽMM‹ŽMLKHKHHL‹ŒL‹L‹ŒL“LˆKŽKŒˆ‹ŽMLKHKHHL‹ŒLˆ‹ŒL“KŽL›M‹ŽM‹ŽMLKHKHH‹ŒLˆ‹ŒL“LˆMŒL›‹ŽM‹ŽMˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ[œÙ[™XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LÈ˜LHHLH]˜LHHHZ˜LHHL’KŒØNHHLËŒŽHŽ›KŒKŒXMËŽMÈËŽMÈKLKŽHKÎHHKŒHKØËŒNKKŒL‹ŒÍ‹KŒKLËKŒÎËKMKŒÌ‹LKŒMˆKŽKLKŽ[ŒKKŒPNKŽMHKŽMHŒˆLˆLL•ŒØLHHLKLV“LËŒNMŒ˜LHHKŒHKŒØËŒLKŒÌËŒŽMXLHHKŽKŽ˜ËKŒL‹KŒKŒŒ‹KKKŒÌ‹KÍXLHHLKŒËKŒV“MKŒÌÈNŒL˜LHHŒHKXËLKHKŒËŽHKÈKŒNLHHŽNLKÍŒˆŒˆKLKŒÌËKŽMHHHLKKŒV“LMŒMÈŒŽLHHLKŒL‹KŽÈŒŒKLKŽËŒÈHHHKŒˆKŽNHLŒHLŒH‹ŒÌ‹KŒÈHHŽËLKŒLÖˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[ÛˆÚ[™ÝÕÜÝ][™RXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“MXLHHHKLZLHHHH]‹ŒNLHHHˆXLÈÈLËLÒXLÈÈLÈÝŽLÈÈÈÚŒNLHHHL’XLHHKLKLUVˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“NLXLÈÈHËLÚLÈÈHÈÝŽLÈÈKLÈÚNLÈÈKLËLÝ‹N›LˆLHHHKLZLHHHH]ŽLHHKLHZNLHHKLKL]‹Nˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ›ÛÚÐÚXÚÒXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“LMH˜LÈÈHÈÝŒL’KXLKHKHÚMKKHKKUZXLHHHH]ŒMXLHHKLHRXLÈÈKLËLÕXLÈÈHËLÚL›KKŒÈKØLHHLKLKHLNL‹ŒËL‹ŒØLHHLKK›ÈØLHHKKMVˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ˜\ÚXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LMŒHXËHÍKŒÍÍKÍUŒÚKŒXËHÍKŒÍÍKÍ]‹XÌKKŒÍÍKKÍKÍRËÍPKÍKÍHHÈŒ]‹KXÌKKŒÍKÍKÍKKÍRUŒKÍXÌKKŒÍKÍKÍKKÍZVˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“MKŒˆØLHHLHKŒ›ÍˆL‹ŒLØLÈÈÈ‹ŽZŒÍ˜LÈÈËL‹Ž[ÍKLL‹ŒLØLHHLKLKŒ’KŒÖ“LLHL˜LHHHLˆ˜LHHHˆ‹M–›LËLXLHHHH]˜LHHHKLˆ‹M˜LHHHKLVˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ]XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LM‹‹ŽM˜ËŒŽHLKŒKËMKŽˆ‹ŒÍËKŒ‹ŒKŒËŒ‹KŒËŒÍÌKŒŽKŒËŽHKŒËHŽMKŒŒHKŒÍ‹KŒËËK‹ÍËLHKŒ‹LKÌ‹Œ‹KÍKŒÎLKMËŒÎL‹LKŒÍKKŒŽKL‹MKŽËLËM˜MKŽLˆKŽLˆL‹KL‹ŒÍHËŽËŽLËŒKKŽØËLKMHL‹ŽM‹ŒÍËMŒŒˆKŒXMËˆËˆL‹ŽMˆËŒÈKLÈKLÈLKŒH˜ÌKKŒˆ‹ÍËÎËŽMXM‹ŒÈ‹ŒÈ‹È‹ŽHŒÈŒÈŒÍˆKŒHL‹ÈL‹ÈKŒÍKLKŒNKHHËŒˆKŒØËŒKŒŒ‹Œ‹ËKŒNKNKKÍËËLKŽKÍËL‹ÍHKŒ‹LKŒŒËŒËL‹LËÍ‹L‹ŒNMKMKLKŒÌØNŒHŒHKLËŒËLËMÈLKŽLÈLKŽLÈKLKŒËMKŒL˜ÌL‹ŒËMŒNHKMKŽNKÈKÈHËŽ‹LËŽÌKŒ‹KŽHËLKŒÍKŒÍ‹LKŒÍKŽËŒÍÈŽKŒLˆKÌˆ‹HKÍˆËŒŽËŒXNŽˆŽˆHKŒMˆM˜ÌKŒÍ‹KŒŒÈ‹MËKÈËMKŽHKŽHKLKŽLˆ‹ØËKŽ‹NLKÍ‹ŽËL‹ŽKŽØL‹‹KLK‹KXËKKŒÍKKKKÎKÌËLKŒÌ‹KŒËMKKÍKLKŒÍˆKŒÍMŒÈŒÈKL‹ŒËLËËHMÍËŒÌÈMKŒMˆÈMÈL‹XÌLKŒMŒ‹L‹ŒM‹‹LËŒKËKŽHKLKMÈKÌËL‹Œ˜MŒÈŒÈHŒËKŒÌXËËŒŽKŽ‹ŽKŒÈKŒM›ŒËKŽMXËŒ‹KŒ‹ŒKKŒÌË‹KŒÌÚKŒ–›KMKŒˆŒËŽKKKŒÍHKŽMËLKŒLKKËÍËLK‹ÍËL‹ÈKŽKŒNLKM‹KLËL‹ŒØLKÍˆKÍˆLKKKÌØËKŽLKKŒÍKLKŽMÈKŒMŒŽŒŽKÎ‹ØÌŽKŒMÈKNLH‹Œ‹ŒÍ‹KŽËÌÈKLËÌÖˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ^XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“LLŽNHËŒMLHHHH‹ŽŒMHLHHšËŽ›KÈØLHHHšËŽ›KŽŽLHHKŽMËŒÌ“ŽHMšŽMÛKŽŽLHHKŽMËŒÌ›Ž‹MKŒM’ŒLHHHLšLËŽ›ËMŒXLHHHLšLËŽ›ŽMŽLHHHLKŽMËKŒÌ“MKŒMHMŽMÛŽMŽ“LMŒMHMËMKŽ[KÈŽMÖˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆš\™RXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆš[[OH™]™[›Ù‚ˆH“LÈMNHHHNÌL‹ŒËKŒKMKŒŒ‹LKÎKMËNNŒˆŒÎKËÈLKŒËŒNKÎËŽXK‹ˆKLKŒËŒLSL‹ŒŒˆK˜KŽKŽHLKKŒÌÛMŒˆŒLL‹ŒÈL‹ŒÈÈM›NKŒ‹KŽKMËMÈLKKŒŒÓKˆMXLËŒËŒHKŒL‹ËKŒMKŒ‹KKKŒŽKÌKKŒ“LÈM‹[KÍLËŒÍˆ‚ˆÛ\[OH™]™[›Ù‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ™[Z^XÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“MˆØLHHHKLZ˜LHHHH]˜LHHHKLˆK[M‹‹MˆˆMKŒÍUŒMØLÈÈÈÈHHHHˆHHKMKM]‹LK˜ÌLKÍ‹ËLËˆKŽMKMÓLNHØLHHKLKLVˆ‚ˆÏ‚ˆ]ˆš[^Ü›ÜË™š[˜Ý\œ™[ÛÛÜˆŸBˆH“LNŒXLHHKLHZM˜LHHKLKL]‹M˜LHHHHˆŒËN[‹M‹MˆˆŒUØLÈÈLËLÈHHHHLˆHHHH]ŒK˜ÌKÍ‹KÈË‹LKŽMHÓLËHŒMØLHHHHVˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB‚™^Ü[˜Ý[Ûˆ\ØYXÛÛŠ›ÜÎˆXÛÛ”›ÜÊHÂˆ™]\›ˆ
+ˆXÛÛ‚ˆË‹‹œ›ÜßBˆšY]Ð›ÞHŒ‚ˆ‚ˆ]ˆš[H˜Ý\œ™[ÛÛÜˆ‚ˆH“LLˆŒØLLHLHHLŒˆLHLHŒ–›LLMØLHHHH]LHHHHšMLHHHKLˆ‹MØLHHHHLšØLHHHKLVˆ‚ˆÏ‚ˆÒXÛÛ‚ˆ
+NÂŸB

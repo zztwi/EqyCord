@@ -29,7 +29,7 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
     // Individual authors remain in plugin details and original sources.
-    const origin = getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin);
+    const origin = getPluginOrigin(plugin.name, PluginMeta[plugin.name]?.userPlugin, PluginMeta[plugin.name]?.folderName);
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
