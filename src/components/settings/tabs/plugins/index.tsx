@@ -168,7 +168,7 @@ function PluginSettings() {
     )
         .toSorted((a, b) => Number(settings.plugins[b.name]?.isFavorite ?? false) - Number(settings.plugins[a.name]?.isFavorite ?? false));
 
-    const hasUserPlugins = useMemo(() => !IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin), []);
+    const hasEqyCordPlugins = useMemo(() => Object.keys(Plugins).some(name => name.startsWith("Eqy")) || (!IS_STANDALONE && Object.values(PluginMeta).some(m => m.userPlugin)), []);
 
     const [searchValue, setSearchValue] = useState({ value: "", tags: [] as PluginTag[], status: SearchStatus.ALL });
 
@@ -192,13 +192,13 @@ function PluginSettings() {
                 if (!newPlugins?.includes(plugin.name)) return false;
                 break;
             case SearchStatus.USER_PLUGINS:
-                if (!PluginMeta[plugin.name]?.userPlugin) return false;
+                if (!plugin.name.startsWith("Eqy") && !PluginMeta[plugin.name]?.userPlugin) return false;
                 break;
             case SearchStatus.API_PLUGINS:
                 if (!plugin.name.endsWith("API")) return false;
                 break;
             case SearchStatus.VENCORD_PLUGINS:
-                if (PluginMeta[plugin.name]?.userPlugin) return false;
+                if (plugin.name.startsWith("Eqy") || PluginMeta[plugin.name]?.userPlugin) return false;
                 break;
             case SearchStatus.EQYCORD_PLUGINS:
                 if (!PluginMeta[plugin.name]?.userPlugin) return false;
@@ -307,10 +307,10 @@ function PluginSettings() {
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
                             { label: "Show New", value: SearchStatus.NEW },
-                            hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
+                            !IS_STANDALONE && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
                             { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },
                             { label: "Show Vencord Plugins", value: SearchStatus.VENCORD_PLUGINS },
-                            hasUserPlugins && { label: "Show EqyCord Plugins", value: SearchStatus.EQYCORD_PLUGINS },
+                            hasEqyCordPlugins && { label: "Show EqyCord Plugins", value: SearchStatus.EQYCORD_PLUGINS },
                         ].filter(isTruthy)}
                         serialize={String}
                         select={status => setSearchValue(prev => ({ ...prev, status }))}
