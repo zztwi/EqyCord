@@ -7,11 +7,12 @@
 import "@components/messageSearch.css";
 
 import { Button } from "@components/Button";
+import { HeadingSecondary } from "@components/Heading";
 import { cleanPaste, codePaste } from "@shared/smartPaste";
 import definePlugin from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
-import { ChannelStore, DraftStore, DraftType, Menu, Modal, openModal, React, SelectedChannelStore, UploadHandler, UserStore } from "@webpack/common";
+import { ChannelStore, DraftStore, DraftType, Menu, Modal, openModal, React, SelectedChannelStore, TextArea, TextInput, UploadHandler, UserStore } from "@webpack/common";
 
 const drafts = findByPropsLazy("changeDraft", "saveDraft");
 function PasteDialog({ props, channelId }: { props: RenderModalProps; channelId: string; }) {
@@ -26,8 +27,8 @@ function PasteDialog({ props, channelId }: { props: RenderModalProps; channelId:
         drafts.changeDraft(channelId, [original.current, text].filter(Boolean).join("\n"), DraftType.ChannelMessage); props.onClose();
     } }]}><div className="eqy-search-panel">
         <p className="eqy-hint">Paste and edit text here. Nothing is sent automatically.</p>
-        <textarea aria-label="Paste text" maxLength={200000} placeholder="Paste your text here…" value={text} onChange={e => setText(e.currentTarget.value)} />
-        <label>Code language (optional)<input placeholder="javascript, python, json…" value={language} onChange={e => setLanguage(e.currentTarget.value)} /></label>
+        <TextArea aria-label="Paste text" maxLength={200000} placeholder="Paste your text here…" value={text} onChange={setText} rows={8} />
+        <section><HeadingSecondary>Code language (optional)</HeadingSecondary><TextInput placeholder="javascript, python, json…" value={language} onChange={setLanguage} /></section>
         <div className="eqy-control-actions"><Button size="small" variant="secondary" onClick={async () => { try { setText((await navigator.clipboard.readText()).slice(0, 200000)); } catch { setError("Clipboard access unavailable. Paste into the text box instead."); } }}>Read clipboard</Button><Button size="small" variant="secondary" onClick={() => setText(cleanPaste(text))}>Clean whitespace</Button><Button size="small" variant="secondary" onClick={() => setText(codePaste(text, language))}>Format as code</Button><Button size="small" variant="secondary" disabled={!text.trim()} onClick={() => {
             if (!valid()) { setError("The chat or draft changed. Close this panel and try again."); return; }
             UploadHandler.promptToUpload([new File([text], "message.txt", { type: "text/plain" })], ChannelStore.getChannel(channelId), DraftType.ChannelMessage); props.onClose();

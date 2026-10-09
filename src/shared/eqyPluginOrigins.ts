@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const EQYCORD_PLUGINS = new Set(["TranslationPeek", "DuplicateFinder", "SmartPaste", "AttachmentPreview", "VoiceFocus", "QuietMode", "VoicePanelAPI", "AutoTranslate", "VoiceTool", "MessageSearch", "RelatedMessages", "AttachmentSearch", "VoiceReplay", "EqyAutoTranslate", "EqyVoiceTools"]);
+export const EQYCORD_PLUGINS = new Set(["TranslationPeek", "DuplicateFinder", "SmartPaste", "AttachmentPreview", "VoiceFocus", "QuietMode", "AutoTranslate", "VoiceTool", "MessageSearch", "RelatedMessages", "AttachmentSearch", "EqyAutoTranslate", "EqyVoiceTools"]);
 
 export type PluginOrigin = "EqyCord" | "Vencord" | "Community";
 

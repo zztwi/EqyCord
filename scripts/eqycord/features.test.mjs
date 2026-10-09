@@ -74,21 +74,6 @@ test("related messages rank meaningful shared words and attachments retain only 
     assert.throws(() => parseSearchResponse({ messages: "bad" }));
 });
 
-test("voice rolling buffer respects duration, byte bounds, clear and produces PCM WAV", async () => {
-    const { RollingAudio, pcmWav } = await load("src/plugins/voiceReplay/buffer.ts");
-    const buffer = new RollingAudio(30, 5);
-    buffer.push({ bytes: new Uint8Array(3), timestamp: 1000, mime: "audio/webm" });
-    buffer.push({ bytes: new Uint8Array(3), timestamp: 2000, mime: "audio/webm" });
-    assert.equal(buffer.count, 1);
-    assert.equal(buffer.snapshot(30, 33000).length, 0);
-    buffer.push({ bytes: new Uint8Array(1), timestamp: 34000, mime: "audio/webm" });
-    assert.equal(buffer.snapshot(1, 34000).length, 1);
-    buffer.clear(); assert.equal(buffer.count, 0);
-    const wav = Buffer.from(pcmWav(new Float32Array([-2, 0, 2])));
-    assert.equal(wav.toString("ascii", 0, 4), "RIFF"); assert.equal(wav.readUInt32LE(24), 16000);
-    assert.equal(wav.readInt16LE(44), -32768); assert.equal(wav.readInt16LE(48), 32767);
-});
-
 async function searchSetup(get) {
     let account = "me";
     const subscriptions = new Map();

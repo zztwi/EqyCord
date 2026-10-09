@@ -6,7 +6,6 @@
 
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
 import test from "node:test";
 import { build } from "esbuild";
 
@@ -41,20 +40,6 @@ test("attachment native rejects external/local URLs, oversize and unsupported fi
     await assert.rejects(extractBytes(Buffer.from("file"), "program.exe"), /Supported/);
 });
 
-test("Whisper rejects invalid WAV and language before executing a child process", async () => {
-    const { transcribeWav } = await load("src/plugins/voiceReplay/transcribe.ts");
-    await assert.rejects(transcribeWav("unused", new Uint8Array(44), "it"), /Invalid audio/);
-    await assert.rejects(transcribeWav("unused", new Uint8Array(44), "it;evil"), /Unsupported language/);
-});
-
-test("every distributed Whisper binary and model matches the hashes pinned in source", async () => {
-    const { WHISPER_RUNTIME_HASHES } = await load("src/plugins/voiceReplay/runtimeHashes.ts");
-    const manifest = JSON.parse(await readFile("dist/vendor/voice-replay/runtime.json", "utf8"));
-    assert.equal(manifest.release, "b5454");
-    assert.deepEqual(manifest.hashes, WHISPER_RUNTIME_HASHES);
-    assert.equal(Object.keys(manifest.hashes).length, 17);
-});
-
 test("real Windows image/PDF OCR reads text and enforces the five-page limit", { skip: process.env.EQYCORD_NATIVE_SMOKE !== "1" }, async () => {
     assert.equal(process.platform, "win32");
     const { extractBytes } = await load("src/plugins/attachmentSearch/extract.ts");
@@ -63,10 +48,4 @@ test("real Windows image/PDF OCR reads text and enforces the five-page limit", {
     const pdf = await extractBytes(pdfFixture(), "fixture.pdf");
     assert.match(pdf.text, /EqyCord PDF page 1/); assert.match(pdf.text, /EqyCord PDF page 5/);
     assert.doesNotMatch(pdf.text, /page 6/); assert.match(pdf.note, /5\/6/);
-});
-
-test("real pinned Whisper CPU runtime transcribes the official speech sample locally", { skip: process.env.EQYCORD_NATIVE_SMOKE !== "1" }, async () => {
-    const { transcribeWav } = await load("src/plugins/voiceReplay/transcribe.ts");
-    const result = await transcribeWav(resolve("dist/vendor/voice-replay"), await readFile("work/jfk.wav"), "en");
-    assert.match(result, /ask not what your country can do for you/i);
 });

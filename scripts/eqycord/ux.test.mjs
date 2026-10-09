@@ -57,7 +57,7 @@ async function translationSetup(fetch) {
     const define = plugin => plugin;
     const settings = def => ({ def, store: Object.fromEntries(Object.entries(def).map(([key, option]) => [key, option.default ?? option.options?.find(o => o.default)?.value])) });
     const plugin = (await load("src/plugins/translationPeek/index.tsx", {
-        "@components/messageSearch.css": {}, "@api/ChatButtons": {}, "@api/Settings": { SettingsStore: { plain: { plugins: stored }, markAsChanged() {} }, definePluginSettings: settings },
+        "@components/messageSearch.css": {}, "@components/FormSwitch": {}, "@components/Heading": {}, "@api/ChatButtons": {}, "@api/Settings": { SettingsStore: { plain: { plugins: stored }, markAsChanged() {} }, definePluginSettings: settings },
         "@plugins/translate/languages": { GoogleLanguages: { auto: "Detect language", en: "English", it: "Italian" } }, "@plugins/translate/TranslateIcon": {},
         "@utils/types": Object.assign(define, { OptionType: { BOOLEAN: 1, SELECT: 2 } }), "@webpack/common": { UserStore: { getCurrentUser: () => ({ id: current }) }, showToast() {} }
     }, { fetch })).default;
@@ -99,9 +99,34 @@ test("Smart Paste cleans text without destroying indentation and safely fences e
     assert.ok(codePaste("`x".repeat(50000), "js").startsWith("```js"));
 });
 
-test("voice panel and Quiet Mode patches match the installed Canary reference asset", { skip: !process.env.EQYCORD_DISCORD_ASSETS }, () => {
+test("Quiet Mode menu toggle resets on leaving voice and cannot activate a stopped plugin", async () => {
+    let channel = "voice";
+    let changes = 0;
+    const { default: plugin } = await load("src/plugins/quietMode/index.tsx", {
+        "@components/messageSearch.css": {},
+        "@utils/types": { __esModule: true, default: value => value },
+        "@components/FormSwitch": { FormSwitch() {} },
+        "@webpack/common": {
+            Menu: { MenuCheckboxItem() {} },
+            SelectedChannelStore: { getVoiceChannelId: () => channel },
+            StreamerModeStore: { emitChange: () => changes++ },
+            useStateFromStores: (_stores, read) => read()
+        }
+    }, { React: { createElement: (type, props) => ({ type, props }) } });
+    plugin.start();
+    const items = [];
+    plugin.contextMenus["user-context"](items);
+    assert.equal(items.length, 1); assert.equal(items[0].props.checked, false);
+    items[0].props.action(); assert.equal(plugin.isQuiet(), true);
+    plugin.flux.VOICE_CHANNEL_SELECT({ channelId: null }); assert.equal(plugin.isQuiet(), false);
+    items[0].props.action(); plugin.stop(); assert.equal(plugin.isQuiet(), false);
+    items[0].props.action(); assert.equal(plugin.isQuiet(), false);
+    channel = null; const disconnected = []; plugin.contextMenus["user-context"](disconnected);
+    assert.equal(disconnected.length, 0); assert.ok(changes >= 3);
+});
+
+test("Quiet Mode patches match the installed Canary reference asset", { skip: !process.env.EQYCORD_DISCORD_ASSETS }, () => {
     const source = readFileSync(process.env.EQYCORD_DISCORD_ASSETS + "/web.460ec5f2eb74e503.js", "utf8");
-    assert.equal([...source.matchAll(/(dismissTooltips:[A-Za-z_$][\w$]*\}\),)(?=null!=[A-Za-z_$][\w$]*\.[A-Za-z_$][\w$]*\?)/g)].length, 1);
     for (const getter of ["Sounds", "Notifications"]) assert.equal([...source.matchAll(new RegExp(`get disable${getter}\\(\\)\\{return `, "g"))].length, 1);
     assert.ok(source.includes("setLocalVolume(e,t)"));
 });

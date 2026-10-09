@@ -6,20 +6,24 @@
 
 import "@components/messageSearch.css";
 
-import { registerVoiceButton, unregisterVoiceButton } from "@plugins/_api/voicePanel";
+import { FormSwitch } from "@components/FormSwitch";
 import definePlugin from "@utils/types";
-import { StreamerModeStore } from "@webpack/common";
+import { Menu, SelectedChannelStore, StreamerModeStore, useStateFromStores } from "@webpack/common";
 
 let active = false;
-function toggle() { active = !active; StreamerModeStore.emitChange(); }
-function Icon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>; }
+let running = false;
+function toggle() { if (!running) return; active = !active; StreamerModeStore.emitChange(); }
 export default definePlugin({
-    name: "QuietMode", description: "Toggle Discord notification sounds and notifications off locally from the voice panel. Your microphone and voice audio stay unchanged.",
-    authors: [{ name: "0009cx0", id: 0n }], tags: ["Voice", "Notifications"], dependencies: ["VoicePanelAPI"],
+    name: "QuietMode", description: "Toggle Discord notification sounds and notifications off locally from settings or a voice participant menu. Your microphone and voice audio stay unchanged.",
+    authors: [{ name: "0009cx0", id: 0n }], tags: ["Voice", "Notifications"],
     patches: [{ find: 'static displayName="StreamerModeStore"', replacement: { match: /(get disable(?:Sounds|Notifications)\(\)\{return )/g, replace: "$1$self.isQuiet()||" } }],
-    start() { registerVoiceButton("quiet", { label: "Quiet Mode · toggle notifications", icon: Icon, action: toggle, active: () => active }); },
-    stop() { active = false; StreamerModeStore.emitChange(); unregisterVoiceButton("quiet"); },
+    start() { running = true; },
+    stop() { running = false; active = false; StreamerModeStore.emitChange(); },
     flux: { LOGOUT() { active = false; }, VOICE_CHANNEL_SELECT({ channelId }: { channelId: string | null; }) { if (!channelId) { active = false; StreamerModeStore.emitChange(); } } },
     isQuiet: () => active,
-    settingsAboutComponent: () => <div className="eqy-search-panel"><p>Use the bell in the voice panel to toggle Quiet Mode. It resets when you leave voice or disable this plugin.</p></div>
+    contextMenus: { "user-context": children => { if (SelectedChannelStore.getVoiceChannelId()) children.push(<Menu.MenuCheckboxItem id="eqy-quiet" label="Quiet Mode" checked={active} action={toggle} />); } },
+    settingsAboutComponent: () => {
+        const checked = useStateFromStores([StreamerModeStore], () => active);
+        return <div className="eqy-search-panel"><FormSwitch title="Quiet Mode" value={checked} onChange={toggle} disabled={!running} /><p>Suppress notification sounds and notifications locally. Enable the plugin first. Quiet Mode resets when you leave voice or disable the plugin.</p></div>;
+    }
 });

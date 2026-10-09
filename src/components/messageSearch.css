@@ -16,45 +16,6 @@
     margin: 0;
 }
 
-.eqy-search-panel label {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary, #b5bac1);
-}
-
-.eqy-search-panel label:has(input[type="checkbox"]) {
-    flex-direction: row;
-    align-items: flex-start;
-    font-size: 14px;
-    font-weight: 400;
-}
-
-.eqy-search-panel input:not([type="checkbox"]), .eqy-search-panel select, .eqy-search-panel textarea {
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 40px;
-    background: var(--input-background, #1e1f22);
-    color: var(--text-primary, #dbdee1);
-    border: 1px solid var(--border-subtle, #3f4147);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font: inherit;
-    color-scheme: dark;
-}
-
-.eqy-search-panel textarea {
-    min-height: 180px;
-    resize: vertical;
-}
-
-.eqy-search-panel input:focus-visible, .eqy-search-panel select:focus-visible, .eqy-search-panel textarea:focus-visible {
-    outline: 2px solid var(--text-link, #00a8fc);
-    outline-offset: 2px;
-}
-
 .eqy-filter-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -149,21 +110,6 @@
     background: var(--search-popout-option-filter-text, #d9aa40);
     color: #111;
     border-radius: 2px;
-}
-
-.eqy-message-location, .eqy-text-action, .eqy-file-line button {
-    background: transparent;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-    color: var(--text-link, #00a8fc);
-    font: inherit;
-    font-size: 12px;
-    text-align: left;
-}
-
-.eqy-message-location:hover, .eqy-text-action:hover, .eqy-file-line button:hover {
-    text-decoration: underline;
 }
 
 .eqy-file-line {
@@ -263,25 +209,7 @@
     color: var(--text-muted, #949ba4);
 }
 
-.eqy-voice-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 32px;
-    padding: 0;
-    border: 0;
-    border-radius: 6px;
-    background: transparent;
-    color: var(--icon-primary, #b5bac1);
-    cursor: pointer;
-}
 
-.eqy-voice-button:hover {
-    background: var(--background-modifier-hover, #292b30);
-    color: var(--text-primary, #fff);
-}
-
-.eqy-voice-button:focus-visible {
-    outline: 2px solid var(--text-link, #00a8fc);
+.eqy-filter-row > section {
+    min-width: 0;
 }

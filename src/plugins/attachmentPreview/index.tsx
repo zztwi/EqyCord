@@ -11,7 +11,7 @@ import { readAttachment } from "@components/MessageSearch";
 import { canReadChannel } from "@utils/messageSearchService";
 import definePlugin from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Menu, Modal, openModal, React, UserStore } from "@webpack/common";
+import { Menu, Modal, openModal, React, TextInput, UserStore } from "@webpack/common";
 
 function Preview({ props, file, channelId }: { props: RenderModalProps; file: { url: string; filename: string; }; channelId: string; }) {
     const [text, setText] = React.useState("");
@@ -31,7 +31,7 @@ function Preview({ props, file, channelId }: { props: RenderModalProps; file: { 
             catch (error) { if (mounted.current) setNotice(String(error)); }
             finally { if (mounted.current) setBusy(false); }
         }}>{busy ? "Reading…" : image || /\.pdf$/i.test(file.filename) ? "Read text with OCR" : "Read text"}</Button>}
-        {text && <><input aria-label="Find in file" value={query} onChange={e => setQuery(e.currentTarget.value)} placeholder="Find in file…" /><div className="eqy-search-results"><pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", font: "inherit", margin: 0 }}>{query ? text.split("\n").filter(line => line.toLowerCase().includes(query.toLowerCase())).join("\n") || "No matching lines" : text}</pre></div></>}
+        {text && <><TextInput aria-label="Find in file" value={query} onChange={setQuery} placeholder="Find in file…" /><div className="eqy-search-results"><pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", font: "inherit", margin: 0 }}>{query ? text.split("\n").filter(line => line.toLowerCase().includes(query.toLowerCase())).join("\n") || "No matching lines" : text}</pre></div></>}
         {notice && <p className="eqy-hint" role="status">{notice}</p>}
         {!video && <p className="eqy-hint">Text extraction runs locally on Windows. PDFs show OCR text from the first five pages; document layout is not preserved. Maximum file size: 10 MB.</p>}
     </div></Modal>;

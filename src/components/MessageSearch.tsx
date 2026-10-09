@@ -6,12 +6,13 @@
 
 import "./messageSearch.css";
 
-import { Button } from "@components/Button";
+import { Button, TextButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { HeadingSecondary } from "@components/Heading";
 import { keywords } from "@shared/messageSearch";
 import { cachedContext, cachedSearch, canReadChannel, channelLabel, HistoryProgress, loadMessageContext, searchAuthors, searchChannels, searchHistory, SearchMessage, SearchOptions, searchSnapshot, storeAttachmentText, subscribeSearch } from "@utils/messageSearchService";
 import { RenderModalProps } from "@vencord/discord-types";
-import { ChannelRouter, FluxDispatcher, MessageActions, Modal, openModal, React, SelectedChannelStore, UserStore } from "@webpack/common";
+import { ChannelRouter, FluxDispatcher, MessageActions, Modal, openModal, React, SearchableSelect, SelectedChannelStore, TextInput, UserStore } from "@webpack/common";
 
 export type Extractor = (url: string, filename: string) => Promise<{ text: string; note: string; }>;
 let extractor: Extractor | undefined;
@@ -47,10 +48,10 @@ function MessageRow({ message, query = "", close, context = false }: { message: 
         <div className="eqy-message-avatar" aria-hidden="true">{user?.getAvatarURL?.() ? <img src={user.getAvatarURL()} alt="" /> : message.author.slice(0, 1)}</div>
         <div className="eqy-message-body">
             <div className="eqy-message-heading"><strong>{message.author}</strong><time dateTime={new Date(message.timestamp).toISOString()}>{new Date(message.timestamp).toLocaleString("en", { dateStyle: "medium", timeStyle: "short" })}</time></div>
-            <button className="eqy-message-location" onClick={() => jump(message, close)}>{channelLabel(message.channelId)} · Jump to message ↗</button>
+            <TextButton variant="link" className="eqy-message-location" onClick={() => jump(message, close)}>{channelLabel(message.channelId)} · Jump to message ↗</TextButton>
             <div className="eqy-message-text"><Highlight text={message.content.slice(0, 4000) || "Attachment"} query={query} /></div>
             {!!message.linkTitles?.length && <small>{message.linkTitles.join(" · ")}</small>}
-            {message.attachments.map(file => <div className="eqy-file-line" key={file.id}><span>📎 {file.filename}</span>{extractor && <button disabled={busy} onClick={async () => {
+            {message.attachments.map(file => <div className="eqy-file-line" key={file.id}><span>📎 {file.filename}</span>{extractor && <TextButton variant="link" disabled={busy} onClick={async () => {
                 setBusy(true); setNotice("");
                 const account = UserStore.getCurrentUser()?.id;
                 try {
@@ -58,15 +59,15 @@ function MessageRow({ message, query = "", close, context = false }: { message: 
                     if (mounted.current && account === UserStore.getCurrentUser()?.id && canReadChannel(message.channelId)) { storeAttachmentText(message.id, file.id, result.text); setNotice(result.note); }
                 } catch (error) { if (mounted.current) setNotice(String(error)); }
                 finally { if (mounted.current) setBusy(false); }
-            }}>{busy ? "Reading…" : "Read text"}</button>}</div>)}
-            {!context && <button className="eqy-text-action" disabled={busy} onClick={async () => {
+            }}>{busy ? "Reading…" : "Read text"}</TextButton>}</div>)}
+            {!context && <TextButton variant="link" className="eqy-text-action" disabled={busy} onClick={async () => {
                 if (expanded) { setExpanded(false); return; }
                 setExpanded(true); setBusy(true); setNotice("");
                 const run = controller.current = new AbortController();
                 try { await loadMessageContext(message, run.signal); }
                 catch { if (mounted.current && !run.signal.aborted) setNotice("Could not load context. Showing available messages."); }
                 finally { if (mounted.current) setBusy(false); }
-            }}>{expanded ? "Hide context" : "Show context"}</button>}
+            }}>{expanded ? "Hide context" : "Show context"}</TextButton>}
             {notice && <p className="eqy-hint" role="status">{notice}</p>}
             {expanded && <div className="eqy-message-context">{cachedContext(message.id).filter(item => item.id !== message.id).map(item => <MessageRow key={item.id} message={item} close={close} context />)}</div>}
         </div>
@@ -119,15 +120,15 @@ function SearchDialog({ initial, rootProps }: { initial: SearchOptions; rootProp
         ...(busy ? [{ text: "Cancel search", variant: "secondary", onClick: () => active.current?.abort() }] : mode === "duplicates" ? [] : [{ text: searched ? "Search more" : "Search", variant: "primary", onClick: search, disabled: mode !== "attachments" && !query.trim() }])
     ]}>
         <div className="eqy-search-panel">
-            {mode !== "duplicates" && <input aria-label="Search messages or attachments" value={query} onChange={e => setQuery(e.currentTarget.value)} onKeyDown={e => { if (e.key === "Enter" && !busy) void search(); }} placeholder={mode === "attachments" ? "Search filenames or extracted text" : "Search messages, links or keywords"} />}
+            {mode !== "duplicates" && <TextInput aria-label="Search messages or attachments" value={query} onChange={setQuery} onKeyDown={e => { if (e.key === "Enter" && !busy) void search(); }} placeholder={mode === "attachments" ? "Search filenames or extracted text" : "Search messages, links or keywords"} />}
             {filtersOpen && <div className="eqy-filter-row">
-                <label>In<select value={channel} onChange={e => setChannel(e.currentTarget.value)}><option value="">All loaded chats · DM history</option>{[...new Set([...searchChannels(), initial.channelId, SelectedChannelStore.getChannelId()].filter(Boolean))].map(id => <option key={id} value={id}>{channelLabel(id!)}</option>)}</select></label>
-                <label>From<select value={author} onChange={e => setAuthor(e.currentTarget.value)}><option value="">Anyone</option><option value={UserStore.getCurrentUser()?.id}>Me</option>{authors.filter(([id]) => id !== UserStore.getCurrentUser()?.id).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
+                <section><HeadingSecondary>In</HeadingSecondary><SearchableSelect value={channel} onChange={setChannel} closeOnSelect maxVisibleItems={5} options={[{ value: "", label: "All loaded chats · DM history" }, ...[...new Set([...searchChannels(), initial.channelId, SelectedChannelStore.getChannelId()].filter(Boolean))].map(id => ({ value: id!, label: channelLabel(id!) }))]} /></section>
+                <section><HeadingSecondary>From</HeadingSecondary><SearchableSelect value={author} onChange={setAuthor} closeOnSelect maxVisibleItems={5} options={[{ value: "", label: "Anyone" }, { value: UserStore.getCurrentUser()?.id ?? "", label: "Me" }, ...authors.filter(([id]) => id !== UserStore.getCurrentUser()?.id).map(([value, label]) => ({ value, label }))]} /></section>
             </div>}
             {filtersOpen && <div className="eqy-filter-row">
-                <label>Has<select value={kind} onChange={e => setKind(e.currentTarget.value as SearchOptions["kind"])}>{["all", "links", "images", "videos", "files"].map(value => <option key={value} value={value}>{value === "all" ? "Anything" : value[0].toUpperCase() + value.slice(1)}</option>)}</select></label>
-                <label>After<input type="date" value={after} onChange={e => setAfter(e.currentTarget.value)} /></label>
-                <label>Before<input type="date" value={before} onChange={e => setBefore(e.currentTarget.value)} /></label>
+                <section><HeadingSecondary>Has</HeadingSecondary><SearchableSelect value={kind} onChange={setKind} closeOnSelect options={["all", "links", "images", "videos", "files"].map(value => ({ value, label: value === "all" ? "Anything" : value[0].toUpperCase() + value.slice(1) }))} /></section>
+                <section><HeadingSecondary>After</HeadingSecondary><TextInput type="date" value={after} onChange={setAfter} /></section>
+                <section><HeadingSecondary>Before</HeadingSecondary><TextInput type="date" value={before} onChange={setBefore} /></section>
             </div>}
             {mode === "duplicates" && <p className="eqy-hint">Matches the same link or uploaded file in loaded chats. Matching URLs do not prove that separately uploaded files have identical contents.</p>}
             {mode === "related" && <p className="eqy-hint">Finds shared keywords and ranks their relevance.</p>}

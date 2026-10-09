@@ -8,12 +8,14 @@ import "@components/messageSearch.css";
 
 import { ChatBarButton } from "@api/ChatButtons";
 import { definePluginSettings, SettingsStore } from "@api/Settings";
+import { FormSwitch } from "@components/FormSwitch";
+import { HeadingSecondary } from "@components/Heading";
 import { GoogleLanguages } from "@plugins/translate/languages";
 import { TranslateIcon } from "@plugins/translate/TranslateIcon";
 import { Translation, TranslationQueue } from "@shared/translationQueue";
 import definePlugin, { OptionType } from "@utils/types";
 import { Message, RenderModalProps } from "@vencord/discord-types";
-import { Menu, Modal, openModal, React, showToast, UserStore } from "@webpack/common";
+import { Menu, Modal, openModal, React, SearchableSelect, showToast, UserStore } from "@webpack/common";
 
 // Transport, language data and icon derived from Vencord Translate (2023 Vendicated,
 // AshtonMemer, koish1 and contributors). Original copyright and GPL notices remain in translate/.
@@ -73,8 +75,8 @@ function Incoming({ message }: { message: Message; }) {
 function OutgoingDialog({ props }: { props: RenderModalProps; }) {
     const { outgoing, target } = settings.use(["outgoing", "target"]);
     return <Modal {...props} title="Translation Peek" size="sm" actions={[{ text: "Done", variant: "primary", onClick: props.onClose }]}><div className="eqy-search-panel">
-        <label><input type="checkbox" checked={outgoing} onChange={event => settings.store.outgoing = event.currentTarget.checked} /> Translate outgoing messages</label>
-        <label>Send In<select value={target} onChange={event => settings.store.target = event.currentTarget.value}>{languages.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+        <FormSwitch title="Translate outgoing messages" value={outgoing} onChange={value => settings.store.outgoing = value} hideBorder />
+        <section><HeadingSecondary>Send In</HeadingSecondary><SearchableSelect options={languages} value={target} onChange={value => settings.store.target = value} closeOnSelect maxVisibleItems={5} placeholder="Select a language" /></section>
         <p className="eqy-hint">When enabled, pressing Enter translates and sends your message. Incoming translations remain active independently. Text is shared with Google Translate.</p>
     </div></Modal>;
 }
