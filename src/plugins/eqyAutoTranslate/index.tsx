@@ -23,12 +23,12 @@ const settings = definePluginSettings({
         description: "Destination language. Configure the provider in Translate and keep its Auto Translate off.",
         options: [
             { label: "English", value: "en", default: true },
-            { label: "Italiano", value: "it" },
-            { label: "Español", value: "es" },
-            { label: "Français", value: "fr" },
-            { label: "Deutsch", value: "de" },
-            { label: "Português", value: "pt" },
-            { label: "日本語", value: "ja" }
+            { label: "Italian", value: "it" },
+            { label: "Spanish", value: "es" },
+            { label: "French", value: "fr" },
+            { label: "German", value: "de" },
+            { label: "Portuguese", value: "pt" },
+            { label: "Japanese", value: "ja" }
         ] as const
     }
 });

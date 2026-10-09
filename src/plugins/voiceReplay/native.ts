@@ -38,19 +38,19 @@ async function cleanup() {
 }
 
 export async function startCapture(event: IpcMainInvokeEvent, seconds: number, consent: boolean) {
-    if (process.platform !== "win32") throw new Error("VoiceReplay richiede Discord desktop su Windows.");
-    if (!consent || ![30, 60, 120, 300].includes(seconds)) throw new Error("Conferma il consenso e scegli una durata valida.");
-    if (capture || pending) throw new Error("Il buffer audio è già attivo.");
+    if (process.platform !== "win32") throw new Error("Voice Replay requires Discord desktop on Windows.");
+    if (!consent || ![30, 60, 120, 300].includes(seconds)) throw new Error("Confirm participant consent and choose a valid duration.");
+    if (capture || pending) throw new Error("The audio buffer is already active.");
     pending = true; owner = event.sender.id; error = "";
     const run = ++epoch;
     try {
         audio = new RollingAudio(seconds);
         directory = await mkdtemp(join(tmpdir(), "eqy-capture-"));
-        if (run !== epoch) throw new Error("Avvio annullato.");
+        if (run !== epoch) throw new Error("Start cancelled.");
         chunkChannel = "eqy-voice-" + randomUUID();
         const preload = join(directory, "preload.js");
         await writeFile(preload, `const {contextBridge,ipcRenderer}=require('electron');contextBridge.exposeInMainWorld('captureBridge',{chunk:(bytes,mime)=>ipcRenderer.send(${JSON.stringify(chunkChannel)},bytes,mime)});`);
-        if (run !== epoch) throw new Error("Avvio annullato.");
+        if (run !== epoch) throw new Error("Start cancelled.");
         const isolated = session.fromPartition("eqy-voice-" + randomUUID());
         isolated.setPermissionRequestHandler((_webContents, permission, callback) => callback(permission === "media" || permission === "display-capture"));
         isolated.setDisplayMediaRequestHandler(async (_request, callback) => {
@@ -66,12 +66,12 @@ export async function startCapture(event: IpcMainInvokeEvent, seconds: number, c
             audio.push({ bytes: Uint8Array.from(bytes), mime, timestamp: Date.now() });
         });
         event.sender.once("destroyed", () => { if (owner === event.sender.id) void cleanup(); });
-        window.on("closed", () => { if (capture === window) { error = "Cattura audio interrotta."; void cleanup(); } });
+        window.on("closed", () => { if (capture === window) { error = "Audio capture interrupted."; void cleanup(); } });
         await window.loadURL("data:text/html;charset=utf-8," + encodeURIComponent(`<html><body><script>
 let stream, active=false;
 async function start(){
  stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
- if(!stream.getAudioTracks().length){stream.getTracks().forEach(t=>t.stop());throw Error('Audio loopback non disponibile.');}
+ if(!stream.getAudioTracks().length){stream.getTracks().forEach(t=>t.stop());throw Error('Loopback audio unavailable.');}
  active=true;
  stream.getTracks().forEach(t=>t.onended=()=>{active=false;stream.getTracks().forEach(x=>x.stop());window.close();});
  const audio=new MediaStream(stream.getAudioTracks());
@@ -82,16 +82,16 @@ async function start(){
  segment();return true;
 }
 </script></body></html>`));
-        if (run !== epoch) throw new Error("Avvio annullato.");
+        if (run !== epoch) throw new Error("Start cancelled.");
         await window.webContents.executeJavaScript("start()", true);
-        if (run !== epoch) throw new Error("Avvio annullato.");
+        if (run !== epoch) throw new Error("Start cancelled.");
         pending = false;
         return { active: true, seconds };
     } catch (e) { error = String(e); await cleanup(); throw e; }
 }
 
 export async function stopCapture(event: IpcMainInvokeEvent) {
-    if (owner && event.sender.id !== owner) throw new Error("Sessione audio diversa.");
+    if (owner && event.sender.id !== owner) throw new Error("This audio session belongs to another window.");
     await cleanup(); return true;
 }
 export function captureStatus(event: IpcMainInvokeEvent) {
@@ -102,13 +102,13 @@ export function pauseCapture(event: IpcMainInvokeEvent, value: boolean) {
     paused = !!value; return true;
 }
 export function audioSnapshot(event: IpcMainInvokeEvent, seconds: number) {
-    if (owner !== event.sender.id || !capture || pending) throw new Error("Avvia prima il buffer audio.");
-    if (![30, 60, 120, 300].includes(seconds)) throw new Error("Durata non valida.");
+    if (owner !== event.sender.id || !capture || pending) throw new Error("Start the audio buffer first.");
+    if (![30, 60, 120, 300].includes(seconds)) throw new Error("Invalid duration.");
     return audio.snapshot(seconds);
 }
 export async function transcribe(event: IpcMainInvokeEvent, wav: Uint8Array, language: string) {
-    if (owner !== event.sender.id || !capture) throw new Error("Buffer audio non attivo.");
-    if (transcribing) throw new Error("Trascrizione già in corso.");
+    if (owner !== event.sender.id || !capture) throw new Error("Audio buffer is not active.");
+    if (transcribing) throw new Error("Transcription is already in progress.");
     const controller = transcribing = new AbortController();
     try { return await transcribeWav(join(__dirname, "vendor", "voice-replay"), wav, language, controller.signal); }
     finally { if (transcribing === controller) transcribing = undefined; }

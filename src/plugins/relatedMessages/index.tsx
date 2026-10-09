@@ -12,7 +12,7 @@ import { Menu } from "@webpack/common";
 
 const messageMenu: NavContextMenuPatchCallback = (children, { message, channel }) => {
     if (!message?.content || !channel?.id) return;
-    children.push(<Menu.MenuItem id="eqy-related-messages" label="Trova messaggi correlati" action={() => {
+    children.push(<Menu.MenuItem id="eqy-related-messages" label="Find related messages" action={() => {
         indexMessage(message, channel.id);
         openMessageSearch({ query: message.content, mode: "related", excludeId: message.id });
     }} />);
@@ -26,5 +26,5 @@ export default definePlugin({
     contextMenus: { message: messageMenu },
     start() { acquireSearch("RelatedMessages"); },
     stop() { releaseSearch("RelatedMessages"); },
-    settingsAboutComponent: () => <button onClick={() => openMessageSearch({ query: "", mode: "related" })}>Apri ricerca correlata</button>
+    settingsAboutComponent: () => <button onClick={() => openMessageSearch({ query: "", mode: "related" })}>Open Related Messages</button>
 });

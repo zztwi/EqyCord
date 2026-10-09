@@ -162,7 +162,7 @@ function PluginSettings() {
     }, []);
 
     const sortedPlugins = useMemo(() =>
-        Object.values(Plugins).sort((a, b) => a.name.localeCompare(b.name)),
+        Object.values(Plugins).filter(plugin => !["Translate", "AutoTranslate"].includes(plugin.name)).sort((a, b) => a.name.localeCompare(b.name)),
         []
     )
         .toSorted((a, b) => Number(settings.plugins[b.name]?.isFavorite ?? false) - Number(settings.plugins[a.name]?.isFavorite ?? false));

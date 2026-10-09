@@ -2,6 +2,14 @@
 
 Environment: Windows, Node.js 24.19.0, pnpm 11.25.0. package.json retains upstream's pnpm 11.9.0 declaration; the local runtime supplied 11.25.0. Frozen-lockfile install succeeded without changing the lockfile.
 
+## Current UI and feature checks
+
+- Seven added tests cover link/duplicate matching, date/type filters, translation queue deduplication and cancellation, real TranslationPeek send hooks with mocked Discord/fetch boundaries, legacy migration, account changes, VoiceFocus restore/manual overrides, SmartPaste formatting and static voice/QuietMode patch matches.
+- Live Google transport smoke: generic English "Hello, how are you?" detected as en and translated to Italian; "Come stai?" detected as it and retained. No private message was used or sent in Discord.
+- Browser UI fixture renders the real EqyCord SearchDialog and CSS using React, with mocked Discord Modal/message-service boundaries. Filter/result, outgoing translation, VoiceReplay and SmartPaste screens were inspected; one Close footer button, scrollable result list, no horizontal overflow and no browser errors. This does not certify the native Discord Modal layout.
+- First-party visible UI, settings, notices, language labels and native extraction/capture errors are English. Discord itself and unmodified upstream plugins retain their own locale/content.
+- VoiceReplay, VoiceFocus and QuietMode controls use a shared account voice-panel insertion. Static reference matches are unique; real-call audio and live volume/notification behavior remain unverified.
+
 ## Executed checks
 
 - pnpm install --frozen-lockfile: passed.
@@ -9,7 +17,7 @@ Environment: Windows, Node.js 24.19.0, pnpm 11.25.0. package.json retains upstre
 - pnpm test after the corrections: passed (desktop standalone builds, TypeScript, ESLint, CSS lint, plugin metadata generation and EqyCord tests).
 - pnpm build: passed (regular Windows desktop build). Installer fixture tests also passed again against this desktop build.
 - pnpm buildWeb: passed; browser bundle, userscript, Chromium and Firefox extension packages generated.
-- `pnpm testEqyCord` with `EQYCORD_NATIVE_SMOKE=1` and the public Canary fixture: 35 tests passed, zero failures/skips on Windows. This includes DM-history API mocks, account/permission handling, QuickSwitcher patch parsing, Ghost lifecycle, local PNG and six-page PDF OCR, and real CPU Whisper transcription.
+- `pnpm testEqyCord` with `EQYCORD_NATIVE_SMOKE=1` and the public Canary fixture: 42 tests passed, zero failures/skips on Windows. This includes DM-history API mocks, account/permission handling, QuickSwitcher patch parsing, Ghost lifecycle, local PNG and six-page PDF OCR, and real CPU Whisper transcription.
 - `pnpm install --frozen-lockfile`: passed after adding the new plugins; lockfile unchanged.
 - Windows OCR smoke test generated a local PNG (“EqyCord Search test 123”) and a six-page PDF. OCR found the image text and PDF pages 1–5, leaving out page 6 as configured.
 - Pinned Whisper CPU runtime: CLI help ran successfully; the multilingual tiny model transcribed an official JFK speech sample locally. This does not verify capture or transcription of real Discord voice audio.
@@ -30,9 +38,9 @@ The user confirmed continuing with a Vencord-style inject after the ToS discussi
 
 ## Required before a public release
 
-- Real Discord UI: all six sidebar panels, toggle/settings cards, responsive origin/status/tag combinations and author/source/license links. Check QuickSwitcher results, context menus and OCR controls in live Canary.
+- Real Discord UI: sidebar panels, toggle/settings cards, responsive origin/status/tag combinations and author/source/license links. Check QuickSwitcher results, context menus and OCR controls in live Canary.
 - Authenticated Discord history search: verify the DM history route against the current account on Canary. Mocks validate URL, pagination, abort and rate-limit behavior; public Discord search docs describe guild search.
-- AutoTranslate in two accounts: actual provider success/failure, every modal dismissal, timeout, plugin disable, attachments/mentions, limits, other transforming plugins, repeated sends and retention of the composer draft on cancel.
+- TranslationPeek in two accounts: incoming inline display, same-language skipping, outgoing toggle/target, provider success/failure, timeout, plugin disable, attachments/mentions, limits, other transforming plugins and draft preservation. Legacy preview tests remain as regression coverage for the retired source.
 - VoiceReplay in actual Discord voice: loopback capture, gaps, replay, transcription speed/accuracy and cleanup on each event. The sample audio run and generated OCR fixtures validate the engines, not a real call.
 - Ghost in two accounts: observer's mute/deaf icons, audio reception/transmission, real native mute/deafen, Ghost off, channel change, reconnect and server restrictions. Hidden-audio behavior is not certified by the mocked/static tests.
 - Real clean Windows install/launch/uninstall and Discord update/repair on each available Stable/PTB/Canary channel; unsupported layouts must fail clearly.
@@ -40,3 +48,5 @@ The user confirmed continuing with a Vencord-style inject after the ToS discussi
 - Remote GitHub Actions status must be checked separately; local success does not imply that remote CI ran.
 
 The agent sent no Discord messages, made no voice call and connected no cloud account. The agent installed the earlier EqyCord build on Canary; the user tested its translator UI. Ghost audio compatibility remains unverified. The PR remains draft; no merge is performed. UI slogans were removed, card bylines shortened and first-party author display names changed to 0009cx0; original GPL notices/authorship remain intact.
+
+The new UI package is prepared separately from the running Canary installation; the previous installed commit is 5a792152 until an upgrade succeeds. Installation state must be read from latest-installation.json; compiling a package does not update an open client.

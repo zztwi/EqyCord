@@ -16,9 +16,10 @@ import { GhostController, VoiceSocket, VoiceState } from "./state";
 const ghost = new GhostController(() => SelectedChannelStore.getVoiceChannelId(), message => showToast(message, "failure"));
 migratePluginSettings("VoiceTool", "EqyVoiceTools");
 
-function GhostIcon() {
+function GhostIcon({ active }: { active?: boolean; }) {
     return <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M12 2a8 8 0 0 0-8 8v11a1 1 0 0 0 1.6.8L8 20l3.4 2.6a1 1 0 0 0 1.2 0L16 20l2.4 1.8A1 1 0 0 0 20 21V10a8 8 0 0 0-8-8Zm-3 8a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
+        {!active && <path d="M3 21 21 3" stroke="var(--status-danger, #f23f43)" strokeWidth="2.5" />}
     </svg>;
 }
 
@@ -45,7 +46,7 @@ const GhostButton = ErrorBoundary.wrap(() => {
         data-pending={ghost.pending}
         disabled={!connected || !ghost.available}
         onClick={() => ghost.toggle()}
-    ><GhostIcon /></button></span>}</Tooltip>;
+    ><GhostIcon active={ghost.confirmed} /></button></span>}</Tooltip>;
 }, { noop: true });
 
 export default definePlugin({

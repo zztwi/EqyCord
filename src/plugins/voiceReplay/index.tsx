@@ -4,19 +4,22 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { ChatBarButton } from "@api/ChatButtons";
+import "@components/messageSearch.css";
+
 import { definePluginSettings } from "@api/Settings";
+import { Button } from "@components/Button";
+import { registerVoiceButton, unregisterVoiceButton } from "@plugins/_api/voicePanel";
 import definePlugin, { OptionType, PluginNative } from "@utils/types";
-import { ConfirmModal, openModal, React, SelectedChannelStore, useStateFromStores } from "@webpack/common";
+import { Modal, openModal, React, SelectedChannelStore, useStateFromStores } from "@webpack/common";
 
 import { pcmWav } from "./buffer";
 
 const Native = VencordNative.pluginHelpers.VoiceReplay as PluginNative<typeof import("./native")>;
-const durations = [{ label: "30 secondi", value: 30 }, { label: "1 minuto", value: 60, default: true }, { label: "2 minuti", value: 120 }, { label: "5 minuti", value: 300 }] as const;
+const durations = [{ label: "30 seconds", value: 30 }, { label: "1 minute", value: 60, default: true }, { label: "2 minutes", value: 120 }, { label: "5 minutes", value: 300 }] as const;
 const settings = definePluginSettings({
-    retention: { type: OptionType.SELECT, description: "Durata massima del buffer audio locale. Modificala prima di avviare la cattura.", options: durations },
-    language: { type: OptionType.SELECT, description: "Lingua della trascrizione locale Whisper (può contenere errori).", options: [
-        { label: "Rileva lingua", value: "auto", default: true }, { label: "Italiano", value: "it" }, { label: "English", value: "en" }, { label: "Español", value: "es" }, { label: "Français", value: "fr" }, { label: "Deutsch", value: "de" }
+    retention: { type: OptionType.SELECT, description: "Maximum local audio buffer duration. Change it before starting capture.", options: durations },
+    language: { type: OptionType.SELECT, description: "Language for local Whisper transcription (may contain errors).", options: [
+        { label: "Detect language", value: "auto", default: true }, { label: "Italian", value: "it" }, { label: "English", value: "en" }, { label: "Spanish", value: "es" }, { label: "French", value: "fr" }, { label: "German", value: "de" }
     ] as const }
 });
 let running = false;
@@ -27,7 +30,7 @@ async function stop() { generation++; for (const clear of clearListeners) clear(
 
 async function recover(seconds: number) {
     const segments = await Native.audioSnapshot(seconds);
-    if (!segments.length) throw new Error("Il buffer è vuoto. Attendi alcuni secondi dopo l’avvio.");
+    if (!segments.length) throw new Error("The buffer is empty. Wait a few seconds after starting capture.");
     const context = new AudioContext({ sampleRate: 16000 });
     try {
         const decoded: Float32Array[] = [];
@@ -74,7 +77,7 @@ function Controls() {
         if (!running || run !== generation) return;
         if (transcript) {
             const result = await Native.transcribe(wav, settings.store.language ?? "auto");
-            if (mounted.current && run === generation) setText(result || "Nessun parlato riconosciuto.");
+            if (mounted.current && run === generation) setText(result || "No speech recognized.");
         } else if (mounted.current) {
             if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
             const value = URL.createObjectURL(new Blob([Uint8Array.from(wav).buffer], { type: "audio/wav" }));
@@ -82,41 +85,33 @@ function Controls() {
         }
     };
     return <div className="eqy-search-panel">
-        <p>Voice Replay conserva gli ultimi {settings.store.retention} secondi solo dopo l’avvio. Cattura l’audio riprodotto dal PC, compresi suoni di altre app. Non cattura il tuo microfono separatamente.</p>
-        <label><input type="checkbox" checked={consent} onChange={e => setConsent(e.currentTarget.checked)} /> Ho informato i partecipanti e ho il consenso per registrare e trascrivere.</label>
-        {IS_WEB ? <p>Il buffer audio e Whisper richiedono Discord desktop su Windows.</p> : <>
-            <button disabled={!connected || !consent || active || busy} onClick={() => perform(async () => {
-                if (!running) throw new Error("Plugin disattivato.");
+        <p className="eqy-hint">Voice Replay keeps the last {settings.store.retention} seconds after you start capture. It records PC playback, including other apps, without a separate microphone track.</p>
+        <label><input type="checkbox" checked={consent} onChange={e => setConsent(e.currentTarget.checked)} /> Participants have been informed and consent to recording and transcription.</label>
+        {IS_WEB ? <p>Audio capture and Whisper require Discord desktop on Windows.</p> : <>
+            <div className="eqy-control-actions"><Button variant="primary" disabled={!running || !connected || !consent || active || busy} onClick={() => perform(async () => {
+                if (!running) throw new Error("Plugin disabled.");
                 const run = generation, channel = SelectedChannelStore.getVoiceChannelId();
                 await Native.startCapture(settings.store.retention ?? 60, consent);
                 if (run !== generation || channel !== SelectedChannelStore.getVoiceChannelId()) { await Native.stopCapture(); return; }
                 voiceChannel = channel; if (mounted.current) { setActive(true); setRetention(settings.store.retention ?? 60); }
-            })}>Avvia buffer audio</button>
-            <button disabled={!active && !busy} onClick={() => perform(stop)}>Ferma e cancella buffer</button>
-            <p role="status">{active ? `Cattura attiva · ${chunks} segmenti · massimo ${retention} secondi` : "Cattura spenta"}{!connected ? " · Entra prima in un canale vocale" : ""}</p>
-            <label>Recupera <select value={seconds} onChange={e => setSeconds(Number(e.currentTarget.value))}>{durations.filter(value => value.value <= retention).map(value => <option key={value.value} value={value.value}>{value.label}</option>)}</select></label>
-            <button disabled={!active || busy} onClick={() => perform(() => obtain(false))}>Riascolta</button>
-            <button disabled={!active || busy} onClick={() => perform(() => obtain(true))}>{busy ? "Elaborazione…" : "Trascrivi sul PC"}</button>
+            })}>Start capture</Button>
+            <Button variant="secondary" disabled={!active && !busy} onClick={() => perform(stop)}>Stop and clear</Button></div>
+            <p role="status">{active ? `Recording � ${chunks} segments � up to ${retention} seconds` : "Capture off"}{!connected ? " � Join a voice channel first" : ""}</p>
+            <label>Replay duration <select value={seconds} onChange={e => setSeconds(Number(e.currentTarget.value))}>{durations.filter(value => value.value <= retention).map(value => <option key={value.value} value={value.value}>{value.label}</option>)}</select></label>
+            <div className="eqy-control-actions"><Button variant="secondary" disabled={!active || busy} onClick={() => perform(() => obtain(false))}>Replay audio</Button>
+            <Button variant="secondary" disabled={!active || busy} onClick={() => perform(() => obtain(true))}>{busy ? "Processing�" : "Transcribe locally"}</Button></div>
             {url && <audio controls src={url} onPlay={() => { void Native.pauseCapture(true).catch(() => {}); }} onPause={() => { void Native.pauseCapture(false).catch(() => {}); }} onEnded={() => { void Native.pauseCapture(false).catch(() => {}); }} />}
             {text && <p style={{ whiteSpace: "pre-wrap" }}>{text}</p>}
         </>}
         {notice && <p role="alert">{notice}</p>}
-        <p>Si svuota cambiando canale, uscendo dalla voce, disconnettendoti o disattivando il plugin. Trascrizione su richiesta, senza riconoscimento dei singoli parlanti; possibili piccoli intervalli tra i segmenti. Il buffer si sospende durante il riascolto per non ricatturare l’audio.</p>
+        <details className="eqy-hint"><summary>About capture</summary><p>The buffer clears when you change channels, leave voice, disconnect or disable this plugin. Transcription is on demand; speakers are not identified. Small gaps between segments are possible. Capture pauses while replay audio plays.</p></details>
     </div>;
 }
 
 function ReplayIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6M12 7v5l3 2" /></svg>; }
-function ReplayButton() {
-    const [active, setActive] = React.useState(false);
-    React.useEffect(() => {
-        let mounted = true;
-        const update = () => { if (!IS_WEB) Native.captureStatus().then(value => { if (mounted) setActive(value.active); }).catch(() => {}); };
-        update(); const timer = setInterval(update, 1000);
-        return () => { mounted = false; clearInterval(timer); };
-    }, []);
-    return <ChatBarButton tooltip={active ? "Voice Replay — cattura audio attiva" : "Voice Replay — buffer e trascrizione"} onClick={openReplay}><span style={{ color: active ? "var(--status-danger, #f04747)" : "inherit" }}><ReplayIcon /></span></ChatBarButton>;
-}
-function openReplay() { openModal(props => <ConfirmModal {...props} title="Voice Replay" confirmText="Chiudi" cancelText="Chiudi" onConfirm={props.onClose} onCancel={props.onClose}><Controls /></ConfirmModal>); }
+let captureActive = false;
+let statusTimer: ReturnType<typeof setInterval> | undefined;
+function openReplay() { openModal(props => <Modal {...props} title="Voice Replay" size="md" actions={[{ text: "Close", variant: "secondary", onClick: props.onClose }]}><Controls /></Modal>); }
 
 export default definePlugin({
     name: "VoiceReplay",
@@ -124,14 +119,17 @@ export default definePlugin({
     authors: [{ name: "0009cx0", id: 0n }],
     tags: ["Utility"],
     settings,
-    start() { running = true; voiceChannel = SelectedChannelStore.getVoiceChannelId(); },
-    stop() { running = false; void stop(); },
+    dependencies: ["VoicePanelAPI"],
+    start() {
+        running = true; voiceChannel = SelectedChannelStore.getVoiceChannelId();
+        registerVoiceButton("replay", { label: "Voice Replay � record, replay and transcribe", icon: ReplayIcon, action: openReplay, active: () => captureActive });
+        if (!IS_WEB) statusTimer = setInterval(() => { Native.captureStatus().then(value => { captureActive = value.active; }).catch(() => { captureActive = false; }); }, 1000);
+    },
+    stop() { running = false; captureActive = false; clearInterval(statusTimer); unregisterVoiceButton("replay"); void stop(); },
     flux: {
         VOICE_CHANNEL_SELECT({ channelId }: { channelId: string; }) { if (channelId !== voiceChannel) { voiceChannel = channelId; void stop(); } },
         LOGOUT() { void stop(); },
         CONNECTION_CLOSED() { void stop(); }
     },
-    renderChatBarButton: ({ isMainChat }) => isMainChat ? <ReplayButton /> : null,
-    chatBarButtonIcon: ReplayIcon,
     settingsAboutComponent: Controls
 });

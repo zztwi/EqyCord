@@ -10,8 +10,8 @@ import { fetchAttachment } from "./extract";
 
 let busy = false;
 export async function extractAttachment(_event: IpcMainInvokeEvent, url: string, filename: string) {
-    if (busy) throw new Error("È già in corso la lettura di un allegato.");
-    if (typeof url !== "string" || typeof filename !== "string" || filename.length > 300) throw new Error("Allegato non valido.");
+    if (busy) throw new Error("An attachment is already being read.");
+    if (typeof url !== "string" || typeof filename !== "string" || filename.length > 300) throw new Error("Invalid attachment.");
     busy = true;
     try { return await fetchAttachment(url, filename); }
     finally { busy = false; }

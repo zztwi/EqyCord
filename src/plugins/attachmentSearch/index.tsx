@@ -13,7 +13,7 @@ import { Menu } from "@webpack/common";
 const Native = VencordNative.pluginHelpers.AttachmentSearch as PluginNative<typeof import("./native")>;
 const menu: NavContextMenuPatchCallback = (children, { message, channel }) => {
     if (!channel?.id) return;
-    children.push(<Menu.MenuItem id="eqy-search-attachments" label="Cerca negli allegati" action={() => {
+    children.push(<Menu.MenuItem id="eqy-search-attachments" label="Search attachments" action={() => {
         if (message) indexMessage(message, channel.id);
         openMessageSearch({ query: "", mode: "attachments", channelId: channel.id });
     }} />);
@@ -27,5 +27,5 @@ export default definePlugin({
     contextMenus: { message: menu, "channel-context": menu, "user-context": menu },
     start() { acquireSearch("AttachmentSearch"); if (!IS_WEB) setAttachmentExtractor((url, filename) => Native.extractAttachment(url, filename)); },
     stop() { setAttachmentExtractor(); releaseSearch("AttachmentSearch"); },
-    settingsAboutComponent: () => <><p>OCR immagini/PDF: Windows, massimo 10 MB e prime 5 pagine. Sul web: ricerca dei nomi file. Il testo resta in memoria fino alla disconnessione.</p><button onClick={() => openMessageSearch({ query: "", mode: "attachments" })}>Apri ricerca allegati</button></>
+    settingsAboutComponent: () => <><p>Windows OCR supports images and the first five PDF pages, up to 10 MB. Browser builds support filename search. Extracted text stays in memory until disconnect.</p><button onClick={() => openMessageSearch({ query: "", mode: "attachments" })}>Open Attachment Search</button></>
 });

@@ -30,9 +30,11 @@ export function indexMessage(message: any, channelId = message?.channel_id) {
     const previous = MessageStore.getMessage(channelId, message.id);
     const value = { ...previous, ...message };
     index.upsert({
-        id: value.id, channelId, authorId: value.author?.id ?? "", author: value.author?.globalName ?? value.author?.global_name ?? value.author?.username ?? "Utente",
-        content: value.content ?? "", timestamp: Number(new Date(value.timestamp ?? 0)),
-        attachments: (value.attachments ?? []).map((file: any) => ({ id: file.id, filename: file.filename ?? "Allegato", url: file.url, size: file.size }))
+        id: value.id, channelId, authorId: value.author?.id ?? "", author: value.author?.globalName ?? value.author?.global_name ?? value.author?.username ?? "User",
+        content: value.content ?? "", timestamp: Number(new Date(value.timestamp ?? 0)) || 0,
+        links: [...(value.content?.match(/https?:\/\/[^\s<>]+/g) ?? []), ...(value.embeds ?? []).map((embed: any) => embed.url).filter(Boolean)],
+        linkTitles: (value.embeds ?? []).map((embed: any) => embed.rawTitle ?? embed.title ?? ""),
+        attachments: (value.attachments ?? []).map((file: any) => ({ id: file.id, filename: file.filename ?? "Attachment", url: file.url, size: file.size }))
     });
 }
 function seed() {
@@ -66,20 +68,32 @@ export function releaseSearch(name: string) {
 }
 export function cachedSearch(options: SearchOptions) { ensureAccount(); return index.search(options, canReadChannel); }
 export function storeAttachmentText(messageId: string, attachmentId: string, text: string) { ensureAccount(); index.setAttachmentText(messageId, attachmentId, text); emit(); }
+export function searchChannels() { ensureAccount(); return index.channels(canReadChannel); }
+export function searchAuthors() { ensureAccount(); return index.authors(canReadChannel); }
+export function cachedContext(id: string) { ensureAccount(); return index.context(id, canReadChannel); }
+export async function loadMessageContext(message: SearchMessage, signal: AbortSignal) {
+    const account = ensureAccount(), run = generation;
+    if (!account || !canReadChannel(message.channelId)) throw new Error("This channel is unavailable.");
+    const response = await RestAPI.get({ url: `/channels/${message.channelId}/messages`, query: { around: message.id, limit: 11 }, retries: 0 });
+    if (signal.aborted || run !== generation || account !== UserStore.getCurrentUser()?.id) return;
+    if (!canReadChannel(message.channelId) || !Array.isArray(response.body)) return;
+    for (const value of response.body) indexMessage(value, message.channelId);
+    emit();
+}
 export function dmChannelIds() { return PrivateChannelSortStore.getPrivateChannelIds().filter(canReadChannel); }
 export function channelLabel(channelId: string) {
     const channel = ChannelStore.getChannel(channelId);
-    if (!channel) return "Chat non disponibile";
+    if (!channel) return "Unavailable channel";
     if (channel.isDM()) return UserStore.getUser(channel.recipients[0])?.globalName ?? UserStore.getUser(channel.recipients[0])?.username ?? "DM";
-    return channel.name || "Chat di gruppo";
+    return channel.name || "Group chat";
 }
 export interface HistoryProgress { checked: number; channels: number; found: number; failed: number; indexing: number; }
 export async function searchHistory(options: SearchOptions, onProgress: (progress: HistoryProgress) => void, signal: AbortSignal, offsets = new Map<string, number>()) {
     const account = ensureAccount(), run = generation;
-    if (!account) throw new Error("Accedi prima a Discord.");
+    if (!account) throw new Error("Sign in to Discord first.");
     const channels = options.channelId ? [options.channelId].filter(canReadChannel) : dmChannelIds();
     const progress: HistoryProgress = { checked: 0, channels: channels.length, found: 0, failed: 0, indexing: 0 };
-    const current = () => { if (signal.aborted || run !== generation || account !== UserStore.getCurrentUser()?.id) throw new DOMException("Ricerca annullata", "AbortError"); };
+    const current = () => { if (signal.aborted || run !== generation || account !== UserStore.getCurrentUser()?.id) throw new DOMException("Search cancelled", "AbortError"); };
     onProgress({ ...progress });
     for (const channelId of channels) {
         current();
@@ -88,6 +102,7 @@ export async function searchHistory(options: SearchOptions, onProgress: (progres
             if (options.mode === "attachments") { query.has = ["file"]; if (options.query.trim()) query.attachment_filename = [options.query.trim()]; }
             else if (options.query.trim()) query.content = options.query.trim();
             else continue;
+            if (options.kind && options.kind !== "all") query.has = [options.kind === "links" ? "link" : options.kind === "images" ? "image" : options.kind === "videos" ? "video" : "file"];
             if (options.authorId) query.author_id = [options.authorId];
             const response = await RestAPI.get({ url: `/channels/${channelId}/messages/search`, query, retries: 0 });
             current();
@@ -101,7 +116,7 @@ export async function searchHistory(options: SearchOptions, onProgress: (progres
             emit();
         } catch (error: any) {
             current();
-            if (error.status === 429) throw new Error("Discord ha limitato le richieste. Attendi prima di riprovare.");
+            if (error.status === 429) throw new Error("Discord rate limit reached. Wait before trying again.");
             progress.failed++;
         } finally { progress.checked++; onProgress({ ...progress }); }
         if (!signal.aborted) await new Promise<void>(resolve => {

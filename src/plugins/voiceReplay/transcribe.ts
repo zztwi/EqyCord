@@ -16,16 +16,16 @@ import { WHISPER_RUNTIME_HASHES } from "./runtimeHashes";
 const exec = promisify(execFile);
 let checkedDirectory: string | undefined;
 export async function transcribeWav(runtime: string, bytes: Uint8Array, language: string, signal?: AbortSignal) {
-    if (!["auto", "it", "en", "es", "fr", "de", "pt", "ja"].includes(language)) throw new Error("Lingua non supportata.");
+    if (!["auto", "it", "en", "es", "fr", "de", "pt", "ja"].includes(language)) throw new Error("Unsupported language.");
     const wav = Buffer.from(bytes);
-    if (wav.length < 44 || wav.length > 9600044 || wav.toString("ascii", 0, 4) !== "RIFF" || wav.toString("ascii", 8, 12) !== "WAVE" || wav.readUInt16LE(20) !== 1 || wav.readUInt16LE(22) !== 1 || wav.readUInt32LE(24) !== 16000 || wav.readUInt16LE(34) !== 16) throw new Error("Audio non valido: richiesto WAV PCM mono 16 kHz, massimo 5 minuti.");
+    if (wav.length < 44 || wav.length > 9600044 || wav.toString("ascii", 0, 4) !== "RIFF" || wav.toString("ascii", 8, 12) !== "WAVE" || wav.readUInt16LE(20) !== 1 || wav.readUInt16LE(22) !== 1 || wav.readUInt32LE(24) !== 16000 || wav.readUInt16LE(34) !== 16) throw new Error("Invalid audio: requires mono 16 kHz PCM WAV, up to five minutes.");
     if (checkedDirectory !== runtime) {
         const manifest = JSON.parse(await readFile(join(runtime, "runtime.json"), "utf8"));
-        if (manifest.release !== "b5454" || manifest.sourceCommit !== "d1be6fde11ac6e0407606b4e42fe72d34add8037") throw new Error("Release runtime Whisper non riconosciuta.");
+        if (manifest.release !== "b5454" || manifest.sourceCommit !== "d1be6fde11ac6e0407606b4e42fe72d34add8037") throw new Error("Unrecognized Whisper runtime release.");
         const hashes = manifest.hashes as Record<string, string>;
-        if (!hashes || Object.keys(hashes).length !== Object.keys(WHISPER_RUNTIME_HASHES).length) throw new Error("Manifest runtime non valido.");
+        if (!hashes || Object.keys(hashes).length !== Object.keys(WHISPER_RUNTIME_HASHES).length) throw new Error("Invalid runtime manifest.");
         for (const [name, expectedHash] of Object.entries(WHISPER_RUNTIME_HASHES)) {
-            if (hashes[name] !== expectedHash || createHash("sha256").update(await readFile(join(runtime, name))).digest("hex") !== expectedHash) throw new Error("Runtime trascrizione alterato: " + name);
+            if (hashes[name] !== expectedHash || createHash("sha256").update(await readFile(join(runtime, name))).digest("hex") !== expectedHash) throw new Error("Modified transcription runtime: " + name);
         }
         checkedDirectory = runtime;
     }

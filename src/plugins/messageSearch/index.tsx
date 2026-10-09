@@ -24,5 +24,5 @@ export default definePlugin({
     start() { acquireSearch("MessageSearch"); },
     stop() { releaseSearch("MessageSearch"); },
     renderMessages(query: string) { return <QuickMessageResults query={query} limit={Math.min(10, Math.max(1, Number(settings.store.resultCount) || 4))} mine={settings.store.ownMessages} />; },
-    settingsAboutComponent: () => <button onClick={() => openMessageSearch()}>Apri ricerca messaggi</button>
+    settingsAboutComponent: () => <button onClick={() => openMessageSearch()}>Open Message Search</button>
 });

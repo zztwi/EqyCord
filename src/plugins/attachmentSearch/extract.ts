@@ -15,17 +15,17 @@ const textTypes = new Set([".txt", ".md", ".csv", ".json", ".log", ".xml", ".yam
 const imageTypes = new Set([".png", ".jpg", ".jpeg", ".webp", ".bmp", ".pdf"]);
 export function attachmentUrl(value: string) {
     const url = new URL(value);
-    if (url.protocol !== "https:" || !["cdn.discordapp.com", "media.discordapp.net"].includes(url.hostname) || url.port || url.username || url.password || !/^\/attachments\/\d+\/\d+\//.test(url.pathname)) throw new Error("Solo allegati sul CDN Discord sono supportati.");
+    if (url.protocol !== "https:" || !["cdn.discordapp.com", "media.discordapp.net"].includes(url.hostname) || url.port || url.username || url.password || !/^\/attachments\/\d+\/\d+\//.test(url.pathname)) throw new Error("Only attachments on the Discord CDN are supported.");
     return url;
 }
 
 /** Internal helper: callers supply bytes, never an IPC-controlled filesystem path. */
 export async function extractBytes(bytes: Uint8Array, filename: string) {
-    if (bytes.length > 10 * 1024 * 1024) throw new Error("Limite: 10 MB per allegato.");
+    if (bytes.length > 10 * 1024 * 1024) throw new Error("Maximum attachment size: 10 MB.");
     const extension = extname(filename).toLowerCase();
-    if (textTypes.has(extension)) return { text: new TextDecoder().decode(bytes).slice(0, 200000), note: "Testo indicizzato localmente (massimo 200.000 caratteri)." };
-    if (!imageTypes.has(extension)) throw new Error("Supportati: file di testo, PNG, JPEG, WebP, BMP e PDF (prime 5 pagine). Nessuna lettura di archivi o eseguibili.");
-    if (process.platform !== "win32") throw new Error("OCR immagini/PDF disponibile solo su Windows.");
+    if (textTypes.has(extension)) return { text: new TextDecoder().decode(bytes).slice(0, 200000), note: "Text indexed locally (up to 200,000 characters)." };
+    if (!imageTypes.has(extension)) throw new Error("Supported: text files, PNG, JPEG, WebP, BMP and PDF (first five pages). Archives and executables are not supported.");
+    if (process.platform !== "win32") throw new Error("Image and PDF OCR is available on Windows only.");
     const directory = await mkdtemp(join(tmpdir(), "eqy-ocr-"));
     const path = join(directory, "attachment" + extension), output = join(directory, "result.json");
     await writeFile(path, bytes);
@@ -48,7 +48,7 @@ function AwaitAction($operation) {
  $task=$method.Invoke($null,@($operation)); $task.Wait()
 }
 $engine=[Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages()
-if(-not $engine){throw 'Installa una lingua OCR nelle impostazioni di Windows.'}
+if(-not $engine){throw 'Install an OCR language in Windows settings.'}
 function ReadImage($stream) {
  $decoder=Await ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream)) ([Windows.Graphics.Imaging.BitmapDecoder])
  $bitmap=Await ($decoder.GetSoftwareBitmapAsync([Windows.Graphics.Imaging.BitmapPixelFormat]::Bgra8,[Windows.Graphics.Imaging.BitmapAlphaMode]::Premultiplied)) ([Windows.Graphics.Imaging.SoftwareBitmap])
@@ -67,7 +67,7 @@ if(${extension === ".pdf" ? "$true" : "$false"}) {
  $stream=Await ($file.OpenAsync([Windows.Storage.FileAccessMode]::Read)) ([Windows.Storage.Streams.IRandomAccessStream])
  try {$texts.Add((ReadImage $stream))} finally {$stream.Dispose()}
 }
-$json=@{text=($texts -join "\n");note=('OCR locale: '+$processed+'/'+$pages+' pagine. Il riconoscimento può contenere errori.')} | ConvertTo-Json -Compress
+$json=@{text=($texts -join "\n");note=('Local OCR: '+$processed+'/'+$pages+' pages. Recognition may contain errors.')} | ConvertTo-Json -Compress
 [System.IO.File]::WriteAllText(${quote(output)},$json,(New-Object System.Text.UTF8Encoding($false)))
 `;
     try {
@@ -80,12 +80,12 @@ $json=@{text=($texts -join "\n");note=('OCR locale: '+$processed+'/'+$pages+' pa
 export async function fetchAttachment(value: string, filename: string) {
     const url = attachmentUrl(value);
     const response = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(20000) });
-    if (!response.ok || !response.body) throw new Error("Download fallito: " + response.status);
-    if (Number(response.headers.get("content-length")) > 10 * 1024 * 1024) throw new Error("Limite: 10 MB.");
+    if (!response.ok || !response.body) throw new Error("Download failed: " + response.status);
+    if (Number(response.headers.get("content-length")) > 10 * 1024 * 1024) throw new Error("Maximum size: 10 MB.");
     const parts: Uint8Array[] = []; let length = 0;
     for await (const chunk of response.body as any) {
         length += chunk.length;
-        if (length > 10 * 1024 * 1024) { await response.body.cancel().catch(() => {}); throw new Error("Limite: 10 MB."); }
+        if (length > 10 * 1024 * 1024) { await response.body.cancel().catch(() => {}); throw new Error("Maximum size: 10 MB."); }
         parts.push(chunk);
     }
     return extractBytes(Buffer.concat(parts), filename);

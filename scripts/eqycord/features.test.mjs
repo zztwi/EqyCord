@@ -114,21 +114,21 @@ test("history search uses DM endpoint, advances pages, and drops results after c
     assert.equal(calls[0].url, "/channels/dm/messages/search"); assert.equal(calls[1].query.offset, 25);
     assert.equal(s.service.cachedSearch({ query: "caffe" }).length, 1);
     s.switchAccount(); assert.equal(s.service.cachedSearch({ query: "caffe" }).length, 0);
-    controller.abort(); await assert.rejects(s.service.searchHistory({ query: "caffe" }, () => {}, controller.signal), /annullata/);
+    controller.abort(); await assert.rejects(s.service.searchHistory({ query: "caffe" }, () => {}, controller.signal), /cancelled/);
     s.service.releaseSearch("test"); assert.equal(s.subscriptions.size, 0);
     let resolve;
     const pending = await searchSetup(() => new Promise(done => { resolve = done; }));
     const run = pending.service.searchHistory({ query: "private" }, () => {}, new AbortController().signal);
     pending.switchAccount();
     resolve({ status: 200, body: { messages: [[{ id: "2", channel_id: "dm", content: "private", author: { id: "me" }, attachments: [] }]] } });
-    await assert.rejects(run, /annullata/);
+    await assert.rejects(run, /cancelled/);
     assert.equal(pending.service.cachedSearch({ query: "private" }).length, 0);
     pending.service.releaseSearch("test");
 });
 
 test("history search stops on rate limits and reports indexing without advancing pages", async () => {
     const s = await searchSetup(async () => { throw { status: 429 }; });
-    await assert.rejects(s.service.searchHistory({ query: "hello" }, () => {}, new AbortController().signal), /limitato/);
+    await assert.rejects(s.service.searchHistory({ query: "hello" }, () => {}, new AbortController().signal), /rate limit/);
     s.service.releaseSearch("test");
     const indexing = await searchSetup(async () => ({ status: 202 }));
     const offsets = new Map();

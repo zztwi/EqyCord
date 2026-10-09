@@ -38,13 +38,13 @@ test("attachment native rejects external/local URLs, oversize and unsupported fi
     for (const url of ["file:///C:/secret.txt", "https://example.com/attachments/1/2/test.txt", "http://cdn.discordapp.com/attachments/1/2/test.txt", "https://cdn.discordapp.com/other", "https://cdn.discordapp.com:444/attachments/1/2/test.txt"]) assert.throws(() => attachmentUrl(url));
     assert.equal((await extractBytes(Buffer.from("fattura marzo"), "note.txt")).text, "fattura marzo");
     await assert.rejects(extractBytes(new Uint8Array(10 * 1024 * 1024 + 1), "note.txt"), /10 MB/);
-    await assert.rejects(extractBytes(Buffer.from("file"), "program.exe"), /Supportati/);
+    await assert.rejects(extractBytes(Buffer.from("file"), "program.exe"), /Supported/);
 });
 
 test("Whisper rejects invalid WAV and language before executing a child process", async () => {
     const { transcribeWav } = await load("src/plugins/voiceReplay/transcribe.ts");
-    await assert.rejects(transcribeWav("unused", new Uint8Array(44), "it"), /Audio non valido/);
-    await assert.rejects(transcribeWav("unused", new Uint8Array(44), "it;evil"), /Lingua non supportata/);
+    await assert.rejects(transcribeWav("unused", new Uint8Array(44), "it"), /Invalid audio/);
+    await assert.rejects(transcribeWav("unused", new Uint8Array(44), "it;evil"), /Unsupported language/);
 });
 
 test("every distributed Whisper binary and model matches the hashes pinned in source", async () => {
