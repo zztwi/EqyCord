@@ -37,7 +37,7 @@ Cloud remains the original Vencord integration and configured external backend, 
 
 ## Windows installer / restore
 
-Requires Windows and Node.js 22 or later. Keep the checkout/package at its installation path: the loader points to its dist directory. Close the chosen Discord client first. The wrapper refuses a running client and does not deliberately terminate it.
+Requires Windows and Node.js 22 or later. Double-click EqyCord-Windows.cmd to select a channel and action, or use the commands below. Keep the checkout/package at its installation path: the loader points to its dist directory. Close the chosen Discord client first. The wrapper refuses a running client and does not deliberately terminate it.
 
 Development commands from a Git checkout:
 
@@ -56,7 +56,7 @@ The wrapper reuses the original [Vencord Installer v1.4.2](https://github.com/Ve
 
 Preflight accepts the legacy app-<version>/resources/app.asar layout and rejects missing/ambiguous versions and paths outside the selected root. It refuses to overwrite any existing mod, hashes the original _app.asar backup, records ownership/build hashes, verifies the installed loader and refuses unsafe restoration after tampering. Uninstall restores the original archive and verifies its exact hash. A failed install attempts upstream rollback only when its own loader and unchanged original backup can be identified. Preserve _app.asar and the ownership record if recovery fails; do not delete them.
 
-Discord updates can create a new app directory: status may then show an unpatched current version. Inspect the old version before removing the checkout; the older loader still refers to it. Support for Stable/PTB/Canary is conditional on layout and Discord runtime compatibility, not certification for all three channels.
+Discord updates can create a new app directory: status then shows the current version and ownedVersions lists older EqyCord patches. To restore an older version, use uninstall --app-version app-<version> with the same --branch/--location. verify and status also accept --app-version. Uninstall restores only the chosen owned archive using verified backup hashes, without changing the newer client. Installation still uses the pinned Vencord injector and always targets the current version. Support for Stable/PTB/Canary is conditional on layout and Discord runtime compatibility, not certification for all three channels.
 
 ## Credits and distribution
 

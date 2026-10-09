@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { join, relative, resolve } from "node:path";
 import test from "node:test";
 
-import { inspectInstall, operate, PROJECT } from "./installer.mjs";
+import { inspectInstall, operate, parseArguments, PROJECT } from "./installer.mjs";
 
 function fixture() {
     const work = join(PROJECT, "work");
@@ -37,6 +37,31 @@ test("Windows preflight detects legacy layout and rejects invalid/ambiguous vers
         mkdirSync(join(f.location, "app-1.0.9", "resources"), { recursive: true });
         mkdirSync(join(f.location, "app-1.0.10", "resources"), { recursive: true });
         assert.throws(() => inspectInstall(f.location), /Ambiguous/);
+    } finally { f.cleanup(); }
+});
+
+test("installer rejects mistyped, missing, duplicate and unsafe CLI arguments", () => {
+    assert.deepEqual(parseArguments(["install", "--branch", "canary"]), { action: "install", branch: "canary", location: undefined, appVersion: undefined });
+    for (const args of [["repair"], ["install", "--brnach", "canary"], ["install", "--branch"], ["install", "--branch", "canary", "--branch", "stable"], ["uninstall", "--app-version", "../app-1.0.1"]]) {
+        assert.throws(() => parseArguments(args));
+    }
+});
+
+test("Windows uninstall can restore the owned old version after Discord creates a newer version", { skip: process.platform !== "win32" }, async () => {
+    const f = fixture();
+    try {
+        const original = readFileSync(join(f.resources, "app.asar"));
+        await operate("install", f.location);
+        const newer = join(f.location, "app-1.0.2", "resources");
+        mkdirSync(newer, { recursive: true });
+        writeFileSync(join(newer, "app.asar"), "new-discord-version");
+        assert.deepEqual(inspectInstall(f.location).ownedVersions, ["app-1.0.1"]);
+        await assert.rejects(operate("uninstall", f.location), /No owned/);
+        await operate("verify", f.location, "stable", PROJECT, "app-1.0.1");
+        await operate("uninstall", f.location, "stable", PROJECT, "app-1.0.1");
+        assert.deepEqual(readFileSync(join(f.resources, "app.asar")), original);
+        assert.equal(readFileSync(join(newer, "app.asar"), "utf8"), "new-discord-version");
+        assert.deepEqual(inspectInstall(f.location).ownedVersions, []);
     } finally { f.cleanup(); }
 });
 

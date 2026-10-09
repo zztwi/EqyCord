@@ -9,7 +9,7 @@ Environment: Windows, Node.js 24.19.0, pnpm 11.25.0. package.json retains upstre
 - pnpm test after the corrections: passed (desktop standalone builds, TypeScript, ESLint, CSS lint, plugin metadata generation and EqyCord tests).
 - pnpm build: passed (regular Windows desktop build). Installer fixture tests also passed again against this desktop build.
 - pnpm buildWeb: passed; browser bundle, userscript, Chromium and Firefox extension packages generated.
-- pnpm testEqyCord: 18 tests passed, zero failures/skips on Windows after adding upstream-preservation coverage.
+- pnpm testEqyCord: 20 tests passed, zero failures/skips on Windows after adding upstream-preservation coverage.
 - Live Google provider smoke test using the actual upstream Translate utility and a generic test string: Hello, world! -> Italian Ciao mondo! passed. Discord/native boundaries were mocked; this does not validate a live send or DeepL/Kagi.
 - Automated plugin preservation: all 418 files and 185 original definitions retained; original copyright and authors checked against upstream base 718c867256a9d181edc7a534afb296b9bb41ab58.
 - Actual plugin hooks executed with mocked Discord boundaries: approval, cancel, close, modal-manager close callback, plugin stop, changed draft, provider failure, conflicting translators, ordinary voice actions and disconnected/stopped controls.
@@ -17,6 +17,10 @@ Environment: Windows, Node.js 24.19.0, pnpm 11.25.0. package.json retains upstre
 - Real offline import/export functions executed with mocked storage: unknown-plugin round trip and restoration after a failing CSS write passed. The previous user's JSON was unavailable; a synthetic fixture was used.
 - Pinned VencordInstallerCli.exe v1.4.2 executed on a synthetic legacy Windows installation. Install, loader verification, backup hash, foreign-mod refusal, tamper refusal and uninstall/byte-for-byte restoration passed. Original fixture SHA256: 64b08e60c59ba183a22c53b4a5b240ead62783370be4bc5c8ae03afc1aa59d98. The fixture is not a running Discord installation.
 - Read-only preflight on installed Stable app-1.0.9261: recognized, already patched by an existing mod, left unchanged. Canary app-1.0.1217: recognized and unpatched, left unchanged. PTB is not installed here.
+
+## Installer follow-up
+
+The user confirmed continuing with a Vencord-style inject after the ToS discussion. No Discord credentials or token are required. Added an interactive Windows launcher and strict argument validation. Added a simulated Discord update test: restore the owned old archive while preserving the newer archive. All 20 local tests pass; no live client installation is claimed.
 
 ## Required before a public release
 

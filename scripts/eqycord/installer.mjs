@@ -9,6 +9,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createInterface } from "node:readline/promises";
 
 export const PROJECT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 export const INSTALLER_VERSION = "v1.4.2";
@@ -23,18 +24,19 @@ function inside(root, path) {
         throw new Error("Target resolves outside the selected installation.");
 }
 
-export function inspectInstall(location, branch = "stable") {
+export function inspectInstall(location, branch = "stable", appVersion) {
     if (!Object.hasOwn(channels, branch)) throw new Error("Supported channels: stable, ptb, canary (subject to runtime compatibility).");
     const root = realpathSync(location);
     const versions = readdirSync(root, { withFileTypes: true })
         .filter(entry => entry.isDirectory() && /^app-\d+(\.\d+)+$/.test(entry.name) && existsSync(join(root, entry.name, "resources")))
         .map(entry => entry.name).sort();
-    const version = versions.at(-1);
+    if (appVersion && !versions.includes(appVersion)) throw new Error("Unknown app version: " + appVersion);
+    const version = appVersion ?? versions.at(-1);
     if (!version) throw new Error("Unsupported Discord layout: expected app-<version>/resources.");
     // The pinned upstream installer selects the lexically last app directory.
     // Refuse ambiguous versions rather than patching an older installation.
     const numericLatest = [...versions].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).at(-1);
-    if (numericLatest !== version) throw new Error("Ambiguous Discord versions. Remove stale versions using Discord's installer first.");
+    if (!appVersion && numericLatest !== version) throw new Error("Ambiguous Discord versions. Remove stale versions using Discord's installer first.");
     const resources = join(root, version, "resources");
     inside(root, resources);
     const app = join(resources, "app.asar");
@@ -42,7 +44,8 @@ export function inspectInstall(location, branch = "stable") {
     if (!existsSync(app)) throw new Error("Unsupported or broken installation: missing app.asar.");
     inside(root, app);
     if (existsSync(backup)) inside(root, backup);
-    return { root, branch, version, resources, app, backup, stateFile: join(resources, ".eqycord-install.json"), patched: existsSync(backup) };
+    const ownedVersions = versions.filter(version => existsSync(join(root, version, "resources", ".eqycord-install.json")));
+    return { root, branch, version, resources, app, backup, stateFile: join(resources, ".eqycord-install.json"), patched: existsSync(backup), ownedVersions };
 }
 
 export async function ensureInstaller(project = PROJECT) {
@@ -71,10 +74,11 @@ function assertClosed(root) {
         throw new Error(`Close ${image} before installing or restoring. EqyCord will not terminate it.`);
 }
 
-export async function operate(action, location, branch = "stable", project = PROJECT) {
+export async function operate(action, location, branch = "stable", project = PROJECT, appVersion) {
     if (process.platform !== "win32") throw new Error("This wrapper supports Windows only.");
     if (!["install", "uninstall", "verify"].includes(action)) throw new Error("Use install, uninstall, verify or status.");
-    const plan = inspectInstall(location, branch);
+    if (action === "install" && appVersion) throw new Error("Install always targets the current app version. --app-version is for status, verify and uninstall.");
+    const plan = inspectInstall(location, branch, appVersion);
     const patcher = join(realpathSync(project), "dist", "patcher.js");
     let state;
     if (existsSync(plan.stateFile)) {
@@ -108,6 +112,25 @@ export async function operate(action, location, branch = "stable", project = PRO
         }
     }
     assertClosed(plan.root);
+    if (action === "uninstall") {
+        // Restore the selected owned version directly. The upstream CLI always
+        // selects the latest folder, so it cannot restore a previous version
+        // after Discord has updated. Preserve both files until hash verification.
+        const temporary = join(plan.resources, ".eqycord-loader.tmp");
+        if (existsSync(temporary)) throw new Error("A previous restore is incomplete. Retain all files and inspect the restore log.");
+        renameSync(plan.app, temporary);
+        try {
+            renameSync(plan.backup, plan.app);
+            if (hash(plan.app) !== state.originalHash) throw new Error("Restored archive hash does not match the original.");
+        } catch (error) {
+            if (existsSync(plan.app) && !existsSync(plan.backup)) renameSync(plan.app, plan.backup);
+            renameSync(temporary, plan.app);
+            throw error;
+        }
+        unlinkSync(temporary);
+        unlinkSync(plan.stateFile);
+        return { ...inspectInstall(location, branch, appVersion), verified: true };
+    }
     const originalHash = action === "install" ? hash(plan.app) : state.originalHash;
     const binary = await ensureInstaller(project);
     const run = operation => spawnSync(binary, ["--" + operation, "--location", plan.root], {
@@ -142,17 +165,48 @@ export async function operate(action, location, branch = "stable", project = PRO
         }
         throw error;
     }
-    return { ...inspectInstall(location, branch), verified: true };
+    return { ...inspectInstall(location, branch, appVersion), verified: true };
+}
+
+export function parseArguments(argv) {
+    const [action = "status", ...args] = argv;
+    if (!["status", "install", "verify", "uninstall", "menu", "help"].includes(action)) throw new Error("Unknown action: " + action);
+    const options = {};
+    for (let i = 0; i < args.length; i += 2) {
+        const flag = args[i];
+        if (!["--branch", "--location", "--app-version"].includes(flag)) throw new Error("Unknown option: " + flag);
+        if (!args[i + 1] || args[i + 1].startsWith("--")) throw new Error("Missing value for " + flag);
+        if (Object.hasOwn(options, flag)) throw new Error("Duplicate option: " + flag);
+        options[flag] = args[i + 1];
+    }
+    const branch = options["--branch"] ?? "stable";
+    if (!Object.hasOwn(channels, branch)) throw new Error("Unknown channel: " + branch);
+    if (options["--app-version"] && !/^app-\d+(\.\d+)+$/.test(options["--app-version"])) throw new Error("Invalid app version.");
+    return { action, branch, location: options["--location"], appVersion: options["--app-version"] };
+}
+
+async function menu() {
+    const prompt = createInterface({ input: process.stdin, output: process.stdout });
+    try {
+        console.log("EqyCord — Vencord-based Windows injector\nRequires Node.js 22+. Close Discord before install/uninstall. Existing mods are not overwritten.");
+        const branch = (await prompt.question("Channel [stable / ptb / canary] (stable): ")).trim() || "stable";
+        const action = (await prompt.question("Action [status / install / verify / uninstall] (status): ")).trim() || "status";
+        return parseArguments([action, "--branch", branch]);
+    } finally { prompt.close(); }
 }
 
 async function main() {
-    const [action = "status", ...args] = process.argv.slice(2);
-    const value = flag => { const index = args.indexOf(flag); return index < 0 ? undefined : args[index + 1]; };
-    const branch = value("--branch") ?? "stable";
-    if (!Object.hasOwn(channels, branch)) throw new Error("Unknown channel: " + branch);
-    if (!process.env.LOCALAPPDATA && !value("--location")) throw new Error("LOCALAPPDATA unavailable; specify --location.");
-    const location = value("--location") ?? join(process.env.LOCALAPPDATA, channels[branch]);
-    const result = action === "status" ? inspectInstall(location, branch) : await operate(action, location, branch);
+    if (Number(process.versions.node.split(".")[0]) < 22) throw new Error("EqyCord requires Node.js 22 or later.");
+    let parsed = parseArguments(process.argv.slice(2));
+    if (parsed.action === "help") {
+        console.log("Usage: node scripts/eqycord/installer.mjs <status|install|verify|uninstall|menu> [--branch stable|ptb|canary] [--location <root>] [--app-version app-<version>]\n--app-version selects an older owned version for status, verify or uninstall.");
+        return;
+    }
+    if (parsed.action === "menu") parsed = await menu();
+    const { action, branch, appVersion } = parsed;
+    if (!process.env.LOCALAPPDATA && !parsed.location) throw new Error("LOCALAPPDATA unavailable; specify --location.");
+    const location = parsed.location ?? join(process.env.LOCALAPPDATA, channels[branch]);
+    const result = action === "status" ? inspectInstall(location, branch, appVersion) : await operate(action, location, branch, PROJECT, appVersion);
     console.log(JSON.stringify(result, null, 2));
 }
 
