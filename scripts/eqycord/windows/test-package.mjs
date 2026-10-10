@@ -10,6 +10,16 @@ const repository = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const setup = resolve(process.argv[2] ?? "");
 assert.ok(setup.endsWith(".exe") && existsSync(setup), "Pass the built setup executable.");
 const testRoot = mkdtempSync(join(repository, "work", "setup-package-test-"));
+const lifecycleTest = join(testRoot, "LifecycleTests.exe");
+const compileLifecycle = spawnSync(join(process.env.WINDIR, "Microsoft.NET", "Framework64", "v4.0.30319", "csc.exe"), [
+    "/nologo", "/target:exe", "/platform:x64", `/out:${lifecycleTest}`,
+    join(repository, "scripts/eqycord/windows/DiscordLifecycle.cs"),
+    join(repository, "scripts/eqycord/windows/DiscordLifecycleTests.cs")
+], { windowsHide: true, encoding: "utf8", timeout: 30000 });
+assert.equal(compileLifecycle.status, 0, compileLifecycle.stdout || compileLifecycle.stderr);
+const lifecycle = spawnSync(lifecycleTest, [], { windowsHide: true, encoding: "utf8", timeout: 60000 });
+assert.equal(lifecycle.status, 0, lifecycle.stderr || lifecycle.error?.message);
+console.log(lifecycle.stdout.trim());
 const uiReport = join(testRoot, "ui");
 const ui = spawnSync(setup, ["--ui-test", uiReport], { windowsHide: true, timeout: 90000 });
 assert.equal(ui.status, 0, existsSync(join(uiReport, "error.txt")) ? readFileSync(join(uiReport, "error.txt"), "utf8") : "Setup UI must start and close without changing Discord.");

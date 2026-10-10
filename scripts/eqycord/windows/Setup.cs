@@ -131,7 +131,7 @@ public class SetupWindow : Form {
         AddButton("Verify", 209, delegate { Run("verify"); });
         AddButton("Uninstall", 392, delegate { Run("uninstall"); });
         status.SetBounds(26, 202, 548, 27);
-        status.Text = "Close the selected Discord client before installing or uninstalling.";
+        status.Text = "Install / Repair and Restore automatically restart the selected Discord client.";
         Controls.Add(status);
         progress.SetBounds(26, 232, 548, 6);
         progress.Visible = false;
@@ -261,6 +261,7 @@ public class SetupWindow : Form {
                 start.RedirectStandardOutput = true;
                 start.RedirectStandardError = true;
                 start.WorkingDirectory = build;
+                Action apply = delegate {
                 using (var process = Process.Start(start)) {
                     string errors = "";
                     process.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs args) { if (args.Data != null) errors += args.Data + Environment.NewLine; };
@@ -269,9 +270,12 @@ public class SetupWindow : Form {
                     process.WaitForExit();
                     if (process.ExitCode != 0) throw new IOException(String.IsNullOrWhiteSpace(errors) ? output : errors);
                 }
+                };
+                if (action == "verify") apply();
+                else new DiscordLifecycle(location, branch).Apply(apply);
                 success = true;
-                message = action == "install" || action == "repair" ? "EqyCord installed or repaired. Open the selected Discord client.\r\nKeep the files in LocalAppData/EqyCord. You can delete the setup download."
-                    : action == "uninstall" ? "Original Discord archive restored and verified. Your settings were preserved."
+                message = action == "install" || action == "repair" ? "EqyCord installed or repaired. Discord is restarting.\r\nKeep the files in LocalAppData/EqyCord. You can delete the setup download."
+                    : action == "uninstall" ? "Original Discord archive restored and verified. Discord is restarting. Your settings were preserved."
                     : "Installed EqyCord files and original Discord backup verified.";
             } catch (Exception error) { message = error.Message; }
             if (!IsDisposed) BeginInvoke(new Action(delegate {

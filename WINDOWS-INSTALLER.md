@@ -4,7 +4,7 @@ Share **EqyCord-Setup.exe**. It contains the tested client build, a private Node
 
 ## Interface
 
-The selected Phantom mark appears next to EqyCord, on the loading surface, and in the executable/window icon. It uses a transparent background and includes icon sizes of 16, 32, 48, and 256 pixels.
+The selected Phantom mark appears next to EqyCord, on the loading surface, and in the executable/window icon. It uses a transparent background with a thin light outline and includes icon sizes of 16, 24, 32, 48, 64, 128, and 256 pixels.
 
 The English introduction uses EqyCord's brand and Phantom identity. The footer credits EqyCord's creator as `0009cx0` and links to `https://discord.com/users/380070146317877249`, immediately before Licenses & source. That action opens a fixed URL in the default browser; the embedded surface never accepts arbitrary URLs. Original upstream credits, source notices, and licenses are retained.
 
@@ -24,17 +24,19 @@ Only the embedded local document can send setup actions. External navigation and
 
 Windows 10/11 x64 with .NET Framework 4.8 and a normal desktop Discord installation is required. Stable, PTB, and Canary are offered subject to compatibility. Microsoft Store and other layouts are not supported.
 
-1. Close the chosen Discord client completely, including its tray icon.
-2. Open EqyCord-Setup.exe and choose Stable, PTB, or Canary.
-3. Click Install / Repair EqyCord, then open Discord after the success message.
+1. Open EqyCord-Setup.exe and choose Stable, PTB, or Canary.
+2. Click Install / Repair EqyCord. The selected client closes automatically, including its background processes. This disconnects any call in that client.
+3. The setup applies the change and restarts the selected Discord channel automatically, even if it was initially closed.
+
+The setup attempts a graceful close before terminating remaining processes belonging to the selected installation. Other Discord channels and installations stay open. Paths are checked before stopping processes; if the client cannot be closed, files are not patched. If patching fails after a running client was closed, the setup tries to reopen it and retains the original error. Restart-launcher failures are reported instead of claiming a successful restart.
 
 The setup does not install Node globally and does not require a terminal or administrator rights for normal per-user Discord installations. Files are kept in `%LOCALAPPDATA%/EqyCord/builds/<commit>`. The downloaded setup can be deleted after installation; keep the installed build folder.
 
-Existing client mods are not overwritten. Uninstall them using their own installer first. To update or repair an owned EqyCord installation, close Discord and click Install / Repair EqyCord. The original Discord archive is retained and verified; a failed replacement keeps recovery files. Automatic client updates can invalidate a patch and may require reinstalling.
+Existing client mods are not overwritten. Uninstall them using their own installer first. To update or repair an owned EqyCord installation, click Install / Repair EqyCord; it automatically closes and restarts Discord. The original Discord archive is retained and verified; a failed replacement keeps recovery files. Automatic client updates can invalidate a patch and may require reinstalling.
 
 ## Verify and restore
 
-Verify checks the patch, original backup, and installed client files. Uninstall restores the exact original Discord archive and checks its hash; it preserves settings and source files. The setup discovers its owned installation from Discord metadata, including an older app directory after Discord updates. Unknown, modified, or foreign patches are refused.
+Verify checks the patch, original backup, and installed client files without restarting Discord. Restore closes the selected client, restores the exact original Discord archive, checks its hash, and restarts Discord; it preserves settings and source files. The setup discovers its owned installation from Discord metadata, including an older app directory after Discord updates. Unknown, modified, or foreign patches are refused.
 
 The older Desktop/EqyCord distribution can be verified, migrated or restored only when its exact pinned loader matches and BUILD-UPDATE.json matches the renderer checksum. This records the existing original backup hash during migration; it cannot establish the historical integrity of an unrecorded legacy backup. Foreign or altered legacy loaders are refused. If Discord has already created a newer app directory, restore the older owned version before repairing the current version.
 
