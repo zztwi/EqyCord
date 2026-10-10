@@ -55,6 +55,7 @@ export const CspPolicies: PolicyMap = {
 
     // Function Specific
     "api.github.com": ConnectSrc, // used for updating Vencord itself
+    "https://eqycord-profiles.zz0009cx0.workers.dev": ConnectSrc, // EqyCord authenticated cosmetic profiles
     "ws.audioscrobbler.com": ConnectSrc, // Last.fm API
     "musicbrainz.org": ConnectSrc,
     "*.listenbrainz.org": ConnectSrc,

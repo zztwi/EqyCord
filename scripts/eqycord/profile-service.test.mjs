@@ -13,6 +13,13 @@ async function load(entry) {
     return module.exports;
 }
 const schema = await load("src/shared/eqyCustomProfile.ts");
+test("Client pins the deployed profile origin with an exact connect-src policy", () => {
+    const { origin } = JSON.parse(readFileSync("src/shared/eqyProfileService.json", "utf8"));
+    assert.equal(schema.profileApiOrigin(origin), "https://eqycord-profiles.zz0009cx0.workers.dev");
+    const csp = readFileSync("src/main/csp/index.ts", "utf8");
+    assert.ok(csp.includes(`"${origin}": ConnectSrc`));
+    assert.ok(!csp.includes('"*.workers.dev"'));
+});
 const worker = (await load("services/profile-api/worker.ts")).default;
 const userA = "380070146317877249", userB = "1306071807815712828";
 function fixture() {

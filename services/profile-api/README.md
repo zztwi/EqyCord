@@ -1,6 +1,15 @@
 # EqyCord profile service
 
-This is a deployable Cloudflare Worker with D1 storage. **It is not deployed or configured in this checkout.** The client service origin is empty, so CustomProfile works locally and makes no profile API requests until the service is activated.
+The profile API is deployed on Cloudflare Workers with D1 storage. The client pins `https://eqycord-profiles.zz0009cx0.workers.dev` with an exact connection policy. Sharing remains opt-in and requires account verification.
+
+## Provisioning status (2026-10-10)
+
+- Discord application: `EqyCord`, client ID `1558477119158231060`.
+- OAuth callback saved: `https://eqycord-profiles.zz0009cx0.workers.dev/auth/callback`.
+- Profile API deployed at that origin; preview URLs disabled.
+- D1 ID `ffa76a4b-55ca-4ec5-abc8-0a040d7eae26`: all six schema statements applied remotely and the four service tables verified with a live query.
+- OAuth client secret stored encrypted in Cloudflare; not stored in source or the client build.
+- Live unauthenticated profile read returns 401 and sign-in start returns 200. Full real Discord OAuth, authenticated writes and two-client rendering verification remain pending; local security tests do not substitute for those checks.
 
 ## Behavior
 
