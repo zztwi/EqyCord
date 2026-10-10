@@ -4,13 +4,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "@utils/eqyMedia/styles.css";
+
 import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
+import { mediaNotice } from "@utils/eqyMedia/notice";
 import definePlugin from "@utils/types";
-import { AuthenticationStore, React, SelectedChannelStore, showToast, UserStore, useStateFromStores } from "@webpack/common";
+import { AuthenticationStore, React, SelectedChannelStore, UserStore, useStateFromStores } from "@webpack/common";
 
 import { GhostController, VoiceSocket, VoiceState } from "./state";
 
-const ghost = new GhostController(() => SelectedChannelStore.getVoiceChannelId(), message => showToast(message, "failure"));
+const ghost = new GhostController(() => SelectedChannelStore.getVoiceChannelId(), message => mediaNotice(message, "failure"));
 
 
 function GhostIcon({ active, className }: { active?: boolean; className?: string; }) {
@@ -44,11 +47,12 @@ function GhostButton({ iconForeground, hideTooltips, nameplate }: UserAreaRender
 
 export default definePlugin({
     name: "Ghost",
+    enabledByDefault: true,
     description: "EqyCord Ghost: an experimental voice-panel button that reports mute/deafen separately from local audio. Two-account audio verification required.",
     tags: ["Voice"],
     authors: [{ name: "0009cx0", id: 380070146317877249n }],
     dependencies: ["UserAreaAPI"],
-    userAreaButton: { icon: GhostIcon, render: props => <GhostButton {...props} /> },
+    userAreaButton: { icon: GhostIcon, render: props => <GhostButton {...props} />, priority: 19 },
     patches: [
         {
             find: /voiceStateUpdate\(\i\)\{/,

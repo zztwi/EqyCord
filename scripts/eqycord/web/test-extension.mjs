@@ -26,16 +26,30 @@ try {
         return {
             loaded: names.map(name => ({ name, enabledByDefault: window.Vencord.Plugins.plugins[name].enabledByDefault, configuredEnabled: window.Vencord.Settings.plugins[name].enabled, active: window.Vencord.Settings.plugins[name][name === "FreezeCam" ? "frozen" : "active"] })),
             api: !!window.Vencord.Plugins.plugins.UserAreaAPI,
+            ghostEnabled: window.Vencord.Settings.plugins.Ghost.enabled,
             fixture: document.title === "EqyCord extension fixture"
         };
     });
     assert.ok(report.fixture);
     assert.ok(report.api);
+    assert.equal(report.ghostEnabled, true);
     for (const plugin of report.loaded) {
         assert.equal(plugin.enabledByDefault, true);
         assert.equal(plugin.configuredEnabled, true);
         assert.equal(plugin.active, false);
     }
+    const migration = await page.evaluate(() => {
+        const voice = window.Vencord.Plugins.plugins.VoiceTroll, lag = window.Vencord.Plugins.plugins.FakeLagVoice;
+        voice.start(); lag.start();
+        const initial = { voice: voice.settings.store.intensity, lag: lag.settings.store.intensity, frequency: lag.settings.store.frequency, duration: lag.settings.store.duration, voiceOff: !voice.settings.store.active, lagOff: !lag.settings.store.active };
+        voice.settings.store.intensity = 0.4; lag.settings.store.frequency = 0.7;
+        voice.stop(); lag.stop(); voice.start(); lag.start();
+        const preserved = { voice: voice.settings.store.intensity, frequency: lag.settings.store.frequency };
+        voice.stop(); lag.stop();
+        return { initial, preserved };
+    });
+    assert.deepEqual(migration.initial, { voice: 1, lag: 1, frequency: 3, duration: 0.2, voiceOff: true, lagOff: true });
+    assert.deepEqual(migration.preserved, { voice: 0.4, frequency: 0.7 });
     await page.evaluate(() => window.VencordNative.settings.set({ plugins: { VoiceTroll: { enabled: false } } }));
     await page.reload();
     await page.waitForFunction(() => !!window.Vencord?.Settings?.plugins?.VoiceTroll, { timeout: 15000 });
