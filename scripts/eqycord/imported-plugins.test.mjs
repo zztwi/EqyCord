@@ -102,6 +102,29 @@ test("CustomProfile restores hooks and keeps styled identities out of canonical 
     assert.ok(calls.dispatch.every(event => event.user === realUser && event.user.globalName === "Original"));
 });
 
+test("CustomProfile applies black and white to global and guild profile themes without changing account privileges", async () => {
+    for (const color of [0, 0xffffff]) {
+        const original = { bio: "original", themeColors: [123, 456], premiumType: 0 };
+        const guild = { bio: "guild bio", themeColors: [789, 123] };
+        const cp = await loadPlugin("customProfile", { common: { UserProfileStore: { getUserProfile: () => original, getGuildMemberProfile: () => guild } } });
+        const originalGet = cp.common.UserProfileStore.getGuildMemberProfile;
+        cp.data.set("eqycord.customProfiles.v1", { [me]: { enabled: true, shared: false, presets: [], data: { accentColor: color, accentColor2: color, nitro: false, badgeFlags: 1 | 2 | 131072 } } });
+        await cp.plugin.start();
+        const styled = cp.common.UserProfileStore.getUserProfile(me);
+        assert.deepEqual(styled.themeColors, [color, color]);
+        assert.equal(styled.premiumType, 2);
+        assert.deepEqual(cp.common.UserProfileStore.getGuildMemberProfile(me, "guild").themeColors, [color, color]);
+        assert.equal(cp.common.UserProfileStore.getGuildMemberProfile(me, "guild").bio, "guild bio");
+        assert.equal(cp.common.UserStore.getCurrentUser().premiumType, undefined);
+        assert.deepEqual(original.themeColors, [123, 456]);
+        assert.deepEqual(guild.themeColors, [789, 123]);
+        assert.deepEqual(cp.calls.badge[0].getBadges({ userId: me }).map(b => b.description), ["EqyCord profile style: Discord Staff"]);
+        cp.plugin.stop();
+        assert.equal(cp.common.UserProfileStore.getGuildMemberProfile, originalGet);
+        assert.deepEqual(cp.common.UserProfileStore.getUserProfile(me).themeColors, [123, 456]);
+    }
+});
+
 test("FakeTag and CustomProfile can stop in either order without restoring stale appearances", async () => {
     for (const first of ["tag", "profile"]) {
         const cp = await loadPlugin("customProfile");

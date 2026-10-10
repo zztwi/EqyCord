@@ -65,11 +65,19 @@ function profileAppearance(original: any, id: string) {
     return virtualMerge(original, {
         ...(data.bio != null ? { bio: data.bio } : {}),
         ...(data.pronouns != null ? { pronouns: data.pronouns } : {}),
-        ...(data.accentColor != null ? { accentColor: data.accentColor, themeColors: [data.accentColor, data.accentColor2 ?? data.accentColor] } : {}),
-        ...(data.nitro ? { premiumType: 2 } : {}),
+        ...profileColors(data),
         ...(data.profileEffectId ? { profileEffectId: data.profileEffectId } : {}),
         ...(data.decorationAsset ? { avatarDecoration: { asset: data.decorationAsset, skuId: data.decorationAsset } } : {})
     });
+}
+// Premium styling belongs only to the profile projection, never the account
+// store or an API request. Explicit colors must work even for 0x000000.
+function profileColors(data: CustomProfileData) {
+    const primary = data.accentColor ?? data.accentColor2;
+    return {
+        ...(primary != null ? { accentColor: primary, themeColors: [primary, data.accentColor2 ?? primary] } : {}),
+        ...(data.nitro || primary != null ? { premiumType: 2 } : {})
+    };
 }
 function wrap(object: any, key: string, apply: (result: any, args: any[]) => any) {
     if (typeof object?.[key] !== "function") return;
@@ -136,12 +144,12 @@ function Editor(props: any) {
             <label className="eqy-cp-field">Upload a local profile picture<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" disabled={busy} onChange={e => { const file = e.target.files?.[0]; if (!file) return; if (file.size > 250_000) { setError("Choose an image smaller than 250 KB"); return; } const reader = new FileReader(); reader.onload = () => { if (isProfileImage(reader.result, true)) set("avatar", reader.result); else setError("Unsupported image"); }; reader.readAsDataURL(file); }} /></label>
             <label className="eqy-cp-field">Bio<textarea maxLength={190} value={data.bio ?? ""} onChange={e => set("bio", e.target.value)} /></label>
             {text("pronouns", "Pronouns")}
-            <div className="eqy-cp-colors">{(["accentColor", "accentColor2"] as const).map((key, i) => <label key={key}>Color {i + 1}<input type="color" value={`#${(data[key] ?? 0x5865f2).toString(16).padStart(6, "0")}`} onChange={e => set(key, parseInt(e.target.value.slice(1), 16))} /><button type="button" onClick={() => set(key, undefined)}>Clear</button></label>)}</div>
+            <h3>Profile colors</h3><p className="eqy-cp-note">Applies to the banner and profile body. Clear both colors to restore your original theme.</p>
+            <div className="eqy-cp-colors">{(["accentColor", "accentColor2"] as const).map((key, i) => <div className="eqy-cp-color" key={key}><label htmlFor={`eqy-cp-color-${i}`}>Color {i + 1}</label><div><input id={`eqy-cp-color-${i}`} type="color" value={`#${(data[key] ?? 0x5865f2).toString(16).padStart(6, "0")}`} onChange={e => set(key, parseInt(e.target.value.slice(1), 16))} /><code>{data[key] == null ? "Default" : `#${data[key]!.toString(16).padStart(6, "0").toUpperCase()}`}</code><button type="button" aria-label={`Clear color ${i + 1}`} onClick={() => set(key, undefined)}>Clear</button></div></div>)}</div>
             {text("createdAt", "Account creation date (display only)", "date")}
             {text("email", "Email (local preview only)")}{text("phone", "Phone (local preview only)")}{text("oldName", "Clan tag (up to 5 characters)")}
             <h3>Badges</h3><div className="eqy-cp-chips">{BADGES.map(b => <button type="button" key={b.flag} aria-pressed={!!((data.badgeFlags ?? 0) & b.flag)} onClick={() => set("badgeFlags", (data.badgeFlags ?? 0) ^ b.flag)}><img src={b.icon} alt="" />{b.label}</button>)}</div>
             <h3>Nitro style</h3>{choices("nitroLevel", NITRO_LEVELS)}
-            <label className="eqy-cp-toggle"><input type="checkbox" checked={data.nitro ?? false} onChange={e => set("nitro", e.target.checked)} />Preview Nitro profile colors</label>
             <h3>Server boost style</h3>{choices("boostMonths", BOOST_ICONS.map((icon, i) => ({ icon, label: BOOST_LABELS[i] })))}
             <h3>Special badges</h3><div className="eqy-cp-chips">{Object.entries(SPECIAL_BADGES).map(([key, b]) => <button type="button" key={key} aria-pressed={data.customBadgeIds?.includes(key) ?? false} onClick={() => set("customBadgeIds", data.customBadgeIds?.includes(key) ? data.customBadgeIds.filter(x => x !== key) : [...data.customBadgeIds ?? [], key])}><img src={b.icon} alt="" />{b.label}</button>)}</div>
             <label className="eqy-cp-field">Avatar decoration<select value={data.decorationAsset ?? ""} onChange={e => set("decorationAsset", e.target.value || undefined)}><option value="">None</option>{AVATAR_DECORATIONS.map((d, i) => <option key={i} value={d.id}>{d.label}</option>)}</select></label>
@@ -176,6 +184,10 @@ export default definePlugin({
             return data ? virtualMerge(user, { ...(data.username ? { username: data.username } : {}), ...(data.globalName ? { globalName: data.globalName } : {}), ...(data.email ? { email: data.email } : {}), ...(data.phone ? { phone: data.phone } : {}) }) : user;
         });
         wrap(UserProfileStore, "getUserProfile", (result, args) => profileAppearance(result, args[0]));
+        wrap(UserProfileStore, "getGuildMemberProfile", (result, args) => {
+            const data = profile(args[0]);
+            return result && data ? virtualMerge(result, profileColors(data)) : result;
+        });
         wrap(IconUtils, "getUserAvatarURL", (result, args) => profile(args[0]?.id)?.avatar ?? result);
         addProfileBadge(badge);
     },

@@ -7,7 +7,7 @@
 import "@utils/eqyMedia/styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { EffectButton, MediaIcon } from "@utils/eqyMedia/controls";
+import { EffectButton, VoiceIcon } from "@utils/eqyMedia/controls";
 import { acquire, hasOutgoing, release, setVoice } from "@utils/eqyMedia/engine";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, showToast } from "@webpack/common";
@@ -24,6 +24,7 @@ function Presets() {
     const config = settings.use(); const [name, setName] = React.useState("");
     return <div className="eqy-effect-settings"><input aria-label="Preset name" maxLength={32} value={name} onChange={e => setName(e.target.value)} /><button disabled={!name.trim() || (config.saved?.length ?? 0) >= 20} onClick={() => { const { effect, intensity, pitch, echo, distortion } = config; settings.store.saved = [...config.saved ?? [], { name: name.trim(), effect, intensity, pitch, echo, distortion }]; setName(""); }}>Save preset</button>{config.saved?.map((p, i) => <div key={i}><button onClick={() => { settings.store.effect = p.effect; settings.store.intensity = p.intensity; settings.store.pitch = p.pitch; settings.store.echo = p.echo; settings.store.distortion = p.distortion; }}>{p.name}</button><button aria-label={`Delete ${p.name}`} onClick={() => { settings.store.saved = config.saved?.filter((_, n) => n !== i); }}>×</button></div>)}</div>;
 }
-function Button() { const config = settings.use(); return <EffectButton name="VoiceTroll" kind="audio" active={config.active} onClick={() => { settings.store.active = !config.active; }} />; }
-export default definePlugin({ name: "VoiceTroll", description: "Live outgoing WebRTC voice effects with presets and a shared audio engine. Native Canary audio requires a compatible capture bridge.", authors: [{ name: "0009cx0", id: 380070146317877249n }], dependencies: ["UserAreaAPI"], settings, userAreaButton: { icon: MediaIcon, render: Button },
-    start() { acquire("VoiceTroll"); setVoice(() => ({ ...settings.store, enabled: settings.store.active })); }, stop() { release("VoiceTroll"); } });
+function Button() { const config = settings.use(); return <EffectButton icon={VoiceIcon} name="VoiceTroll" kind="audio" active={config.active} onClick={() => { settings.store.active = !config.active; }} />; }
+export default definePlugin({ name: "VoiceTroll", description: "Live outgoing WebRTC voice effects with presets and a shared audio engine. Native Canary audio requires a compatible capture bridge.", authors: [{ name: "0009cx0", id: 380070146317877249n }], dependencies: ["UserAreaAPI"], settings, userAreaButton: { icon: VoiceIcon, render: Button, priority: 22 },
+    enabledByDefault: IS_WEB,
+    start() { settings.store.active = false; acquire("VoiceTroll"); setVoice(() => ({ ...settings.store, enabled: settings.store.active })); }, stop() { release("VoiceTroll"); } });

@@ -7,7 +7,7 @@
 import "@utils/eqyMedia/styles.css";
 
 import { definePluginSettings } from "@api/Settings";
-import { EffectButton, MediaIcon } from "@utils/eqyMedia/controls";
+import { EffectButton, LagIcon } from "@utils/eqyMedia/controls";
 import { acquire, hasOutgoing, release, setLag } from "@utils/eqyMedia/engine";
 import definePlugin, { OptionType } from "@utils/types";
 import { React, showToast } from "@webpack/common";
@@ -20,6 +20,7 @@ const settings = definePluginSettings({
     delay: { type: OptionType.NUMBER, description: "Delay in seconds (0–1.5).", default: 0.25 },
     presets: { type: OptionType.COMPONENT, description: "Quick presets.", component: () => <div className="eqy-effect-settings">{[["Light", 0.25, 0.5, 0.08], ["Medium", 0.5, 1, 0.15], ["Extreme", 1, 3, 0.2]].map(([label, intensity, frequency, duration]) => <button key={label} onClick={() => { settings.store.intensity = Number(intensity); settings.store.frequency = Number(frequency); settings.store.duration = Number(duration); }}>{label}</button>)}</div> }
 });
-function Button() { const config = settings.use(); return <EffectButton name="FakeLagVoice" kind="audio" active={config.active} onClick={() => { settings.store.active = !config.active; }} />; }
-export default definePlugin({ name: "FakeLagVoice", description: "Apply gaps, delay and digital glitches to your outgoing WebRTC audio. Native Canary audio requires a compatible capture bridge.", authors: [{ name: "0009cx0", id: 380070146317877249n }], dependencies: ["UserAreaAPI"], settings, userAreaButton: { icon: MediaIcon, render: Button },
-    start() { acquire("FakeLagVoice"); setLag(() => ({ ...settings.store, enabled: settings.store.active })); }, stop() { release("FakeLagVoice"); } });
+function Button() { const config = settings.use(); return <EffectButton icon={LagIcon} name="FakeLagVoice" kind="audio" active={config.active} onClick={() => { settings.store.active = !config.active; }} />; }
+export default definePlugin({ name: "FakeLagVoice", description: "Apply gaps, delay and digital glitches to your outgoing WebRTC audio. Native Canary audio requires a compatible capture bridge.", authors: [{ name: "0009cx0", id: 380070146317877249n }], dependencies: ["UserAreaAPI"], settings, userAreaButton: { icon: LagIcon, render: Button, priority: 21 },
+    enabledByDefault: IS_WEB,
+    start() { settings.store.active = false; acquire("FakeLagVoice"); setLag(() => ({ ...settings.store, enabled: settings.store.active })); }, stop() { release("FakeLagVoice"); } });

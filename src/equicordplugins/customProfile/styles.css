@@ -1,7 +1,7 @@
 .eqy-cp-root {
     --eqy-cp-text: var(--text-default, var(--text-normal, #f2f3f5));
     --eqy-cp-muted: var(--text-muted, #b5bac1);
-    --eqy-cp-input: var(--background-base-lowest, var(--background-tertiary, #1e1f22));
+    --eqy-cp-input: var(--background-mod-subtle, #35373c);
     --eqy-cp-border: var(--border-subtle, #41434a);
 
     width: min(680px, 94vw);
@@ -59,7 +59,7 @@
     color: var(--eqy-cp-text);
     background: var(--eqy-cp-input);
     border: 1px solid var(--eqy-cp-border);
-    border-radius: 8px;
+    border-radius: 6px;
     font: inherit;
     font-weight: 400;
     min-height: 42px;
@@ -94,9 +94,10 @@
 }
 
 .eqy-cp-root button {
+    font: inherit;
     padding: 7px 12px;
     color: var(--eqy-cp-text);
-    background: var(--background-mod-subtle, #35373c);
+    background: var(--eqy-cp-input);
     border: 1px solid var(--eqy-cp-border);
     border-radius: 6px;
     cursor: pointer;
@@ -112,7 +113,54 @@
 }
 
 .eqy-cp-presets input {
-    width: 65%;
+    flex: 1;
+    width: auto;
+    min-width: 140px;
+}
+
+.eqy-cp-presets > button {
+    min-height: 42px;
+    font: inherit;
+}
+
+.eqy-cp-color {
+    flex: 1;
+    min-width: 210px;
+    color: var(--eqy-cp-text);
+}
+
+.eqy-cp-color > label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.eqy-cp-color > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--eqy-cp-input);
+    border: 1px solid var(--eqy-cp-border);
+    border-radius: 6px;
+}
+
+.eqy-cp-color input {
+    width: 32px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.eqy-cp-color code {
+    flex: 1;
+    font-size: 13px;
+}
+
+.eqy-cp-color button {
+    padding: 4px 8px;
 }
 
 .eqy-cp-chips button {
