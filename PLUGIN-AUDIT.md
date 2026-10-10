@@ -426,3 +426,5 @@ Scope: complete generated catalog, static checks, desktop/web builds, automatic 
 | XSOverlay | Universal | Registered and statically checked; Discord feature behavior untested |
 | YoutubeAdblock | desktop | Registered and statically checked; Discord feature behavior untested |
 | ZipPreview | Universal | Registered and statically checked; Discord feature behavior untested |
+
+Web audio graph correction: locally captured microphone inputs are now processed before an application Web Audio graph, so a derived destination track retains voice and lag effects. A direct-track test and a downstream-graph test both measure audio at a real remote WebRTC receiver, including mute and dry restoration after disabling plugins. The old engine fails the graph regression with "Web Audio capture was not detected". A dry bridge remains alive until the original capture ends when an existing downstream graph still consumes it. This is not proof of compatibility with a live Discord call; that check remains required. Browser warnings now describe missing capture without incorrectly identifying the browser as Canary.

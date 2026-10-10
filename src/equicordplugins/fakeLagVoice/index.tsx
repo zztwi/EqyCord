@@ -13,7 +13,7 @@ import { mediaNotice } from "@utils/eqyMedia/notice";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 const settings = definePluginSettings({
-    active: { type: OptionType.BOOLEAN, description: "Apply effects to your outgoing WebRTC microphone. Native Canary audio is unsupported.", default: false, onChange: value => { if (value && !hasOutgoing("audio")) { settings.store.active = false; mediaNotice("No outgoing WebRTC microphone. Native Canary audio is unsupported.", "failure"); } } },
+    active: { type: OptionType.BOOLEAN, description: "Apply effects to your outgoing WebRTC microphone. Native Canary audio is unsupported.", default: false, onChange: value => { if (value && !hasOutgoing("audio")) { settings.store.active = false; mediaNotice("No browser microphone detected. Enable this plugin before starting the call.", "failure"); } } },
     effect: { type: OptionType.SELECT, description: "Audio effect; no network packets are altered.", options: [{ label: "Voice Cut", value: "cut", default: true }, { label: "Packet Loss (audio gaps)", value: "loss" }, { label: "Robotic Lag", value: "robotic" }, { label: "Delay", value: "delay" }, { label: "Glitch", value: "glitch" }] },
     intensity: { type: OptionType.SLIDER, description: "Effect intensity.", markers: [0, 0.25, 0.5, 0.75, 1], default: 0.5 },
     frequency: { type: OptionType.NUMBER, description: "Interruptions per second (0.1–5).", default: 1 },

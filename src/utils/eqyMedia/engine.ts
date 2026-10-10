@@ -6,7 +6,7 @@
 
 import { LagEffect, VoiceDSP, VoiceEffect } from "./dsp";
 
-interface Pipe { source: MediaStreamTrack; output: MediaStreamTrack; senders: Set<RTCRtpSender>; close(): void; }
+interface Pipe { source: MediaStreamTrack; output: MediaStreamTrack; senders: Set<RTCRtpSender>; downstream?: boolean; close(): void; }
 const audio = new Map<MediaStreamTrack, Pipe>();
 const cameras = new Map<MediaStreamTrack, Pipe>();
 const captured = new WeakSet<MediaStreamTrack>();
@@ -20,7 +20,7 @@ let lag = () => ({ enabled: false } as LagEffect);
 let restore: (() => void)[] = [];
 let freezeRevision = 0;
 export const subscribe = (listener: () => void) => { listeners.add(listener); return () => listeners.delete(listener); };
-export const snapshot = () => [...audio.values(), ...cameras.values()].filter(p => p.senders.size).map(p => p.source.kind).sort().join(",");
+export const snapshot = () => [...audio.values(), ...cameras.values()].filter(p => p.source.readyState === "live" && (p.senders.size || p.downstream)).map(p => p.source.kind).sort().join(",");
 const notify = () => listeners.forEach(f => f());
 export const hasOutgoing = (kind: string) => snapshot().split(",").includes(kind);
 export function setVoice(get: typeof voice) { voice = get; }
@@ -28,7 +28,7 @@ export function setLag(get: typeof lag) { lag = get; }
 export async function freeze(value: boolean, data?: string) {
     const epoch = ++freezeRevision;
     if (!value) { frozen = false; image = undefined; return; }
-    if (value && !hasOutgoing("video")) throw new Error("No outgoing WebRTC camera found. Native Canary video is not supported by this engine.");
+    if (value && !hasOutgoing("video")) throw new Error("No browser camera detected. Enable FreezeCam before starting the call, then turn on your camera.");
     if (data) {
         if (!/^data:image\/(png|jpeg|webp);base64,/.test(data) || data.length > 2_000_000) throw new Error("Choose a PNG, JPEG or WebP image smaller than 1 MB");
         const next = new Image(); next.src = data; await next.decode(); if (epoch !== freezeRevision) return; image = next;
@@ -102,6 +102,21 @@ export function acquire(owner: string) {
         return stream;
     };
     media.getUserMedia = get;
+    // Applications can send a Web Audio destination rather than the original
+    // capture track. Process the locally captured input before that graph.
+    const contextPrototype = AudioContext.prototype;
+    const createSource = contextPrototype.createMediaStreamSource;
+    const sourceHook = function (this: AudioContext, stream: MediaStream) {
+        const tracks = stream.getAudioTracks();
+        const pipes = tracks.map(track => captured.has(track) ? pipeFor(track) : undefined);
+        const result = createSource.call(this, pipes.some(Boolean)
+            ? new MediaStream(tracks.map((track, index) => pipes[index]?.output ?? track))
+            : stream);
+        for (const pipe of pipes) if (pipe) pipe.downstream = true;
+        notify();
+        return result;
+    };
+    contextPrototype.createMediaStreamSource = sourceHook;
     const pc = RTCPeerConnection.prototype;
     const add = pc.addTrack, transceiver = pc.addTransceiver, replace = RTCRtpSender.prototype.replaceTrack, remove = pc.removeTrack, { close } = pc;
     const addHook = function (this: RTCPeerConnection, track: MediaStreamTrack, ...streams: MediaStream[]) {
@@ -122,7 +137,7 @@ export function acquire(owner: string) {
     const closeHook = function (this: RTCPeerConnection) { for (const sender of this.getSenders()) attach(sender, null); close.call(this); };
     pc.addTrack = addHook; pc.addTransceiver = transceiverHook; RTCRtpSender.prototype.replaceTrack = replaceHook;
     pc.removeTrack = removeHook; pc.close = closeHook;
-    restore = [() => { if (media.getUserMedia === get) media.getUserMedia = original; }, () => { if (pc.addTrack === addHook) pc.addTrack = add; if (pc.addTransceiver === transceiverHook) pc.addTransceiver = transceiver; if (pc.removeTrack === removeHook) pc.removeTrack = remove; if (pc.close === closeHook) pc.close = close; if (RTCRtpSender.prototype.replaceTrack === replaceHook) RTCRtpSender.prototype.replaceTrack = replace; }];
+    restore = [() => { if (contextPrototype.createMediaStreamSource === sourceHook) contextPrototype.createMediaStreamSource = createSource; }, () => { if (media.getUserMedia === get) media.getUserMedia = original; }, () => { if (pc.addTrack === addHook) pc.addTrack = add; if (pc.addTransceiver === transceiverHook) pc.addTransceiver = transceiver; if (pc.removeTrack === removeHook) pc.removeTrack = remove; if (pc.close === closeHook) pc.close = close; if (RTCRtpSender.prototype.replaceTrack === replaceHook) RTCRtpSender.prototype.replaceTrack = replace; }];
 }
 export function release(owner: string) {
     owners.delete(owner);
@@ -135,9 +150,10 @@ export function release(owner: string) {
     if (!owners.size) { ++generation; restore.forEach(f => f()); restore = []; }
     notify();
     for (const pipe of pipes) void Promise.allSettled([...pipe.senders].map(sender => sender.replaceTrack(pipe.source.readyState === "live" ? pipe.source : null))).then(results => {
-        if (results.every(r => r.status === "fulfilled")) pipe.close();
+        if (results.every(r => r.status === "fulfilled") && !pipe.downstream) pipe.close();
         else {
-            // Keep the dry/live bridge alive if renegotiation is needed, rather
+            // Keep a dry bridge for downstream Web Audio consumers or failed
+            // renegotiation until the original capture ends, rather
             // than stopping a track that a peer is still transmitting.
             const map = pipe.source.kind === "audio" ? audio : cameras;
             map.set(pipe.source, pipe); notify();

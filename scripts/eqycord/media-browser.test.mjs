@@ -8,7 +8,7 @@ import { build } from "esbuild";
 import puppeteer from "puppeteer-core";
 
 const executablePath = process.env.EQYCORD_TEST_BROWSER ?? "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe";
-test("real WebRTC receiver observes frozen video, effected audio and source restoration", { skip: !existsSync(executablePath), timeout: 60000 }, async () => {
+for (const downstream of [false, true]) test(`real WebRTC receiver observes media effects and restoration (${downstream ? "Web Audio graph" : "direct track"})`, { skip: !existsSync(executablePath), timeout: 60000 }, async () => {
     const bundled = await build({ entryPoints: ["src/utils/eqyMedia/engine.ts"], bundle: true, write: false, format: "iife", globalName: "EqyMedia", platform: "browser", logLevel: "silent" });
     const script = bundled.outputFiles[0].text;
     const server = createServer((req, res) => {
@@ -32,10 +32,11 @@ test("real WebRTC receiver observes frozen video, effected audio and source rest
         const page = await browser.newPage();
         const errors = []; page.on("pageerror", e => errors.push(e.message));
         await page.goto(`http://127.0.0.1:${server.address().port}`);
-        const report = await page.evaluate(async () => {
+        const report = await page.evaluate(async downstream => {
             const media = window.EqyMedia;
             const originalGet = navigator.mediaDevices.getUserMedia;
             const originalAdd = RTCPeerConnection.prototype.addTrack;
+            const originalSource = AudioContext.prototype.createMediaStreamSource;
             media.acquire("FreezeCam"); media.acquire("VoiceTroll"); media.acquire("FakeLagVoice");
             const captured = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: { width: 320, height: 240 } });
             const sourceAudio = captured.getAudioTracks()[0], sourceVideo = captured.getVideoTracks()[0];
@@ -44,8 +45,15 @@ test("real WebRTC receiver observes frozen video, effected audio and source rest
             b.onicecandidate = e => { if (e.candidate) void a.addIceCandidate(e.candidate); };
             const remote = new MediaStream();
             b.ontrack = e => remote.addTrack(e.track);
-            const audioSender = a.addTrack(sourceAudio, captured), videoSender = a.addTrack(sourceVideo, captured);
-            if (audioSender.track === sourceAudio || videoSender.track === sourceVideo) throw new Error("Sender did not use processed tracks");
+            const graph = downstream ? new AudioContext() : undefined;
+            await graph?.resume();
+            const graphDestination = graph?.createMediaStreamDestination();
+            const graphInput = graph?.createMediaStreamSource(new MediaStream([sourceAudio]));
+            graphInput?.connect(graphDestination);
+            const transmittedAudio = graphDestination?.stream.getAudioTracks()[0] ?? sourceAudio;
+            if (downstream && !media.hasOutgoing("audio")) throw new Error("Web Audio capture was not detected");
+            const audioSender = a.addTrack(transmittedAudio, captured), videoSender = a.addTrack(sourceVideo, captured);
+            if ((!downstream && audioSender.track === sourceAudio) || videoSender.track === sourceVideo) throw new Error("Sender did not use processed tracks");
             await a.setLocalDescription(await a.createOffer()); await b.setRemoteDescription(a.localDescription);
             await b.setLocalDescription(await b.createAnswer()); await a.setRemoteDescription(b.localDescription);
             const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -89,13 +97,16 @@ test("real WebRTC receiver observes frozen video, effected audio and source rest
             await wait(500); const restored = await rms();
             if (!(dry > 0.001 && gaps < dry * 0.75 && restored > gaps * 1.25)) throw new Error(`Remote audio failed: dry=${dry}, gaps=${gaps}, restored=${restored}`);
             media.release("FakeLagVoice"); media.release("VoiceTroll"); media.release("FreezeCam");
-            for (let n = 0; n < 100 && (audioSender.track !== sourceAudio || videoSender.track !== sourceVideo); n++) await wait(10);
-            if (audioSender.track !== sourceAudio || videoSender.track !== sourceVideo) throw new Error("Original transmitted tracks were not restored");
+            for (let n = 0; n < 100 && (audioSender.track !== transmittedAudio || videoSender.track !== sourceVideo); n++) await wait(10);
+            if (audioSender.track !== transmittedAudio || videoSender.track !== sourceVideo) throw new Error("Original transmitted tracks were not restored");
+            if (AudioContext.prototype.createMediaStreamSource !== originalSource) throw new Error("Web Audio hook was not restored");
             if (navigator.mediaDevices.getUserMedia !== originalGet || RTCPeerConnection.prototype.addTrack !== originalAdd) throw new Error("Hooks were not restored");
             if (sourceAudio.readyState !== "live" || sourceVideo.readyState !== "live") throw new Error("Original capture was stopped");
+            if (downstream) { await wait(500); const stoppedEffects = await rms(); if (Math.abs(stoppedEffects - dry) > dry * 0.3) throw new Error("Disabling plugins did not restore dry graph audio"); }
+            graphInput?.disconnect(); await graph?.close();
             a.close(); b.close(); captured.getTracks().forEach(t => t.stop()); await audioCtx.close();
-            return { remoteVideo: { moving, still, live, customImage: true }, remoteAudio: { dry, muted, robot, gaps, restored }, incomingMediaUntouched: true, originalTracksRestored: true, hooksRestored: true, nativeCanaryTested: false, realDiscordCallTested: false };
-        });
+            return { remoteVideo: { moving, still, live, customImage: true }, remoteAudio: { dry, muted, robot, gaps, restored }, incomingMediaUntouched: true, originalTracksRestored: true, hooksRestored: true, nativeCanaryTested: false, realDiscordCallTested: false, downstreamWebAudio: downstream };
+        }, downstream);
         assert.deepEqual(errors, []);
         mkdirSync("work/media-verification", { recursive: true });
         writeFileSync("work/media-verification/results.json", JSON.stringify(report, null, 2));
