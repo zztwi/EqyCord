@@ -79,6 +79,8 @@ Copy-Item -LiteralPath (Join-Path $repo 'LICENSE') -Destination (Join-Path $payl
     WebView2FixedRuntimeArchiveSHA256 = $fixedHash
     WebView2FixedRuntimeSource = $fixedUrl
     Surface = 'Local WebGL Mesh Drift; private fixed WebView2 Runtime with native fallback'
+    StarterPresetSHA256 = (Get-FileHash -LiteralPath (Join-Path $repo 'src/shared/eqyStarterPreset.json') -Algorithm SHA256).Hash.ToLower()
+    StarterPresetPolicy = 'First desktop launch only when settings.json is absent; existing preferences and QuickCSS preserved'
 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $payload 'BUILD-INFO.json') -Encoding utf8
 
 $files = @{}

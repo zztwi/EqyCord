@@ -35,6 +35,7 @@ assert.equal(run().status, 0, "Extraction must be idempotent.");
 const info = JSON.parse(readFileSync(join(extracted, "BUILD-INFO.json"), "utf8").replace(/^\uFEFF/, ""));
 assert.equal(info.NodeVersion, "22.14.0");
 assert.equal(info.WebView2FixedRuntimeVersion, "154.0.4258.62");
+assert.equal(info.StarterPresetSHA256, createHash("sha256").update(readFileSync(join(repository, "src", "shared", "eqyStarterPreset.json"))).digest("hex"));
 const manifest = JSON.parse(readFileSync(join(dirname(setup), "payload", "manifest.json"), "utf8").replace(/^\uFEFF/, ""));
 for (const [name, digest] of Object.entries(manifest.Files)) {
     assert.equal(createHash("sha256").update(readFileSync(join(extracted, name))).digest("hex"), digest, name);
