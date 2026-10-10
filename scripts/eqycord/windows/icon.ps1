@@ -2,7 +2,7 @@
 param([Parameter(Mandatory)][string]$Output)
 Add-Type -AssemblyName System.Drawing
 $images = @()
-foreach ($size in @(16, 32, 48, 256)) {
+foreach ($size in @(16, 24, 32, 48, 64, 128, 256)) {
     $bitmap = [Drawing.Bitmap]::new($size, $size)
     $graphics = [Drawing.Graphics]::FromImage($bitmap)
     $graphics.SmoothingMode = [Drawing.Drawing2D.SmoothingMode]::AntiAlias
@@ -25,6 +25,9 @@ foreach ($size in @(16, 32, 48, 256)) {
     $path.CloseFigure()
     $fill = [Drawing.SolidBrush]::new([Drawing.Color]::FromArgb(39, 40, 43))
     $graphics.FillPath($fill, $path)
+    # Keep the black Phantom visible on dark desktops and taskbars.
+    $outline = [Drawing.Pen]::new([Drawing.Color]::FromArgb(235, 235, 232), [single]1.5)
+    $graphics.DrawPath($outline, $path)
     $pen = [Drawing.Pen]::new([Drawing.Color]::White, [single]3.5)
     $pen.StartCap = [Drawing.Drawing2D.LineCap]::Round
     $pen.EndCap = [Drawing.Drawing2D.LineCap]::Round
@@ -33,7 +36,7 @@ foreach ($size in @(16, 32, 48, 256)) {
     $stream = [IO.MemoryStream]::new()
     $bitmap.Save($stream, [Drawing.Imaging.ImageFormat]::Png)
     $images += ,@{Size=$size; Bytes=$stream.ToArray()}
-    $stream.Dispose(); $pen.Dispose(); $fill.Dispose(); $path.Dispose(); $graphics.Dispose(); $bitmap.Dispose()
+    $stream.Dispose(); $pen.Dispose(); $outline.Dispose(); $fill.Dispose(); $path.Dispose(); $graphics.Dispose(); $bitmap.Dispose()
 }
 $outputStream = [IO.File]::Create($Output)
 $writer = [IO.BinaryWriter]::new($outputStream)
