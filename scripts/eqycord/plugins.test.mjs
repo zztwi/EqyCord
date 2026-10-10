@@ -69,6 +69,14 @@ test("catalog dependencies resolve to retained plugins or internal API modules",
     assert.deepEqual(missing, []);
 });
 
+test("desktop build registers imported native methods for IPC", () => {
+    const patcher = readFileSync("dist/patcher.js", "utf8");
+    for (const name of ["MessageLoggerEnhanced", "ZipPreview", "FileUpload", "FavouriteAnything", "ThemeLibrary"]) {
+        assert.match(patcher, new RegExp(`(?:"${name}"|\\b${name})\\s*:`), `${name} native module missing from desktop build`);
+    }
+    assert.ok(patcher.includes("messageLoggerEnhancedUniqueIdThingyIdkMan"));
+});
+
 test("Vencord-compatible backup parsing preserves unknown plugin settings and rejects unsafe data", async () => {
     const { parseSettingsBackup } = await load("src/shared/eqySettingsBackup.ts");
     const backup = { settings: { plugins: { Animalese: { enabled: true, volume: 4 }, UnknownPlugin: { custom: "keep" } } }, quickCss: ".x { color: red; }", extra: true };

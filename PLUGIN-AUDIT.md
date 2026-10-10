@@ -18,6 +18,8 @@ Scope: complete generated catalog, static checks, desktop/web builds, automatic 
 
 ## Remaining findings and limits
 
+- The fb979988 Canary startup check exposed an omitted imported-native registry: MessageLoggerEnhanced failed at Native.init. The desktop bundler now includes equicordplugins native modules; a built-artifact regression verifies their IPC registration. This fixes the shared cause for imported file/system plugins, but does not establish every plugin's runtime compatibility.
+
 - ShowHiddenChannels: historical no-effect patch warnings. Some features may be incompatible with Canary; no current module capture was available to validate a correction.
 - RPC: port 6463 occupied while another Discord instance runs; environment conflict.
 - KeyboardSounds audio asset_404 was traced during restart to CSP blocking GitHub sound assets. Both the exact sound repository URL prefix and its raw redirect now have media-only permissions. The sample asset returned HTTP 200 audio/mpeg. Audible playback still requires a manual check.
