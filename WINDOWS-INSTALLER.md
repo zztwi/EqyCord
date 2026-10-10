@@ -8,6 +8,8 @@ The selected Phantom mark appears next to EqyCord, on the loading surface, and i
 
 The English introduction uses EqyCord's brand and Phantom identity. The footer credits EqyCord's creator as `0009cx0` and links to `https://discord.com/users/380070146317877249`, immediately before Licenses & source. That action opens a fixed URL in the default browser; the embedded surface never accepts arbitrary URLs. Original upstream credits, source notices, and licenses are retained.
 
+The top left shows Phantom Edition and a Help link to the EqyCord Discord community at `https://discord.gg/Kexjx2GH3B`. Help opens this fixed invite in the default browser and is also available in the native fallback. Package tests click the actual Help button and check its native bridge action and destination, with external browser launch intercepted during testing.
+
 The setup uses a borderless English interface with a translucent installation panel. Its full-window Mesh Drift background is a WebGL shader: five drifting points carry the ground color `#DCDCD8` and accents `#F5C7B8` / `#C9D8F0`, blended by inverse distance. Hashed value noise, six-octave fbm, and a two-level domain warp soften the motion. Pointer intensity rises and relaxes smoothly. There are no simulated browser or device selectors.
 
 Windows' reduced-motion preference renders a single frame. Resizing can redraw that frame; pointer movement does not animate it. The shader pauses when the document is hidden. If WebGL is unavailable or its context is lost, a static CSS surface appears behind the same usable controls. If the entire web surface cannot initialize, the native install/verify/uninstall interface remains available.

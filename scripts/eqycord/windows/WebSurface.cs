@@ -178,6 +178,7 @@ public sealed class MeshSetupWindow : SetupWindow {
             if (action == "drag") { ReleaseCapture(); SendMessage(Handle, 0xA1, new IntPtr(2), IntPtr.Zero); return; }
             if (action == "licenses") { ShowLicenses(); return; }
             if (action == "creator") { ShowCreator(); return; }
+            if (action == "help") { ShowHelp(); return; }
             string branch;
             if (request.TryGetValue("branch", out branch)) RunAction(action, branch);
         } catch (Exception error) { UpdateSurface("error", "Action could not be completed", error.Message); }
@@ -205,6 +206,12 @@ public sealed class MeshSetupWindow : SetupWindow {
         if (lastTestRequest == null || json.Deserialize<Dictionary<string, string>>(lastTestRequest)["action"] != "creator")
             throw new IOException("The creator profile link did not reach the native bridge.");
         results["creatorLink"] = new Dictionary<string, string> { { "action", "creator" }, { "url", CreatorProfileUrl } };
+        lastTestRequest = null;
+        await surface.ExecuteScriptAsync("document.querySelector('[data-action=help]').click()");
+        await Task.Delay(80);
+        if (lastTestRequest == null || json.Deserialize<Dictionary<string, string>>(lastTestRequest)["action"] != "help")
+            throw new IOException("The Discord help link did not reach the native bridge.");
+        results["helpLink"] = new Dictionary<string, string> { { "action", "help" }, { "url", HelpUrl } };
         await surface.ExecuteScriptAsync("document.querySelector('[data-channel=canary]').click();document.querySelector('[data-action=install]').click()");
         await Task.Delay(80);
         if (lastTestRequest == null || lastTestRequest.IndexOf("canary", StringComparison.Ordinal) < 0 || lastTestRequest.IndexOf("install", StringComparison.Ordinal) < 0)

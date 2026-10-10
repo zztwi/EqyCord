@@ -17,6 +17,7 @@ const uiResults = JSON.parse(readFileSync(join(uiReport, "results.json"), "utf8"
 assert.ok(["animated", "reduced-motion"].includes(uiResults.initial.mesh.mode));
 assert.equal(uiResults.initial.mesh.error, "");
 assert.equal(uiResults.initial.overflow, false);
+assert.deepEqual(uiResults.helpLink, { action: "help", url: "https://discord.gg/Kexjx2GH3B" });
 assert.equal(uiResults.bridge.action, "install");
 assert.equal(uiResults.bridge.branch, "canary");
 assert.match(uiResults.controls, /PASS:/);
