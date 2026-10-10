@@ -14,7 +14,7 @@ All seven plugins are available under the EqyCord origin filter. Enable them ind
 
 CustomProfile cosmetic values can overlap with other profile plugins; test it together with FakeTag and FakeProfileThemes. Banner/effect/decoration patches depend on the current Discord build and require a real Canary check; compilation alone does not establish compatibility.
 
-Profile colors apply automatically when either color is explicitly chosen. Test Color 1 and Color 2 as #000000, Save and reopen the global and server profile popouts; repeat with #FFFFFF. Clear both colors and verify the native theme returns. This changes only the profile appearance, not account privileges. The Badges section now offers Discord Staff and Active Developer only. Other badge categories remain separate.
+Profile colors apply automatically when either color is explicitly chosen. Test Color 1 and Color 2 as #000000, Save and reopen the global and server profile popouts; repeat with #FFFFFF. Clear both colors and verify the native theme returns. This changes only the profile appearance, not account privileges. The Badges section offers all ten original options except Partnered Server Owner and Moderator Programs Alumni. Other badge categories remain separate.
 
 For the configured browser client, launch EqyCord-Web.cmd from its complete package (Brave required) and sign in yourself. Fresh web installs preload FreezeCam, FakeLagVoice and VoiceTroll with effects OFF. Enable permissions personally when requested, then join a test call and use camera/pause, broken-waveform and robot controls. Browser preferences and OAuth sessions are separate from Canary. See WEB-CLIENT.md.
 

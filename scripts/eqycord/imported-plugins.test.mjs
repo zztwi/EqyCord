@@ -118,7 +118,7 @@ test("CustomProfile applies black and white to global and guild profile themes w
         assert.equal(cp.common.UserStore.getCurrentUser().premiumType, undefined);
         assert.deepEqual(original.themeColors, [123, 456]);
         assert.deepEqual(guild.themeColors, [789, 123]);
-        assert.deepEqual(cp.calls.badge[0].getBadges({ userId: me }).map(b => b.description), ["EqyCord profile style: Discord Staff"]);
+        assert.deepEqual(cp.calls.badge[0].getBadges({ userId: me }).map(b => b.description), ["EqyCord profile style: Discord Staff", "EqyCord profile style: Early Verified Bot Developer"]);
         cp.plugin.stop();
         assert.equal(cp.common.UserProfileStore.getGuildMemberProfile, originalGet);
         assert.deepEqual(cp.common.UserProfileStore.getUserProfile(me).themeColors, [123, 456]);

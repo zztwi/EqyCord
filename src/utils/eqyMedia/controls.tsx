@@ -5,7 +5,8 @@
  */
 
 import { UserAreaButton } from "@api/UserArea";
-import { React, showToast } from "@webpack/common";
+import { mediaNotice } from "@utils/eqyMedia/notice";
+import { React } from "@webpack/common";
 
 import { hasOutgoing, snapshot, subscribe } from "./engine";
 function Icon({ children, off, ...props }: any) { return <svg {...props} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{children}{off && <path d="M3 21 21 3" stroke="var(--status-danger, #f23f43)" strokeWidth="2" />}</svg>; }
@@ -15,5 +16,5 @@ export function VoiceIcon(props: any) { return <Icon {...props}><rect x="4" y="7
 export function EffectButton({ name, kind, active, icon: ControlIcon, onClick }: { name: string; kind: string; active: boolean; icon: React.ComponentType<any>; onClick(): void; }) {
     React.useSyncExternalStore(subscribe, snapshot);
     const available = hasOutgoing(kind);
-    return <UserAreaButton className="eqy-media-control" icon={<ControlIcon off={!available || !active} />} tooltipText={available ? `${name}: ${active ? "ON — click to stop" : "OFF — click to enable"}` : `${name}: no outgoing WebRTC ${kind}. Native Canary media is unsupported.`} aria-label={name} role="switch" aria-checked={available && active} orangeGlow={available && active} onClick={() => { if (!available) showToast("No outgoing WebRTC track. Enable before joining a browser call; native Canary media is unsupported.", "failure"); else onClick(); }} />;
+    return <UserAreaButton className="eqy-media-control" icon={<ControlIcon off={!available || !active} />} tooltipText={available ? `${name}: ${active ? "ON — click to stop" : "OFF — click to enable"}` : `${name}: no outgoing WebRTC ${kind}. Native Canary media is unsupported.`} aria-label={name} role="switch" aria-checked={available && active} orangeGlow={available && active} onClick={() => { if (!available) mediaNotice("No outgoing WebRTC track. Enable before joining a browser call; native Canary media is unsupported.", "failure"); else onClick(); }} />;
 }
