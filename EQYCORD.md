@@ -4,7 +4,7 @@ EqyCord is an independent, unofficial Discord client modification. It is not aff
 
 ## Plugin inventory
 
-EqyCord retains all 185 standard Vencord plugin definitions and imports all 200 Equicord plugin definitions from Equicord source commit `51eab49cce4566e51f65f29cc0eaae50efdd48d4`, together with the API modules they require. The imported plugin source has no duplicate plugin names in the retained Vencord inventory.
+EqyCord retains all 185 standard Vencord plugin definitions and retains 199 of the 200 imported Equicord plugin definitions (DiscordDevBanner was retired) from Equicord source commit `51eab49cce4566e51f65f29cc0eaae50efdd48d4`, together with the API modules they require. Five separate EqyCord presence/media plugins and seven imported Endcord utilities are also included; see PLUGIN-TESTING.md for actual compatibility. The imported plugin source has no duplicate plugin names in the retained Vencord inventory.
 
 The plugin origin filter has three choices: **Vencord**, **EqyCord**, and **Community**. Imported Equicord modules are grouped under **EqyCord**. In plugin details, EqyCord-origin entries show the EqyCord profile `0009cx0` (Discord ID `380070146317877249`); Vencord plugin author displays are unchanged. Original copyright notices, source author metadata, and GPL license headers remain in the imported source. User-facing plugin names and descriptions replace the upstream Equicord brand with EqyCord while keeping internal plugin IDs stable.
 

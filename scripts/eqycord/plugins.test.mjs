@@ -6,7 +6,8 @@
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import test from "node:test";
 import { build } from "esbuild";
 
@@ -34,7 +35,10 @@ test("all imported Equicord plugins are registered without duplicate Vencord nam
     const imported = plugins.filter(plugin => plugin.filePath.startsWith("src/equicordplugins/"));
     const upstream = plugins.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/"));
     const endcordNames = new Set(["QuickDelete", "RemindMe", "AutoReact", "SmoothType", "FakeTag", "FakeConnections", "CustomProfile"]);
-    assert.equal(imported.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/ghostVoice") && !endcordNames.has(plugin.name)).length, 200);
+    const newNames = new Set(["FakePlaying", "GhostTyping", "FreezeCam", "FakeLagVoice", "VoiceTroll"]);
+    assert.equal(imported.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/ghostVoice") && !endcordNames.has(plugin.name) && !newNames.has(plugin.name)).length, 199);
+    for (const name of newNames) assert.equal(imported.filter(plugin => plugin.name === name).length, 1, name);
+    assert.equal(plugins.some(plugin => plugin.name === "DiscordDevBanner"), false);
     for (const name of endcordNames) assert.equal(imported.filter(plugin => plugin.name === name).length, 1, name);
     assert.equal(new Set(plugins.map(plugin => plugin.name)).size, plugins.length);
     assert.equal(imported.some(plugin => plugin.name === "Ghost"), true);
@@ -47,6 +51,22 @@ test("all imported Equicord plugins are registered without duplicate Vencord nam
 test("Equicord API plugins are included by the runtime build", () => {
     const source = readFileSync("scripts/build/common.mjs", "utf8");
     assert.match(source, /equicordplugins\/_api/);
+    assert.match(source, /equicordplugins\/_core/);
+});
+
+test("catalog dependencies resolve to retained plugins or internal API modules", () => {
+    const catalog = JSON.parse(readFileSync("dist/plugins.json", "utf8"));
+    const names = new Set(catalog.map(p => p.name));
+    for (const root of ["src/plugins/_api", "src/plugins/_core", "src/equicordplugins/_api", "src/equicordplugins/_core"]) {
+        for (const file of readdirSync(root, { recursive: true })) {
+            if (!/\.(ts|tsx)$/.test(file)) continue;
+            const text = readFileSync(join(root, file), "utf8");
+            const name = text.match(/definePlugin\(\{\s*name:\s*"([^"]+)"/s)?.[1];
+            if (name) names.add(name);
+        }
+    }
+    const missing = catalog.flatMap(p => (p.dependencies ?? []).filter(name => !names.has(name)).map(name => `${p.name}: ${name}`));
+    assert.deepEqual(missing, []);
 });
 
 test("Vencord-compatible backup parsing preserves unknown plugin settings and rejects unsafe data", async () => {

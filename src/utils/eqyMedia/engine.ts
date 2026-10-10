@@ -1,0 +1,146 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { LagEffect, VoiceDSP, VoiceEffect } from "./dsp";
+
+interface Pipe { source: MediaStreamTrack; output: MediaStreamTrack; senders: Set<RTCRtpSender>; close(): void; }
+const audio = new Map<MediaStreamTrack, Pipe>();
+const cameras = new Map<MediaStreamTrack, Pipe>();
+const captured = new WeakSet<MediaStreamTrack>();
+const owners = new Set<string>();
+const listeners = new Set<() => void>();
+let generation = 0;
+let frozen = false;
+let image: HTMLImageElement | undefined;
+let voice = () => ({ enabled: false } as VoiceEffect);
+let lag = () => ({ enabled: false } as LagEffect);
+let restore: (() => void)[] = [];
+let freezeRevision = 0;
+export const subscribe = (listener: () => void) => { listeners.add(listener); return () => listeners.delete(listener); };
+export const snapshot = () => [...audio.values(), ...cameras.values()].filter(p => p.senders.size).map(p => p.source.kind).sort().join(",");
+const notify = () => listeners.forEach(f => f());
+export const hasOutgoing = (kind: string) => snapshot().split(",").includes(kind);
+export function setVoice(get: typeof voice) { voice = get; }
+export function setLag(get: typeof lag) { lag = get; }
+export async function freeze(value: boolean, data?: string) {
+    const epoch = ++freezeRevision;
+    if (!value) { frozen = false; image = undefined; return; }
+    if (value && !hasOutgoing("video")) throw new Error("No outgoing WebRTC camera found. Native Canary video is not supported by this engine.");
+    if (data) {
+        if (!/^data:image\/(png|jpeg|webp);base64,/.test(data) || data.length > 2_000_000) throw new Error("Choose a PNG, JPEG or WebP image smaller than 1 MB");
+        const next = new Image(); next.src = data; await next.decode(); if (epoch !== freezeRevision) return; image = next;
+    } else { image = undefined; frozen = false; await new Promise(resolve => setTimeout(resolve, 40)); if (epoch !== freezeRevision) return; }
+    frozen = value;
+}
+async function processAudio(source: MediaStreamTrack): Promise<Pipe> {
+    const ctx = new AudioContext({ latencyHint: "interactive" });
+    await ctx.resume();
+    const input = ctx.createMediaStreamSource(new MediaStream([source]));
+    // ScriptProcessor is used for compatibility without loading remote worklet code.
+    const processor = ctx.createScriptProcessor(2048, 1, 1);
+    const output = ctx.createMediaStreamDestination();
+    const dsp = new VoiceDSP(ctx.sampleRate);
+    processor.onaudioprocess = event => dsp.process(event.inputBuffer.getChannelData(0), event.outputBuffer.getChannelData(0), voice(), lag());
+    input.connect(processor); processor.connect(output);
+    const track = output.stream.getAudioTracks()[0];
+    let closed = false;
+    return { source, output: track, senders: new Set(), close() { if (closed) return; closed = true; processor.onaudioprocess = null; input.disconnect(); processor.disconnect(); track.stop(); void ctx.close().catch(() => {}); } };
+}
+async function processCamera(source: MediaStreamTrack): Promise<Pipe> {
+    const video = document.createElement("video"); video.muted = true; video.playsInline = true;
+    video.srcObject = new MediaStream([source]); await video.play();
+    const canvas = document.createElement("canvas");
+    const width = video.videoWidth || source.getSettings().width || 640;
+    const height = video.videoHeight || source.getSettings().height || 480;
+    const scale = Math.min(1, 1280 / width, 720 / height);
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const ctx = canvas.getContext("2d")!;
+    const stream = canvas.captureStream(30);
+    const track = stream.getVideoTracks()[0];
+    const draw = () => {
+        if (!source.enabled || source.muted || source.readyState === "ended") { ctx.fillStyle = "black"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+        else if (frozen && image) ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        else if (!frozen) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    };
+    draw(); const timer = setInterval(draw, 1000 / 30);
+    let closed = false;
+    return { source, output: track, senders: new Set(), close() { if (closed) return; closed = true; clearInterval(timer); video.pause(); video.srcObject = null; track.stop(); } };
+}
+function pipeFor(track: MediaStreamTrack) { return audio.get(track) ?? cameras.get(track) ?? [...audio.values(), ...cameras.values()].find(p => p.output === track); }
+function attach(sender: RTCRtpSender, track: MediaStreamTrack | null) {
+    for (const pipe of [...audio.values(), ...cameras.values()]) pipe.senders.delete(sender);
+    if (track) pipeFor(track)?.senders.add(sender);
+    notify();
+}
+export function acquire(owner: string) {
+    if (owners.has(owner)) return;
+    owners.add(owner);
+    if (owners.size !== 1) return;
+    const epoch = ++generation;
+    const media = navigator.mediaDevices;
+    if (!media || typeof RTCPeerConnection === "undefined") return;
+    const original = media.getUserMedia;
+    const get = async function (this: MediaDevices, constraints: MediaStreamConstraints) {
+        const stream = await original.call(this, constraints);
+        for (const source of stream.getTracks()) {
+            captured.add(source);
+            if (epoch !== generation) continue;
+            try {
+                if (source.kind === "video" && !owners.has("FreezeCam")) continue;
+                if (source.kind === "audio" && !owners.has("VoiceTroll") && !owners.has("FakeLagVoice")) continue;
+                const pipe = source.kind === "audio" ? await processAudio(source) : await processCamera(source);
+                if (epoch !== generation || source.readyState === "ended" || (source.kind === "video" ? !owners.has("FreezeCam") : !owners.has("VoiceTroll") && !owners.has("FakeLagVoice"))) { pipe.close(); continue; }
+                const map = source.kind === "audio" ? audio : cameras;
+                map.set(source, pipe);
+                source.addEventListener("ended", () => { map.delete(source); pipe.close(); notify(); }, { once: true });
+            } catch { /* Keep the original media if processing is unsupported or permission is denied. */ }
+        }
+        return stream;
+    };
+    media.getUserMedia = get;
+    const pc = RTCPeerConnection.prototype;
+    const add = pc.addTrack, transceiver = pc.addTransceiver, replace = RTCRtpSender.prototype.replaceTrack, remove = pc.removeTrack, { close } = pc;
+    const addHook = function (this: RTCPeerConnection, track: MediaStreamTrack, ...streams: MediaStream[]) {
+        const pipe = captured.has(track) ? pipeFor(track) : undefined;
+        const sender = add.call(this, pipe?.output ?? track, ...streams); attach(sender, track); return sender;
+    };
+    const transceiverHook = function (this: RTCPeerConnection, track: MediaStreamTrack | string, init?: RTCRtpTransceiverInit) {
+        const pipe = typeof track !== "string" && captured.has(track) ? pipeFor(track) : undefined;
+        const result = transceiver.call(this, pipe?.output ?? track, init);
+        if (typeof track !== "string") attach(result.sender, track);
+        return result;
+    };
+    const replaceHook = async function (this: RTCRtpSender, track: MediaStreamTrack | null) {
+        const pipe = track && captured.has(track) ? pipeFor(track) : undefined;
+        await replace.call(this, pipe?.output ?? track); attach(this, track);
+    };
+    const removeHook = function (this: RTCPeerConnection, sender: RTCRtpSender) { remove.call(this, sender); attach(sender, null); };
+    const closeHook = function (this: RTCPeerConnection) { for (const sender of this.getSenders()) attach(sender, null); close.call(this); };
+    pc.addTrack = addHook; pc.addTransceiver = transceiverHook; RTCRtpSender.prototype.replaceTrack = replaceHook;
+    pc.removeTrack = removeHook; pc.close = closeHook;
+    restore = [() => { if (media.getUserMedia === get) media.getUserMedia = original; }, () => { if (pc.addTrack === addHook) pc.addTrack = add; if (pc.addTransceiver === transceiverHook) pc.addTransceiver = transceiver; if (pc.removeTrack === removeHook) pc.removeTrack = remove; if (pc.close === closeHook) pc.close = close; if (RTCRtpSender.prototype.replaceTrack === replaceHook) RTCRtpSender.prototype.replaceTrack = replace; }];
+}
+export function release(owner: string) {
+    owners.delete(owner);
+    if (owner === "FreezeCam") { ++freezeRevision; frozen = false; image = undefined; }
+    if (owner === "VoiceTroll") setVoice(() => ({ enabled: false } as VoiceEffect));
+    if (owner === "FakeLagVoice") setLag(() => ({ enabled: false } as LagEffect));
+    const pipes: Pipe[] = [];
+    if (!owners.has("VoiceTroll") && !owners.has("FakeLagVoice")) { pipes.push(...audio.values()); audio.clear(); }
+    if (!owners.has("FreezeCam")) { pipes.push(...cameras.values()); cameras.clear(); }
+    if (!owners.size) { ++generation; restore.forEach(f => f()); restore = []; }
+    notify();
+    for (const pipe of pipes) void Promise.allSettled([...pipe.senders].map(sender => sender.replaceTrack(pipe.source.readyState === "live" ? pipe.source : null))).then(results => {
+        if (results.every(r => r.status === "fulfilled")) pipe.close();
+        else {
+            // Keep the dry/live bridge alive if renegotiation is needed, rather
+            // than stopping a track that a peer is still transmitting.
+            const map = pipe.source.kind === "audio" ? audio : cameras;
+            map.set(pipe.source, pipe); notify();
+        }
+    });
+}

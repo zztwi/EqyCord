@@ -93,7 +93,16 @@ public sealed class MeshSetupWindow : SetupWindow {
         ClientSize = new Size(920, 600);
         loading.Dock = DockStyle.Fill; Controls.Add(loading); loading.BringToFront();
         if (testing) { Opacity = 0; ShowInTaskbar = false; }
-        Shown += delegate { InitializeSurface(); };
+        Shown += delegate {
+            if (report != null) {
+                Directory.CreateDirectory(report);
+                using (var bitmap = new Bitmap(loading.Width, loading.Height)) {
+                    loading.DrawToBitmap(bitmap, loading.ClientRectangle);
+                    bitmap.Save(Path.Combine(report, "loading.png"), System.Drawing.Imaging.ImageFormat.Png);
+                }
+            }
+            InitializeSurface();
+        };
     }
     async void InitializeSurface() {
         try {
@@ -137,12 +146,7 @@ public sealed class MeshSetupWindow : SetupWindow {
             };
             ClientSize = new Size(920, 600);
             FormBorderStyle = FormBorderStyle.None;
-            using (var path = new GraphicsPath()) {
-                int size = 28; int w = ClientSize.Width; int h = ClientSize.Height;
-                path.AddArc(0, 0, size, size, 180, 90); path.AddArc(w-size, 0, size, size, 270, 90);
-                path.AddArc(w-size, h-size, size, size, 0, 90); path.AddArc(0, h-size, size, size, 90, 90); path.CloseFigure();
-                Region = new Region(path);
-            }
+            Region = null;
             CenterToScreen();
             var html = UiBootstrap.Resource("EqyCord.Surface");
             surfaceUri = "data:text/html;charset=utf-8;base64," + Convert.ToBase64String(html);
@@ -197,6 +201,7 @@ public sealed class MeshSetupWindow : SetupWindow {
     async Task TestSurface() {
         Directory.CreateDirectory(report);
         var results = new Dictionary<string, object>();
+        results["squareWindow"] = Region == null && FormBorderStyle == FormBorderStyle.None;
         results["initial"] = await ReadJson("{mesh:meshStatus,overflow:document.documentElement.scrollWidth>innerWidth||document.documentElement.scrollHeight>innerHeight}");
         string shader = await surface.ExecuteScriptAsync("meshStatus.mode");
         if (shader != "\"animated\"" && shader != "\"reduced-motion\"") throw new IOException("The WebGL shader did not render: " + shader);
@@ -280,6 +285,7 @@ public sealed class LoadingSurface : Control {
             var form = FindForm();
             if (form != null && form.Icon != null) args.Graphics.DrawIcon(form.Icon, new Rectangle(38, 32, 34, 34));
             args.Graphics.DrawString("EqyCord", title, ink, 78, 30);
+            if (form != null && form.Icon != null) args.Graphics.DrawIcon(form.Icon, new Rectangle(Width - 260, Height/2 - 95, 180, 180));
             args.Graphics.DrawString("Getting things ready…", title, ink, 38, Height/2-35);
             args.Graphics.DrawString("Preparing your private graphics runtime.\nYour Discord files are not changed during this step.", body, ink, 40, Height/2+17);
         }

@@ -12,7 +12,7 @@ The top left shows Phantom Edition and a Help link to the EqyCord Discord commun
 
 New desktop users receive the shared starter preset from `src/shared/eqyStarterPreset.json` automatically on their first Discord launch. It is based on the owner's approved custom settings export, including enabled plugins and plugin preferences. The saved screenshare source/thumbnail is omitted and cloud authentication, sync, and sync version are reset. This shareable preset is embedded in the client build; account data and existing personal settings directories are not packaged. An existing `settings.json` (including one from Vencord) is never replaced, and existing QuickCSS is preserved. Preferences stay editable in Settings afterward, and reinstalling does not reset them. Settings use the existing Vencord-compatible desktop data path; the preset does not install a separate Vencord client.
 
-The setup uses a borderless English interface with a translucent installation panel. Its full-window Mesh Drift background is a WebGL shader: five drifting points carry the ground color `#DCDCD8` and accents `#F5C7B8` / `#C9D8F0`, blended by inverse distance. Hashed value noise, six-octave fbm, and a two-level domain warp soften the motion. Pointer intensity rises and relaxes smoothly. There are no simulated browser or device selectors.
+Both loading and installation windows retain square outer corners. The loading screen has a large Phantom mark on the right; Phantom Edition uses bold text. The setup uses a borderless English interface with a translucent installation panel. Its full-window Mesh Drift background is a WebGL shader: five drifting points carry the ground color `#DCDCD8` and accents `#F5C7B8` / `#C9D8F0`, blended by inverse distance. Hashed value noise, six-octave fbm, and a two-level domain warp soften the motion. Pointer intensity rises and relaxes smoothly. There are no simulated browser or device selectors.
 
 Windows' reduced-motion preference renders a single frame. Resizing can redraw that frame; pointer movement does not animate it. The shader pauses when the document is hidden. If WebGL is unavailable or its context is lost, a static CSS surface appears behind the same usable controls. If the entire web surface cannot initialize, the native install/verify/uninstall interface remains available.
 
@@ -26,17 +26,17 @@ Windows 10/11 x64 with .NET Framework 4.8 and a normal desktop Discord installat
 
 1. Close the chosen Discord client completely, including its tray icon.
 2. Open EqyCord-Setup.exe and choose Stable, PTB, or Canary.
-3. Click Install, then open Discord after the success message.
+3. Click Install / Repair EqyCord, then open Discord after the success message.
 
 The setup does not install Node globally and does not require a terminal or administrator rights for normal per-user Discord installations. Files are kept in `%LOCALAPPDATA%/EqyCord/builds/<commit>`. The downloaded setup can be deleted after installation; keep the installed build folder.
 
-Existing client mods are not overwritten. Uninstall them using their own installer first. To update this EqyCord setup installation, close Discord, uninstall the old build, then install the new one. Automatic client updates can invalidate a patch and may require reinstalling.
+Existing client mods are not overwritten. Uninstall them using their own installer first. To update or repair an owned EqyCord installation, close Discord and click Install / Repair EqyCord. The original Discord archive is retained and verified; a failed replacement keeps recovery files. Automatic client updates can invalidate a patch and may require reinstalling.
 
 ## Verify and restore
 
 Verify checks the patch, original backup, and installed client files. Uninstall restores the exact original Discord archive and checks its hash; it preserves settings and source files. The setup discovers its owned installation from Discord metadata, including an older app directory after Discord updates. Unknown, modified, or foreign patches are refused.
 
-This setup does not claim ownership of the developer's existing Desktop package or a legacy loader lacking `.eqycord-install.json`. Those must be restored with their original installer.
+The older Desktop/EqyCord distribution can be verified, migrated or restored only when its exact pinned loader matches and BUILD-UPDATE.json matches the renderer checksum. This records the existing original backup hash during migration; it cannot establish the historical integrity of an unrecorded legacy backup. Foreign or altered legacy loaders are refused. If Discord has already created a newer app directory, restore the older owned version before repairing the current version.
 
 ## Distribution and visibility
 

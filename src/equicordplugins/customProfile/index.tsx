@@ -131,8 +131,8 @@ function Editor(props: any) {
             <p className="eqy-cp-note">Profile appearance for EqyCord. Badges and Nitro styles are cosmetic.</p>
             <div className="eqy-cp-presets"><input aria-label="Preset name" placeholder="Preset name" value={presetName} onChange={e => setPresetName(e.target.value)} maxLength={32} /><button type="button" disabled={!presetName.trim() || presets.length >= 20 || busy} onClick={() => { setPresets([...presets, { name: presetName.trim(), data: { ...data } }]); setPresetName(""); }}>Save preset</button></div>
             <div className="eqy-cp-chips">{presets.map((p, i) => <span key={i}><button type="button" onClick={() => setData({ ...p.data })}>{p.name}</button><button type="button" aria-label={`Delete preset ${p.name}`} onClick={() => setPresets(presets.filter((_, n) => n !== i))}>×</button></span>)}</div>
-            {text("username", "Username", "text", "Your username")}{text("globalName", "Display name")}
-            {text("avatar", "Profile picture", "url", "HTTPS image URL")}{text("banner", "Banner", "url", "HTTPS image URL")}
+            <h3>Identity</h3><div className="eqy-cp-grid">{text("username", "Username", "text", "Your username")}{text("globalName", "Display name")}</div>
+            <h3>Appearance</h3><div className="eqy-cp-grid">{text("avatar", "Profile picture", "url", "HTTPS image URL")}{text("banner", "Banner", "url", "HTTPS image URL")}</div>
             <label className="eqy-cp-field">Upload a local profile picture<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" disabled={busy} onChange={e => { const file = e.target.files?.[0]; if (!file) return; if (file.size > 250_000) { setError("Choose an image smaller than 250 KB"); return; } const reader = new FileReader(); reader.onload = () => { if (isProfileImage(reader.result, true)) set("avatar", reader.result); else setError("Unsupported image"); }; reader.readAsDataURL(file); }} /></label>
             <label className="eqy-cp-field">Bio<textarea maxLength={190} value={data.bio ?? ""} onChange={e => set("bio", e.target.value)} /></label>
             {text("pronouns", "Pronouns")}

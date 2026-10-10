@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Web.Script.Serialization;
@@ -17,6 +18,16 @@ public sealed class PayloadManifest {
 }
 
 public static class Payload {
+    public static string RecoveryBuild(string destination) {
+        try { Extract(destination); return destination; }
+        catch (IOException) {
+            if (!Directory.Exists(destination)) throw;
+            // Keep changed files for recovery and execute a fresh verified copy.
+            var fresh = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(destination)), Manifest().Build + "-repair-" + Guid.NewGuid().ToString("N"));
+            Extract(fresh);
+            return fresh;
+        }
+    }
     public static ZipArchive Open(string resource = "EqyCord.Payload") {
         return new ZipArchive(Assembly.GetExecutingAssembly().GetManifestResourceStream(resource), ZipArchiveMode.Read);
     }
@@ -75,6 +86,13 @@ public static class Payload {
 }
 
 public class SetupWindow : Form {
+    [DllImport("dwmapi.dll")] static extern int DwmSetWindowAttribute(IntPtr window, int attribute, ref int value, int size);
+    protected override void OnHandleCreated(EventArgs args) {
+        base.OnHandleCreated(args);
+        int squareCorners = 1;
+        // Windows 10 ignores this Windows 11 preference; both use no clip region.
+        DwmSetWindowAttribute(Handle, 33, ref squareCorners, sizeof(int));
+    }
     public const string CreatorProfileUrl = "https://discord.com/users/380070146317877249";
     public const string HelpUrl = "https://discord.gg/Kexjx2GH3B";
     readonly ComboBox channel = new ComboBox();
@@ -103,7 +121,7 @@ public class SetupWindow : Form {
         channel.Items.AddRange(new object[] { "Stable", "PTB", "Canary" });
         channel.SelectedIndex = 0;
         Controls.Add(channel);
-        AddButton("Install", 26, delegate { Run("install"); });
+        AddButton("Install / Repair", 26, delegate { Run("repair"); });
         AddButton("Verify", 209, delegate { Run("verify"); });
         AddButton("Uninstall", 392, delegate { Run("uninstall"); });
         status.SetBounds(26, 202, 548, 27);
@@ -190,6 +208,18 @@ public class SetupWindow : Form {
             project = candidate;
             appVersion = Path.GetFileName(app);
         }
+        if (project == null) {
+            var legacy = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "EqyCord");
+            if (File.Exists(Path.Combine(legacy, "BUILD-UPDATE.json"))) {
+                // The new CLI validates the exact legacy loader and renderer
+                // checksum before verification, migration or restoration.
+                foreach (var app in Directory.GetDirectories(location, "app-*")) {
+                    if (!File.Exists(Path.Combine(app, "resources", "_app.asar"))) continue;
+                    if (project != null) throw new IOException("Several patched versions exist. Restore older versions first.");
+                    project = legacy; appVersion = Path.GetFileName(app);
+                }
+            }
+        }
         return project;
     }
     void Run(string action) {
@@ -197,13 +227,13 @@ public class SetupWindow : Form {
     }
     protected void RunAction(string action, string branch) {
         if (busy) return;
-        if (action != "install" && action != "verify" && action != "uninstall") return;
+        if (action != "install" && action != "repair" && action != "verify" && action != "uninstall") return;
         if (branch != "stable" && branch != "ptb" && branch != "canary") return;
         busy = true;
         channel.Enabled = false;
         foreach (var button in buttons) button.Enabled = false;
         progress.Visible = true;
-        UpdateSurface("busy", action == "install" ? "Installing EqyCord…" : action == "verify" ? "Verifying your installation…" : "Restoring Discord…", "Keep this window open until the operation finishes.");
+        UpdateSurface("busy", action == "install" || action == "repair" ? "Installing or repairing EqyCord…" : action == "verify" ? "Verifying your installation…" : "Restoring Discord…", "Keep this window open until the operation finishes.");
         ThreadPool.QueueUserWorkItem(delegate {
             string message;
             bool success = false;
@@ -212,16 +242,14 @@ public class SetupWindow : Form {
                 string location = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), folder);
                 string version;
                 string previous = OwnedProject(location, out version);
-                if (action == "install" && previous != null)
-                    throw new IOException("EqyCord is already installed. Uninstall that version before installing this build.");
-                if (action != "install" && previous == null)
+                if (action == "install") action = "repair";
+                if (action != "repair" && previous == null)
                     throw new IOException("No installation owned by this setup was found. Existing mods were left unchanged.");
-                string build = action == "install" ? BuildPath() : previous;
-                if (action == "install") Payload.Extract(build);
+                string build = Payload.RecoveryBuild(BuildPath());
                 Payload.RejectLinks(build);
                 var start = new ProcessStartInfo(Path.Combine(build, "runtime", "node.exe"));
                 start.Arguments = Quote(Path.Combine(build, "scripts", "eqycord", "installer.mjs")) + " " + action + " --branch " + branch + " --location " + Quote(location);
-                if (action != "install") start.Arguments += " --app-version " + version;
+                if (previous != null) start.Arguments += " --previous-project " + Quote(previous) + " --app-version " + version;
                 start.UseShellExecute = false;
                 start.CreateNoWindow = true;
                 start.RedirectStandardOutput = true;
@@ -236,7 +264,7 @@ public class SetupWindow : Form {
                     if (process.ExitCode != 0) throw new IOException(String.IsNullOrWhiteSpace(errors) ? output : errors);
                 }
                 success = true;
-                message = action == "install" ? "EqyCord installed. Open the selected Discord client.\r\nKeep the files in LocalAppData/EqyCord. You can delete the setup download."
+                message = action == "install" || action == "repair" ? "EqyCord installed or repaired. Open the selected Discord client.\r\nKeep the files in LocalAppData/EqyCord. You can delete the setup download."
                     : action == "uninstall" ? "Original Discord archive restored and verified. Your settings were preserved."
                     : "Installed EqyCord files and original Discord backup verified.";
             } catch (Exception error) { message = error.Message; }
@@ -257,6 +285,10 @@ public static class Program {
         try {
             if (args.Length == 2 && args[0] == "--extract-only") {
                 Payload.Extract(args[1]);
+                return 0;
+            }
+            if (args.Length == 3 && args[0] == "--recovery-extraction-test") {
+                File.WriteAllText(args[2], Payload.RecoveryBuild(args[1]));
                 return 0;
             }
             UiBootstrap.Initialize();

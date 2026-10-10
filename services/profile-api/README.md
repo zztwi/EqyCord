@@ -9,7 +9,7 @@ The profile API is deployed on Cloudflare Workers with D1 storage. The client pi
 - Profile API deployed at that origin; preview URLs disabled.
 - D1 ID `ffa76a4b-55ca-4ec5-abc8-0a040d7eae26`: all six schema statements applied remotely and the four service tables verified with a live query.
 - OAuth client secret stored encrypted in Cloudflare; not stored in source or the client build.
-- Live unauthenticated profile read returns 401 and sign-in start returns 200. Full real Discord OAuth, authenticated writes and two-client rendering verification remain pending; local security tests do not substitute for those checks.
+- Live Discord OAuth completed on 2026-10-10 with the real account owner. Authenticated read and owner write/readback passed; unknown identity/contact fields were excluded, replay was rejected, the original profile was restored, and the test session was revoked. Unauthenticated and revoked-session reads returned 401. Rendering in two real EqyCord clients still requires verification.
 
 ## Behavior
 

@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import test from "node:test";
 
@@ -42,7 +42,8 @@ test("Windows preflight detects legacy layout and rejects invalid/ambiguous vers
 
 test("installer rejects mistyped, missing, duplicate and unsafe CLI arguments", () => {
     assert.deepEqual(parseArguments(["install", "--branch", "canary"]), { action: "install", branch: "canary", location: undefined, appVersion: undefined });
-    for (const args of [["repair"], ["install", "--brnach", "canary"], ["install", "--branch"], ["install", "--branch", "canary", "--branch", "stable"], ["uninstall", "--app-version", "../app-1.0.1"]]) {
+    assert.equal(parseArguments(["repair"]).action, "repair");
+    for (const args of [["repait"], ["install", "--brnach", "canary"], ["install", "--branch"], ["install", "--branch", "canary", "--branch", "stable"], ["uninstall", "--app-version", "../app-1.0.1"]]) {
         assert.throws(() => parseArguments(args));
     }
 });
@@ -91,5 +92,56 @@ test("pinned Windows installer installs, verifies, detects tampering and restore
         assert.deepEqual(readFileSync(join(f.resources, "app.asar")), original);
         assert.equal(existsSync(join(f.resources, ".eqycord-install.json")), false);
         console.log("Fixture restore SHA256: " + createHash("sha256").update(original).digest("hex"));
+    } finally { f.cleanup(); }
+});
+
+test("repair replaces an owned build and keeps the exact original restoration archive", { skip: process.platform !== "win32" }, async () => {
+    const f = fixture();
+    try {
+        const original = readFileSync(join(f.resources, "app.asar"));
+        await operate("install", f.location);
+        await operate("repair", f.location);
+        await operate("verify", f.location);
+        assert.deepEqual(readFileSync(join(f.resources, "_app.asar")), original);
+        assert.equal(existsSync(join(f.resources, ".eqycord-repair.tmp")), false);
+        await operate("uninstall", f.location);
+        assert.deepEqual(readFileSync(join(f.resources, "app.asar")), original);
+    } finally { f.cleanup(); }
+});
+
+test("verified legacy Desktop loader migrates to the current package; altered loaders are refused", { skip: process.platform !== "win32" }, async () => {
+    const f = fixture();
+    try {
+        const legacy = join(f.location, "legacy-project");
+        mkdirSync(join(legacy, "dist", "Installer"), { recursive: true });
+        for (const file of ["patcher.js", "preload.js", "renderer.js", "renderer.css", "Installer/VencordInstallerCli.exe"])
+            copyFileSync(join(PROJECT, "dist", file), join(legacy, "dist", file));
+        const original = readFileSync(join(f.resources, "app.asar"));
+        await operate("install", f.location, "stable", legacy);
+        unlinkSync(join(f.resources, ".eqycord-install.json"));
+        writeFileSync(join(legacy, "BUILD-UPDATE.json"), JSON.stringify({ RendererSHA256: createHash("sha256").update(readFileSync(join(legacy, "dist", "renderer.js"))).digest("hex") }));
+        await operate("verify", f.location, "stable", legacy);
+        const loader = readFileSync(join(f.resources, "app.asar"));
+        writeFileSync(join(f.resources, "app.asar"), Buffer.concat([loader, Buffer.from("changed")]));
+        await assert.rejects(operate("repair", f.location, "stable", PROJECT, undefined, legacy), /Legacy.*verification failed/);
+        assert.deepEqual(readFileSync(join(f.resources, "_app.asar")), original);
+        writeFileSync(join(f.resources, "app.asar"), loader);
+        await operate("repair", f.location, "stable", PROJECT, undefined, legacy);
+        await operate("verify", f.location);
+        const state = JSON.parse(readFileSync(join(f.resources, ".eqycord-install.json"), "utf8"));
+        assert.equal(state.project, PROJECT);
+        await operate("uninstall", f.location);
+        assert.deepEqual(readFileSync(join(f.resources, "app.asar")), original);
+    } finally { f.cleanup(); }
+});
+
+test("repair refuses a changed original backup without altering the existing loader", { skip: process.platform !== "win32" }, async () => {
+    const f = fixture();
+    try {
+        await operate("install", f.location);
+        const loader = readFileSync(join(f.resources, "app.asar"));
+        writeFileSync(join(f.resources, "_app.asar"), "changed-original");
+        await assert.rejects(operate("repair", f.location), /unsafe repair/);
+        assert.deepEqual(readFileSync(join(f.resources, "app.asar")), loader);
     } finally { f.cleanup(); }
 });
