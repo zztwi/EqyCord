@@ -68,6 +68,12 @@ public static class Payload {
                 }
                 Directory.CreateDirectory(Path.GetDirectoryName(target));
                 var temporary = target + ".extracting";
+                if (File.Exists(temporary)) {
+                    if ((File.GetAttributes(temporary) & FileAttributes.ReparsePoint) != 0) throw new IOException("Temporary extraction file is a link.");
+                    // A previous setup may have been closed during extraction.
+                    // The final files remain protected by the payload manifest.
+                    File.Delete(temporary);
+                }
                 using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write))
                 using (var input = entry.Open()) input.CopyTo(output);
                 if (Digest(temporary) != manifest.Files[entry.FullName]) {

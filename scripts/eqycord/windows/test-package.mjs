@@ -31,6 +31,8 @@ assert.deepEqual(uiResults.fallback, { mode: "fallback", visible: true });
 assert.equal(spawnSync(setup, ["--native-smoke"], { windowsHide: true, timeout: 15000 }).status, 0, "Native fallback must still start.");
 console.log("PASS: real WebGL rendering, UI action bridge (no patching), keyboard controls, busy/error states, pointer smoothing, reduced motion, static fallback, and native fallback startup.");
 const extracted = join(testRoot, "extracted");
+mkdirSync(extracted);
+writeFileSync(join(extracted, "BADGES.md.extracting"), "interrupted-extraction");
 const run = () => spawnSync(setup, ["--extract-only", extracted], { windowsHide: true, timeout: 120000 });
 assert.equal(run().status, 0, "Package extraction must succeed.");
 assert.equal(run().status, 0, "Extraction must be idempotent.");

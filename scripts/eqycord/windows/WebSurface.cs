@@ -276,16 +276,34 @@ public sealed class MeshSetupWindow : SetupWindow {
 
 public sealed class LoadingSurface : Control {
     public LoadingSurface() { DoubleBuffered = true; }
+    static void Phantom(Graphics graphics, float x, float y, float size) {
+        var state = graphics.Save();
+        graphics.SmoothingMode = SmoothingMode.AntiAlias;
+        graphics.TranslateTransform(x, y); graphics.ScaleTransform(size / 56, size / 56); graphics.TranslateTransform(-4, -3);
+        using (var path = new GraphicsPath())
+        using (var fill = new SolidBrush(Color.FromArgb(39,40,43)))
+        using (var eyes = new Pen(Color.White, 3.5f)) {
+            path.AddLine(12,50,12,28); path.AddBezier(12,28,12,15,20,7,32,7);
+            path.AddBezier(32,7,44,7,52,15,52,28); path.AddLine(52,28,52,50);
+            path.AddBezier(52,50,52,53,49,54,47,52); path.AddLine(47,52,40,46);
+            path.AddLine(40,46,34,53); path.AddBezier(34,53,33,55,31,55,30,53);
+            path.AddLine(30,53,24,46); path.AddLine(24,46,17,52);
+            path.AddBezier(17,52,15,54,12,53,12,50); path.CloseFigure();
+            graphics.FillPath(fill, path);
+            eyes.StartCap = LineCap.Round; eyes.EndCap = LineCap.Round;
+            graphics.DrawLine(eyes,22,28,29,31); graphics.DrawLine(eyes,42,28,35,31);
+        }
+        graphics.Restore(state);
+    }
     protected override void OnPaint(PaintEventArgs args) {
         using (var brush = new LinearGradientBrush(ClientRectangle, Color.FromArgb(220,220,216), Color.FromArgb(232,213,206), 25)) args.Graphics.FillRectangle(brush, ClientRectangle);
         args.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
         using (var title = new Font("Segoe UI", 24, FontStyle.Bold))
         using (var body = new Font("Segoe UI", 11))
         using (var ink = new SolidBrush(Color.FromArgb(39,40,43))) {
-            var form = FindForm();
-            if (form != null && form.Icon != null) args.Graphics.DrawIcon(form.Icon, new Rectangle(38, 32, 34, 34));
+            Phantom(args.Graphics, 38, 32, 34);
             args.Graphics.DrawString("EqyCord", title, ink, 78, 30);
-            if (form != null && form.Icon != null) args.Graphics.DrawIcon(form.Icon, new Rectangle(Width - 260, Height/2 - 95, 180, 180));
+            Phantom(args.Graphics, Width - 260, Height/2 - 95, 180);
             args.Graphics.DrawString("Getting things ready…", title, ink, 38, Height/2-35);
             args.Graphics.DrawString("Preparing your private graphics runtime.\nYour Discord files are not changed during this step.", body, ink, 40, Height/2+17);
         }
