@@ -25,6 +25,8 @@ const ui = spawnSync(setup, ["--ui-test", uiReport], { windowsHide: true, timeou
 assert.equal(ui.status, 0, existsSync(join(uiReport, "error.txt")) ? readFileSync(join(uiReport, "error.txt"), "utf8") : "Setup UI must start and close without changing Discord.");
 const uiResults = JSON.parse(readFileSync(join(uiReport, "results.json"), "utf8"));
 assert.equal(uiResults.squareWindow, true);
+assert.equal(uiResults.nativeTitleBar, true);
+assert.equal(uiResults.noDuplicateWindowControls, true);
 assert.ok(existsSync(join(uiReport, "loading.png")));
 assert.ok(["animated", "reduced-motion"].includes(uiResults.initial.mesh.mode));
 assert.equal(uiResults.initial.mesh.error, "");

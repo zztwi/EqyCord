@@ -145,7 +145,7 @@ public sealed class MeshSetupWindow : SetupWindow {
                 }
             };
             ClientSize = new Size(920, 600);
-            FormBorderStyle = FormBorderStyle.None;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             Region = null;
             CenterToScreen();
             var html = UiBootstrap.Resource("EqyCord.Surface");
@@ -201,7 +201,9 @@ public sealed class MeshSetupWindow : SetupWindow {
     async Task TestSurface() {
         Directory.CreateDirectory(report);
         var results = new Dictionary<string, object>();
-        results["squareWindow"] = Region == null && FormBorderStyle == FormBorderStyle.None;
+        results["squareWindow"] = Region == null;
+        results["nativeTitleBar"] = FormBorderStyle == FormBorderStyle.FixedDialog && Text == "EqyCord Setup" && Icon != null;
+        results["noDuplicateWindowControls"] = await ReadJson("document.querySelectorAll(\".window-actions\").length === 0");
         results["initial"] = await ReadJson("{mesh:meshStatus,overflow:document.documentElement.scrollWidth>innerWidth||document.documentElement.scrollHeight>innerHeight}");
         string shader = await surface.ExecuteScriptAsync("meshStatus.mode");
         if (shader != "\"animated\"" && shader != "\"reduced-motion\"") throw new IOException("The WebGL shader did not render: " + shader);
