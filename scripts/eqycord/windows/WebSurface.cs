@@ -264,7 +264,9 @@ public sealed class LoadingSurface : Control {
         using (var title = new Font("Segoe UI", 24, FontStyle.Bold))
         using (var body = new Font("Segoe UI", 11))
         using (var ink = new SolidBrush(Color.FromArgb(39,40,43))) {
-            args.Graphics.DrawString("EqyCord", title, ink, 38, 30);
+            var form = FindForm();
+            if (form != null && form.Icon != null) args.Graphics.DrawIcon(form.Icon, new Rectangle(38, 32, 34, 34));
+            args.Graphics.DrawString("EqyCord", title, ink, 78, 30);
             args.Graphics.DrawString("Getting things ready…", title, ink, 38, Height/2-35);
             args.Graphics.DrawString("Preparing your private graphics runtime.\nYour Discord files are not changed during this step.", body, ink, 40, Height/2+17);
         }

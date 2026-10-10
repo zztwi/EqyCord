@@ -7,23 +7,29 @@ foreach ($size in @(16, 32, 48, 256)) {
     $graphics = [Drawing.Graphics]::FromImage($bitmap)
     $graphics.SmoothingMode = [Drawing.Drawing2D.SmoothingMode]::AntiAlias
     $graphics.Clear([Drawing.Color]::Transparent)
+    # Same Phantom outline as surface.html, scaled from the 64-unit vector.
+    $graphics.ScaleTransform([single]($size / 56.0), [single]($size / 56.0))
+    $graphics.TranslateTransform(-4, -3)
     $path = [Drawing.Drawing2D.GraphicsPath]::new()
-    $radius = $size * 0.48
-    $edge = $size - 1
-    $path.AddArc(0, 0, $radius, $radius, 180, 90)
-    $path.AddArc($edge-$radius, 0, $radius, $radius, 270, 90)
-    $path.AddArc($edge-$radius, $edge-$radius, $radius, $radius, 0, 90)
-    $path.AddArc(0, $edge-$radius, $radius, $radius, 90, 90)
+    $path.AddLine(12, 50, 12, 28)
+    $path.AddBezier(12, 28, 12, 15, 20, 7, 32, 7)
+    $path.AddBezier(32, 7, 44, 7, 52, 15, 52, 28)
+    $path.AddLine(52, 28, 52, 50)
+    $path.AddBezier(52, 50, 52, 53, 49, 54, 47, 52)
+    $path.AddLine(47, 52, 40, 46)
+    $path.AddLine(40, 46, 34, 53)
+    $path.AddBezier(34, 53, 33, 55, 31, 55, 30, 53)
+    $path.AddLine(30, 53, 24, 46)
+    $path.AddLine(24, 46, 17, 52)
+    $path.AddBezier(17, 52, 15, 54, 12, 53, 12, 50)
     $path.CloseFigure()
     $fill = [Drawing.SolidBrush]::new([Drawing.Color]::FromArgb(39, 40, 43))
     $graphics.FillPath($fill, $path)
-    $pen = [Drawing.Pen]::new([Drawing.Color]::White, [single]($size * 0.08))
+    $pen = [Drawing.Pen]::new([Drawing.Color]::White, [single]3.5)
     $pen.StartCap = [Drawing.Drawing2D.LineCap]::Round
     $pen.EndCap = [Drawing.Drawing2D.LineCap]::Round
-    $graphics.DrawLine($pen, [single]($size*.65), [single]($size*.28), [single]($size*.35), [single]($size*.28))
-    $graphics.DrawLine($pen, [single]($size*.35), [single]($size*.28), [single]($size*.35), [single]($size*.72))
-    $graphics.DrawLine($pen, [single]($size*.35), [single]($size*.72), [single]($size*.65), [single]($size*.72))
-    $graphics.DrawLine($pen, [single]($size*.35), [single]($size*.50), [single]($size*.60), [single]($size*.50))
+    $graphics.DrawLine($pen, 22, 28, 29, 31)
+    $graphics.DrawLine($pen, 42, 28, 35, 31)
     $stream = [IO.MemoryStream]::new()
     $bitmap.Save($stream, [Drawing.Imaging.ImageFormat]::Png)
     $images += ,@{Size=$size; Bytes=$stream.ToArray()}

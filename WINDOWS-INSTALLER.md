@@ -4,6 +4,8 @@ Share **EqyCord-Setup.exe**. It contains the tested client build, a private Node
 
 ## Interface
 
+The selected Phantom mark appears next to EqyCord, on the loading surface, and in the executable/window icon. It uses a transparent background and includes icon sizes of 16, 32, 48, and 256 pixels.
+
 The setup uses a borderless English interface with a translucent installation panel. Its full-window Mesh Drift background is a WebGL shader: five drifting points carry the ground color `#DCDCD8` and accents `#F5C7B8` / `#C9D8F0`, blended by inverse distance. Hashed value noise, six-octave fbm, and a two-level domain warp soften the motion. Pointer intensity rises and relaxes smoothly. There are no simulated browser or device selectors.
 
 Windows' reduced-motion preference renders a single frame. Resizing can redraw that frame; pointer movement does not animate it. The shader pauses when the document is hidden. If WebGL is unavailable or its context is lost, a static CSS surface appears behind the same usable controls. If the entire web surface cannot initialize, the native install/verify/uninstall interface remains available.
