@@ -37,6 +37,8 @@ for (const downstream of [false, true]) test(`real WebRTC receiver observes medi
             const originalGet = navigator.mediaDevices.getUserMedia;
             const originalAdd = RTCPeerConnection.prototype.addTrack;
             const originalSource = AudioContext.prototype.createMediaStreamSource;
+            const originalConnect = AudioNode.prototype.connect;
+            const originalDestination = AudioContext.prototype.createMediaStreamDestination;
             media.acquire("FreezeCam"); media.acquire("VoiceTroll"); media.acquire("FakeLagVoice");
             const captured = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: { width: 320, height: 240 } });
             const sourceAudio = captured.getAudioTracks()[0], sourceVideo = captured.getVideoTracks()[0];
@@ -92,6 +94,8 @@ for (const downstream of [false, true]) test(`real WebRTC receiver observes medi
             if (Math.abs(robot - dry) < dry * 0.05) throw new Error(`Receiver did not hear the robot effect: dry=${dry}, robot=${robot}`);
             const diagnostics = media.diagnostics();
             if (!(diagnostics.captures > 0 && diagnostics.audioBlocks > 0 && diagnostics.effectedBlocks > 0)) throw new Error("Diagnostics failed to observe capture and effect processing");
+            if (downstream && diagnostics.microphones[0].derivedGraphSenders !== 1) throw new Error("Derived graph sender lineage was not detected");
+            if (diagnostics.microphones[0].processing.effectedBlocks === 0) throw new Error("Capture-level processing counters are missing");
             if (diagnostics.microphones[0].graphInput !== downstream) throw new Error("Diagnostics conflated graph processing and observed senders");
             if (diagnostics.remoteDiscordTransmission !== "Not verified") throw new Error("Diagnostics claimed a Discord call was verified");
             media.setVoice(() => ({ enabled: false }));
@@ -103,12 +107,22 @@ for (const downstream of [false, true]) test(`real WebRTC receiver observes medi
             media.release("FakeLagVoice"); media.release("VoiceTroll"); media.release("FreezeCam");
             for (let n = 0; n < 100 && (audioSender.track !== transmittedAudio || videoSender.track !== sourceVideo); n++) await wait(10);
             if (audioSender.track !== transmittedAudio || videoSender.track !== sourceVideo) throw new Error("Original transmitted tracks were not restored");
+            if (AudioNode.prototype.connect !== originalConnect || AudioContext.prototype.createMediaStreamDestination !== originalDestination) throw new Error("Graph tracing hooks were not restored");
             if (AudioContext.prototype.createMediaStreamSource !== originalSource) throw new Error("Web Audio hook was not restored");
             if (navigator.mediaDevices.getUserMedia !== originalGet || RTCPeerConnection.prototype.addTrack !== originalAdd) throw new Error("Hooks were not restored");
             if (sourceAudio.readyState !== "live" || sourceVideo.readyState !== "live") throw new Error("Original capture was stopped");
             if (downstream) { await wait(500); const stoppedEffects = await rms(); if (Math.abs(stoppedEffects - dry) > dry * 0.3) throw new Error("Disabling plugins did not restore dry graph audio"); }
             graphInput?.disconnect(); await graph?.close();
             a.close(); b.close(); captured.getTracks().forEach(t => t.stop()); await audioCtx.close();
+            if (media.diagnostics().microphones.length !== 0) throw new Error("Stopped captures leaked audio bridges");
+            // A local stop must clean up even though the browser emits no ended event.
+            media.acquire("VoiceTroll");
+            for (let i = 0; i < 3; i++) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop());
+                if (media.diagnostics().microphones.length !== 0) throw new Error("Repeated microphone tests leaked processors");
+            }
+            media.release("VoiceTroll");
             return { remoteVideo: { moving, still, live, customImage: true }, remoteAudio: { dry, muted, robot, gaps, restored }, incomingMediaUntouched: true, originalTracksRestored: true, hooksRestored: true, nativeCanaryTested: false, realDiscordCallTested: false, downstreamWebAudio: downstream };
         }, downstream);
         assert.deepEqual(errors, []);
