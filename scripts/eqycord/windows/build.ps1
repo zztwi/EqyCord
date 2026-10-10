@@ -58,7 +58,7 @@ Get-ChildItem -LiteralPath (Join-Path $repo 'dist') -File | Where-Object { $_.Na
     Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $payload 'dist')
 }
 Copy-Item -LiteralPath (Join-Path $repo 'scripts/eqycord/installer.mjs') -Destination (Join-Path $payload 'scripts/eqycord/installer.mjs')
-foreach ($file in @('LICENSE', 'EQYCORD.md', 'BADGES.md', 'PLUGIN-AUDIT.md', 'WINDOWS-INSTALLER.md')) {
+foreach ($file in @('LICENSE', 'EQYCORD.md', 'BADGES.md', 'PLUGIN-AUDIT.md', 'WINDOWS-INSTALLER.md', 'ENDCORD-PLUGIN-NOTICES.md', 'PLUGIN-TESTING.md')) {
     Copy-Item -LiteralPath (Join-Path $repo $file) -Destination $payload
 }
 & git -C $repo archive --format=zip "--output=$(Join-Path $payload "source/EqyCord-$build.zip")" HEAD

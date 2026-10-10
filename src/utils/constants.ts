@@ -719,6 +719,15 @@ export const Devs = /* #__PURE__*/ Object.freeze({
 } satisfies Record<string, Dev>);
 
 export const EquicordDevs = Object.freeze({
+    // Imported Endcord author names; unknown Discord IDs stay unset.
+    endcord_Sharp: { name: "Sharp", id: 0n },
+    endcord_lastclipped: { name: "lastclipped", id: 0n },
+    endcord_pepsify: { name: "pepsify", id: 0n },
+    endcord_unfamiliardev: { name: "unfamiliardev", id: 0n },
+    endcord_ewlle: { name: "ewlle", id: 1390609041897554050n },
+    endcord_rootpoi: { name: "rootpoi", id: 1527382025429061823n },
+    endcord_kraethis: { name: "kraethis", id: 904384828143706164n },
+
     nobody: {
         name: "nobody",
         id: 0n

@@ -33,7 +33,10 @@ test("all imported Equicord plugins are registered without duplicate Vencord nam
     const plugins = JSON.parse(readFileSync("dist/plugins.json", "utf8"));
     const imported = plugins.filter(plugin => plugin.filePath.startsWith("src/equicordplugins/"));
     const upstream = plugins.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/"));
-    assert.equal(imported.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/ghostVoice")).length, 200);
+    const endcordNames = new Set(["QuickDelete", "RemindMe", "AutoReact", "SmoothType", "FakeTag", "FakeConnections", "CustomProfile"]);
+    assert.equal(imported.filter(plugin => !plugin.filePath.startsWith("src/equicordplugins/ghostVoice") && !endcordNames.has(plugin.name)).length, 200);
+    for (const name of endcordNames) assert.equal(imported.filter(plugin => plugin.name === name).length, 1, name);
+    assert.equal(new Set(plugins.map(plugin => plugin.name)).size, plugins.length);
     assert.equal(imported.some(plugin => plugin.name === "Ghost"), true);
 
     const upstreamNames = new Set(upstream.map(plugin => plugin.name));

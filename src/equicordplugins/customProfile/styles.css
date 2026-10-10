@@ -1,0 +1,121 @@
+.eqy-cp-root {
+    width: min(560px, 94vw);
+    color: var(--text-normal);
+}
+
+.eqy-cp-root h2 {
+    flex: 1;
+    margin: 0 12px;
+    font-size: 18px;
+}
+
+.eqy-cp-content {
+    max-height: 65vh;
+    padding: 16px 24px;
+}
+
+.eqy-cp-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.eqy-cp-field input,
+.eqy-cp-field select,
+.eqy-cp-field textarea,
+.eqy-cp-presets input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 12px;
+    color: var(--text-normal);
+    background: var(--background-tertiary);
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 6px;
+    font: inherit;
+}
+
+.eqy-cp-field textarea {
+    min-height: 72px;
+    resize: vertical;
+}
+
+.eqy-cp-root button {
+    padding: 7px 12px;
+    color: var(--text-normal);
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.eqy-cp-chips,
+.eqy-cp-presets,
+.eqy-cp-colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.eqy-cp-presets input {
+    width: 65%;
+}
+
+.eqy-cp-chips button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.eqy-cp-chips button[aria-pressed="true"] {
+    border-color: var(--brand-500);
+    background: var(--background-modifier-selected);
+}
+
+.eqy-cp-chips img {
+    width: 16px;
+    height: 16px;
+}
+
+.eqy-cp-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0;
+}
+
+.eqy-cp-note {
+    margin-bottom: 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.eqy-cp-error {
+    color: var(--status-danger);
+    line-height: 1.5;
+}
+
+.eqy-cp-root .eqy-cp-primary {
+    background: var(--brand-500);
+    color: white;
+}
+
+.eqy-cp-root .eqy-cp-danger {
+    color: var(--status-danger);
+}
+
+.eqy-cp-root button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.eqy-cp-root button:focus-visible,
+.eqy-cp-root input:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+}
