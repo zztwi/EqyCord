@@ -17,11 +17,11 @@ public sealed class PayloadManifest {
 }
 
 public static class Payload {
-    public static ZipArchive Open() {
-        return new ZipArchive(Assembly.GetExecutingAssembly().GetManifestResourceStream("EqyCord.Payload"), ZipArchiveMode.Read);
+    public static ZipArchive Open(string resource = "EqyCord.Payload") {
+        return new ZipArchive(Assembly.GetExecutingAssembly().GetManifestResourceStream(resource), ZipArchiveMode.Read);
     }
-    public static PayloadManifest Manifest() {
-        using (var zip = Open())
+    public static PayloadManifest Manifest(string resource = "EqyCord.Payload") {
+        using (var zip = Open(resource))
         using (var reader = new StreamReader(zip.GetEntry("manifest.json").Open()))
             return new JavaScriptSerializer().Deserialize<PayloadManifest>(reader.ReadToEnd());
     }
@@ -38,12 +38,12 @@ public static class Payload {
             directory = directory.Parent;
         }
     }
-    public static void Extract(string destination) {
+    public static void Extract(string destination, string resource = "EqyCord.Payload") {
         var root = Path.GetFullPath(destination).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         RejectLinks(root);
         Directory.CreateDirectory(root);
-        var manifest = Manifest();
-        using (var zip = Open()) {
+        var manifest = Manifest(resource);
+        using (var zip = Open(resource)) {
             foreach (var entry in zip.Entries) {
                 if (entry.FullName == "manifest.json") continue;
                 if (!manifest.Files.ContainsKey(entry.FullName)) throw new IOException("Unexpected package file.");
@@ -74,7 +74,7 @@ public static class Payload {
     }
 }
 
-public sealed class SetupWindow : Form {
+public class SetupWindow : Form {
     readonly ComboBox channel = new ComboBox();
     readonly TextBox log = new TextBox();
     readonly Label status = new Label();
@@ -82,9 +82,11 @@ public sealed class SetupWindow : Form {
     readonly List<Button> buttons = new List<Button>();
     readonly string dataRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EqyCord");
     readonly PayloadManifest manifest = Payload.Manifest();
+    protected bool busy;
 
     public SetupWindow() {
         Text = "EqyCord Setup";
+        Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
         ClientSize = new Size(600, 425);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -117,16 +119,15 @@ public sealed class SetupWindow : Form {
         Controls.Add(log);
         var licenses = new LinkLabel { Text = "Licenses and complete source", Left = 26, Top = 360, Width = 280, Height = 24 };
         licenses.LinkClicked += delegate {
-            try { var build = BuildPath(); Payload.Extract(build); Process.Start("explorer.exe", Quote(build)); }
-            catch (Exception error) { MessageBox.Show(this, error.Message, "EqyCord", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            ShowLicenses();
         };
         Controls.Add(licenses);
         AddLabel("Unofficial client mod. May conflict with Discord's Terms. Windows x64.", 26, 392, 548, 24, 9);
     }
     protected override void OnFormClosing(FormClosingEventArgs args) {
-        if (progress.Visible) {
+        if (busy) {
             args.Cancel = true;
-            status.Text = "Please wait for the current operation to finish.";
+            UpdateSurface("busy", "Please wait for the current operation to finish.", "");
         }
         base.OnFormClosing(args);
     }
@@ -142,6 +143,15 @@ public sealed class SetupWindow : Form {
     string Branch() { return new string[] { "stable", "ptb", "canary" }[channel.SelectedIndex]; }
     string BuildPath() { return Path.Combine(dataRoot, "builds", manifest.Build); }
     public static string Quote(string value) { return "\"" + value.Replace("\"", "\\\"").TrimEnd('\\') + "\""; }
+    protected void ShowLicenses() {
+        if (busy) return;
+        try { var build = BuildPath(); Payload.Extract(build); Process.Start("explorer.exe", Quote(build)); }
+        catch (Exception error) { UpdateSurface("error", "Could not open licenses", error.Message); }
+    }
+    protected virtual void UpdateSurface(string state, string title, string message) {
+        status.Text = title;
+        log.Text = message;
+    }
 
     // Look up ownership in Discord itself, so restore still works after a new
     // setup executable is downloaded or Discord creates a new app directory.
@@ -165,12 +175,17 @@ public sealed class SetupWindow : Form {
         return project;
     }
     void Run(string action) {
-        string branch = Branch();
+        RunAction(action, Branch());
+    }
+    protected void RunAction(string action, string branch) {
+        if (busy) return;
+        if (action != "install" && action != "verify" && action != "uninstall") return;
+        if (branch != "stable" && branch != "ptb" && branch != "canary") return;
+        busy = true;
         channel.Enabled = false;
         foreach (var button in buttons) button.Enabled = false;
         progress.Visible = true;
-        status.Text = "Working…";
-        log.Clear();
+        UpdateSurface("busy", action == "install" ? "Installing EqyCord…" : action == "verify" ? "Verifying your installation…" : "Restoring Discord…", "Keep this window open until the operation finishes.");
         ThreadPool.QueueUserWorkItem(delegate {
             string message;
             bool success = false;
@@ -208,8 +223,8 @@ public sealed class SetupWindow : Form {
                     : "Installed EqyCord files and original Discord backup verified.";
             } catch (Exception error) { message = error.Message; }
             if (!IsDisposed) BeginInvoke(new Action(delegate {
-                status.Text = success ? "Done" : "Action could not be completed";
-                log.Text = message;
+                busy = false;
+                UpdateSurface(success ? "success" : "error", success ? "All done." : "Action could not be completed", message);
                 progress.Visible = false;
                 channel.Enabled = true;
                 foreach (var button in buttons) button.Enabled = true;
@@ -226,22 +241,13 @@ public static class Program {
                 Payload.Extract(args[1]);
                 return 0;
             }
-            bool smoke = args.Length == 1 && args[0] == "--ui-smoke";
-            if (args.Length != 0 && !smoke) return 2;
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            var window = new SetupWindow();
-            if (smoke) {
-                window.Opacity = 0;
-                window.ShowInTaskbar = false;
-                var timer = new System.Windows.Forms.Timer { Interval = 250 };
-                window.Shown += delegate { timer.Start(); };
-                timer.Tick += delegate { timer.Stop(); window.Close(); };
-                window.FormClosed += delegate { timer.Dispose(); };
-            }
-            Application.Run(window);
-            return 0;
+            UiBootstrap.Initialize();
+            return UiBootstrap.Launch(args);
         } catch (Exception error) {
+            if (args.Length == 2 && args[0] == "--ui-test") {
+                Directory.CreateDirectory(args[1]);
+                File.WriteAllText(Path.Combine(args[1], "error.txt"), error.ToString());
+            }
             if (args.Length == 0) MessageBox.Show(error.Message, "EqyCord Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }

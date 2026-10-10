@@ -2,6 +2,16 @@
 
 Share **EqyCord-Setup.exe**. It contains the tested client build, a private Node.js runtime, the checksum-pinned upstream Vencord patcher CLI, licenses, and matching EqyCord and patcher source archives. It does not contain user settings, account data, tokens, or Discord archives.
 
+## Interface
+
+The setup uses a borderless English interface with a translucent installation panel. Its full-window Mesh Drift background is a WebGL shader: five drifting points carry the ground color `#DCDCD8` and accents `#F5C7B8` / `#C9D8F0`, blended by inverse distance. Hashed value noise, six-octave fbm, and a two-level domain warp soften the motion. Pointer intensity rises and relaxes smoothly. There are no simulated browser or device selectors.
+
+Windows' reduced-motion preference renders a single frame. Resizing can redraw that frame; pointer movement does not animate it. The shader pauses when the document is hidden. If WebGL is unavailable or its context is lost, a static CSS surface appears behind the same usable controls. If the entire web surface cannot initialize, the native install/verify/uninstall interface remains available.
+
+The executable embeds Microsoft WebView2 SDK 1.0.2903.40 and a private fixed x64 runtime 154.0.4258.62 from [Microsoft's runtime distribution](https://developer.microsoft.com/en-us/microsoft-edge/webview2/). Both downloads have pinned SHA-256 hashes. No global WebView2 installation or first-launch network download is required. The runtime retains its Microsoft/Chromium notices and bundled third-party license resources; it is not EqyCord-authored code. First launch extracts roughly 700 MB of runtime files under `%LOCALAPPDATA%/EqyCord/setup-ui`, and later launches check their hashes. The standalone EXE is larger because it includes this runtime. Fixed runtime updates require rebuilding and distributing a new setup; the build script pins the tested version explicitly.
+
+Only the embedded local document can send setup actions. External navigation and new windows are blocked, the content policy prohibits network requests, and action/channel inputs are checked by the native controller. No web page can supply arbitrary commands or paths.
+
 ## Install
 
 Windows 10/11 x64 with .NET Framework 4.8 and a normal desktop Discord installation is required. Stable, PTB, and Canary are offered subject to compatibility. Microsoft Store and other layouts are not supported.
@@ -34,4 +44,4 @@ Build the standalone desktop client, commit the exact source, then run `scripts/
 
 The `--extract-only <directory>` argument is for package tests and does not patch Discord. Test extraction, bundled-runtime install/verify/uninstall on an isolated fixture, changed-file refusal, and the user interface separately. A passing fixture test does not establish every plugin's runtime compatibility on another machine.
 
-Run `node scripts/eqycord/windows/test-package.mjs <setup.exe>` to check the built package. It uses `--ui-smoke` for invisible window startup/clean exit and `--extract-only` for fixture extraction. It does not automate clicks or constitute a visual UI review. Fixture artifacts remain under the ignored `work` directory.
+Run `node scripts/eqycord/windows/test-package.mjs <setup.exe>` to check the built package. It uses `--ui-test <report-directory>` to render the actual embedded surface and capture ready, error, success, reduced-motion, and static fallback PNGs. It checks WebGL compilation/rendering, selected-client actions reaching the native bridge, keyboard selection, busy controls, error recovery, pointer smoothing, and the reduced-motion single-frame path. Patching actions are intercepted during this test, so it never modifies a real Discord installation. It separately checks native fallback startup and uses `--extract-only` for fixture extraction/install/verify/uninstall. Review the generated PNGs visually; passing UI tests do not establish real-client installation on every supported channel. Fixture artifacts remain under the ignored `work` directory. `--ui-smoke` is also available for a shorter invisible startup check.
