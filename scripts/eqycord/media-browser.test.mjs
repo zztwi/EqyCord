@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
+import { resolve } from "node:path";
 import test from "node:test";
 import { build } from "esbuild";
 import puppeteer from "puppeteer-core";
@@ -17,7 +18,17 @@ test("real WebRTC receiver observes frozen video, effected audio and source rest
     await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
     let browser;
     try {
-        browser = await puppeteer.launch({ executablePath, headless: true, args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream", "--autoplay-policy=no-user-gesture-required"] });
+        // A continuous known signal avoids confusing Chromium's intermittent
+        // built-in test microphone with an effect-induced audio gap.
+        mkdirSync("work/media-verification", { recursive: true });
+        const wav = Buffer.alloc(44 + 48000 * 2);
+        wav.write("RIFF"); wav.writeUInt32LE(wav.length - 8, 4); wav.write("WAVEfmt ", 8);
+        wav.writeUInt32LE(16, 16); wav.writeUInt16LE(1, 20); wav.writeUInt16LE(1, 22);
+        wav.writeUInt32LE(48000, 24); wav.writeUInt32LE(96000, 28); wav.writeUInt16LE(2, 32); wav.writeUInt16LE(16, 34);
+        wav.write("data", 36); wav.writeUInt32LE(96000, 40);
+        for (let n = 0; n < 48000; n++) wav.writeInt16LE(Math.round(Math.sin(n * 2 * Math.PI * 440 / 48000) * 13000), 44 + n * 2);
+        const audioFile = resolve("work/media-verification/input.wav"); writeFileSync(audioFile, wav);
+        browser = await puppeteer.launch({ executablePath, headless: true, args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream", `--use-file-for-fake-audio-capture=${audioFile}`, "--autoplay-policy=no-user-gesture-required"] });
         const page = await browser.newPage();
         const errors = []; page.on("pageerror", e => errors.push(e.message));
         await page.goto(`http://127.0.0.1:${server.address().port}`);
@@ -26,7 +37,7 @@ test("real WebRTC receiver observes frozen video, effected audio and source rest
             const originalGet = navigator.mediaDevices.getUserMedia;
             const originalAdd = RTCPeerConnection.prototype.addTrack;
             media.acquire("FreezeCam"); media.acquire("VoiceTroll"); media.acquire("FakeLagVoice");
-            const captured = await navigator.mediaDevices.getUserMedia({ audio: true, video: { width: 320, height: 240 } });
+            const captured = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: { width: 320, height: 240 } });
             const sourceAudio = captured.getAudioTracks()[0], sourceVideo = captured.getVideoTracks()[0];
             const a = new RTCPeerConnection(), b = new RTCPeerConnection();
             a.onicecandidate = e => { if (e.candidate) void b.addIceCandidate(e.candidate); };
