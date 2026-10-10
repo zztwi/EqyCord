@@ -226,10 +226,20 @@ public static class Program {
                 Payload.Extract(args[1]);
                 return 0;
             }
-            if (args.Length != 0) return 2;
+            bool smoke = args.Length == 1 && args[0] == "--ui-smoke";
+            if (args.Length != 0 && !smoke) return 2;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new SetupWindow());
+            var window = new SetupWindow();
+            if (smoke) {
+                window.Opacity = 0;
+                window.ShowInTaskbar = false;
+                var timer = new System.Windows.Forms.Timer { Interval = 250 };
+                window.Shown += delegate { timer.Start(); };
+                timer.Tick += delegate { timer.Stop(); window.Close(); };
+                window.FormClosed += delegate { timer.Dispose(); };
+            }
+            Application.Run(window);
             return 0;
         } catch (Exception error) {
             if (args.Length == 0) MessageBox.Show(error.Message, "EqyCord Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);

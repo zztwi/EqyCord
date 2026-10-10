@@ -33,3 +33,5 @@ EqyCord is an unofficial mod and may conflict with Discord's Terms. Original Ven
 Build the standalone desktop client, commit the exact source, then run `scripts/eqycord/windows/build.ps1` in PowerShell 7 from the repository. The Windows compiler and private Node runtime are pinned in that script. The embedded payload has a manifest of file hashes; extraction refuses traversal, directory links, or changed existing files.
 
 The `--extract-only <directory>` argument is for package tests and does not patch Discord. Test extraction, bundled-runtime install/verify/uninstall on an isolated fixture, changed-file refusal, and the user interface separately. A passing fixture test does not establish every plugin's runtime compatibility on another machine.
+
+Run `node scripts/eqycord/windows/test-package.mjs <setup.exe>` to check the built package. It uses `--ui-smoke` for invisible window startup/clean exit and `--extract-only` for fixture extraction. It does not automate clicks or constitute a visual UI review. Fixture artifacts remain under the ignored `work` directory.
