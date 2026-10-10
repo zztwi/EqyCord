@@ -8,7 +8,7 @@ EqyCord retains all 185 standard Vencord plugin definitions and imports all 200 
 
 The plugin origin filter has three choices: **Vencord**, **EqyCord**, and **Community**. Imported Equicord modules are grouped under **EqyCord**. In plugin details, EqyCord-origin entries show the EqyCord profile `0009cx0` (Discord ID `380070146317877249`); Vencord plugin author displays are unchanged. Original copyright notices, source author metadata, and GPL license headers remain in the imported source. User-facing plugin names and descriptions replace the upstream Equicord brand with EqyCord while keeping internal plugin IDs stable.
 
-The earlier EqyCord prototype plugins have been removed, including the Ghost voice control, translation, search, and voice utility plugins. Standard Vencord plugins remain available. Platform-specific plugin exclusions still apply.
+The earlier prototype translation, search, and voice utility plugins have been removed. A new experimental Ghost voice button is included, with two-account audio verification still required. EqyCord Staff and Creator profile badges are bundled for the two accounts documented in BADGES.md. Standard Vencord plugins remain available. Platform-specific plugin exclusions still apply.
 
 ## Settings and backups
 
@@ -20,7 +20,9 @@ Automatic updates are disabled for this fork until an EqyCord release channel is
 
 ## Windows install and restore
 
-The Windows launcher supports Stable, PTB, and Canary only when the installed client layout is compatible. It requires Node.js 22 or later and the selected Discord client to be fully closed. The installer checks the Discord archive and its backup, refuses foreign modifications, and supports restoring the original archive. Keep the EqyCord package in the same folder after installation because the loader points to its `dist` directory.
+The distributable EqyCord-Setup.exe supports Stable, PTB, and Canary when the installed client layout is compatible. It includes a private Node.js runtime and stores the client in a permanent per-user build folder; recipients do not need to install Node or retain the download. See WINDOWS-INSTALLER.md for requirements, verification, restoration, and distribution.
+
+The older EqyCord-Windows.cmd developer launcher still requires Node.js 22 or later and its original package folder. Both installers require the selected Discord client to be fully closed, refuse foreign modifications, and support verified restoration.
 
 ## Source and credits
 
