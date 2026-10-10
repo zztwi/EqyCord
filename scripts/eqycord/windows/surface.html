@@ -17,7 +17,7 @@ header,footer{display:flex;align-items:center;justify-content:space-between;flex
 main{flex:1;display:grid;grid-template-columns:1fr 358px;gap:38px;align-items:center;min-height:0}
 .intro{padding-bottom:14px}.eyebrow{font-size:11px;letter-spacing:2.2px;font-weight:650;margin-bottom:21px;color:#535455}
 h1{font-size:52px;line-height:1.06;font-weight:650;letter-spacing:-2.8px;margin:0 0 22px}h1 span{color:#55565a;font-weight:400}
-.intro p{font-size:15px;line-height:1.7;color:#55565a;max-width:300px;margin:0}
+.intro p{font-size:15px;line-height:1.7;color:#55565a;max-width:340px;margin:0}
 .card{border:1px solid #ffffff9c;background:#ffffff54;box-shadow:0 20px 55px #49454010,inset 0 1px 0 #ffffff5c;border-radius:24px;padding:27px;backdrop-filter:blur(22px)}
 .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}h2{font-size:20px;letter-spacing:-.5px;font-weight:600;margin:0}
 .field-label{font-size:12px;font-weight:600;display:block;margin-bottom:10px}.channels{display:flex;border:1px solid #55555d16;border-radius:12px;background:#ffffff38;padding:4px;gap:4px}
@@ -28,6 +28,7 @@ button{font:inherit;cursor:pointer;border:0;transition:background .16s,box-shado
 .status{margin-top:22px;border-top:1px solid #55555d17;padding-top:16px;display:flex;gap:9px;align-items:flex-start;min-height:35px}.dot{width:6px;height:6px;background:#717876;border-radius:50%;flex-shrink:0;margin-top:5px}.status div{min-width:0}.status strong{font-size:11px;font-weight:500;display:block}.status p{font-size:11px;line-height:1.65;color:#616167;margin:5px 0 0;white-space:pre-line;max-height:98px;overflow:auto;overflow-wrap:anywhere;scrollbar-width:thin}.status[data-state=success] .dot{background:#377756}.status[data-state=error] .dot{background:#a74935}.status[data-state=busy] .dot{background:#353840;animation:pulse 1s ease-in-out infinite}.status[data-state=error] strong{color:#8a382a}
 .status[hidden]{display:none}
 footer{gap:18px;font-size:10px;color:#616367;border-top:1px solid #4d4d5519;padding-top:17px}footer p{margin:0;max-width:540px;line-height:1.5}footer button{background:none;padding:3px 0;white-space:nowrap;font-size:10px;color:#47494c;border-bottom:1px solid #47494c50}
+.footer-links{display:flex;align-items:center;gap:20px;flex-shrink:0}.footer-links strong{font-weight:600}
 @keyframes pulse{50%{opacity:.3}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 @media(max-height:540px){.shell{padding-top:20px}h1{font-size:44px}.card{padding:20px}.card-head{margin-bottom:17px}.hint{margin-bottom:15px}.status{margin-top:16px}}
 </style>
@@ -37,9 +38,9 @@ footer{gap:18px;font-size:10px;color:#616367;border-top:1px solid #4d4d5519;padd
 <div class="shell">
 <header><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="8 4 48 54"><path d="M12 50V28C12 15 20 7 32 7s20 8 20 21v22c0 3-3 4-5 2l-7-6-6 7c-1 2-3 2-4 0l-6-7-7 6c-2 2-5 1-5-2Z" fill="currentColor"/><path d="m22 28 7 3m13-3-7 3" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/></svg></div>EqyCord</div><div class="window-actions"><button data-action="minimize" aria-label="Minimize window"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 10h12"/></svg></button><button data-action="close" aria-label="Close setup"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></header>
 <main>
-<section class="intro"><div class="eyebrow">YOUR DISCORD. YOUR WAY.</div><h1>A little more<br><span>possibility.</span></h1><p>Your favorite client, with more room<br>to make it your own.</p></section>
+<section class="intro"><div class="eyebrow">WELCOME TO EQYCORD</div><h1>EqyCord.<br><span>Make it yours.</span></h1><p>Plugins, personalization, and Phantom style.<br>Discover the EqyCord experience.</p></section>
 <section class="card" aria-label="Installation">
-<div class="card-head"><h2>Make yourself at home.</h2></div>
+<div class="card-head"><h2>Install EqyCord.</h2></div>
 <div id="channel-label" class="field-label">Choose your Discord</div>
 <div class="channels" role="radiogroup" aria-labelledby="channel-label"><button class="channel" role="radio" aria-checked="true" data-channel="stable" tabindex="0">Stable</button><button class="channel" role="radio" aria-checked="false" data-channel="ptb" tabindex="-1">PTB</button><button class="channel" role="radio" aria-checked="false" data-channel="canary" tabindex="-1">Canary</button></div>
 <p class="hint">Close Discord completely, including its tray icon,<br>before installing or restoring.</p>
@@ -48,7 +49,7 @@ footer{gap:18px;font-size:10px;color:#616367;border-top:1px solid #4d4d5519;padd
 <div class="status" id="status" data-state="ready" role="status" aria-live="polite" hidden><span class="dot" aria-hidden="true"></span><div><strong id="status-title"></strong><p id="status-message" hidden></p></div></div>
 </section>
 </main>
-<footer><p>Independent client mod. May conflict with Discord’s Terms.<br>Original project credits and licenses are included.</p><button data-action="licenses">Licenses &amp; source ↗</button></footer>
+<footer><p>Independent client mod. May conflict with Discord’s Terms.<br>Original project credits and licenses are included.</p><div class="footer-links"><button data-action="creator" aria-label="Open 0009cx0's Discord profile">Created by <strong>0009cx0</strong> ↗</button><button data-action="licenses">Licenses &amp; source ↗</button></div></footer>
 </div>
 <script>
 (() => {

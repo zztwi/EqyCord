@@ -75,6 +75,7 @@ public static class Payload {
 }
 
 public class SetupWindow : Form {
+    public const string CreatorProfileUrl = "https://discord.com/users/380070146317877249";
     readonly ComboBox channel = new ComboBox();
     readonly TextBox log = new TextBox();
     readonly Label status = new Label();
@@ -122,6 +123,9 @@ public class SetupWindow : Form {
             ShowLicenses();
         };
         Controls.Add(licenses);
+        var creator = new LinkLabel { Text = "Created by 0009cx0", Left = 340, Top = 360, Width = 234, Height = 24 };
+        creator.LinkClicked += delegate { ShowCreator(); };
+        Controls.Add(creator);
         AddLabel("Unofficial client mod. May conflict with Discord's Terms.", 26, 392, 548, 24, 9);
     }
     protected override void OnFormClosing(FormClosingEventArgs args) {
@@ -147,6 +151,11 @@ public class SetupWindow : Form {
         if (busy) return;
         try { var build = BuildPath(); Payload.Extract(build); Process.Start("explorer.exe", Quote(build)); }
         catch (Exception error) { UpdateSurface("error", "Could not open licenses", error.Message); }
+    }
+    protected void ShowCreator() {
+        if (busy) return;
+        try { Process.Start(new ProcessStartInfo(CreatorProfileUrl) { UseShellExecute = true }); }
+        catch (Exception error) { UpdateSurface("error", "Could not open the creator profile", error.Message); }
     }
     protected virtual void UpdateSurface(string state, string title, string message) {
         status.Text = title;
