@@ -90,6 +90,10 @@ for (const downstream of [false, true]) test(`real WebRTC receiver observes medi
             media.setVoice(() => ({ enabled: true, effect: "robot", intensity: 1, pitch: 0, echo: 0.2, distortion: 0.5 }));
             await wait(500); const robot = await rms();
             if (Math.abs(robot - dry) < dry * 0.05) throw new Error(`Receiver did not hear the robot effect: dry=${dry}, robot=${robot}`);
+            const diagnostics = media.diagnostics();
+            if (!(diagnostics.captures > 0 && diagnostics.audioBlocks > 0 && diagnostics.effectedBlocks > 0)) throw new Error("Diagnostics failed to observe capture and effect processing");
+            if (diagnostics.microphones[0].graphInput !== downstream) throw new Error("Diagnostics conflated graph processing and observed senders");
+            if (diagnostics.remoteDiscordTransmission !== "Not verified") throw new Error("Diagnostics claimed a Discord call was verified");
             media.setVoice(() => ({ enabled: false }));
             media.setLag(() => ({ enabled: true, effect: "cut", intensity: 1, frequency: 5, duration: 1, delay: 0 }));
             await wait(500); const gaps = await rms();

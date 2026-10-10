@@ -8,11 +8,13 @@ import "@utils/eqyMedia/styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { EffectButton, VoiceIcon } from "@utils/eqyMedia/controls";
+import { MediaDiagnostics } from "@utils/eqyMedia/diagnostics";
 import { acquire, hasOutgoing, release, setVoice } from "@utils/eqyMedia/engine";
 import { mediaNotice } from "@utils/eqyMedia/notice";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 const settings = definePluginSettings({
+    diagnostics: { type: OptionType.COMPONENT, description: "Media engine diagnostics (local counters only).", component: () => <MediaDiagnostics /> },
     active: { type: OptionType.BOOLEAN, description: "Apply voice effects to your outgoing WebRTC microphone. Native Canary audio is unsupported.", default: false, onChange: value => { if (value && !hasOutgoing("audio")) { settings.store.active = false; mediaNotice("No browser microphone detected. Enable this plugin before starting the call.", "failure"); } } },
     effect: { type: OptionType.SELECT, description: "Voice effect.", options: [{ label: "Robot Voice", value: "robot", default: true }, { label: "Deep Voice", value: "deep" }, { label: "High Pitch", value: "high" }, { label: "Radio Voice", value: "radio" }, { label: "Echo", value: "echo" }, { label: "Megaphone", value: "megaphone" }, { label: "Metallic Voice", value: "metallic" }, { label: "Distorted Voice", value: "distorted" }] },
     intensity: { type: OptionType.SLIDER, description: "Blend between original and effected voice.", markers: [0, 0.25, 0.5, 0.75, 1], default: 0.75 },

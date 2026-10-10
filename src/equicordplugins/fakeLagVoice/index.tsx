@@ -8,11 +8,13 @@ import "@utils/eqyMedia/styles.css";
 
 import { definePluginSettings } from "@api/Settings";
 import { EffectButton, LagIcon } from "@utils/eqyMedia/controls";
+import { MediaDiagnostics } from "@utils/eqyMedia/diagnostics";
 import { acquire, hasOutgoing, release, setLag } from "@utils/eqyMedia/engine";
 import { mediaNotice } from "@utils/eqyMedia/notice";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 const settings = definePluginSettings({
+    diagnostics: { type: OptionType.COMPONENT, description: "Media engine diagnostics (local counters only).", component: () => <MediaDiagnostics /> },
     active: { type: OptionType.BOOLEAN, description: "Apply effects to your outgoing WebRTC microphone. Native Canary audio is unsupported.", default: false, onChange: value => { if (value && !hasOutgoing("audio")) { settings.store.active = false; mediaNotice("No browser microphone detected. Enable this plugin before starting the call.", "failure"); } } },
     effect: { type: OptionType.SELECT, description: "Audio effect; no network packets are altered.", options: [{ label: "Voice Cut", value: "cut", default: true }, { label: "Packet Loss (audio gaps)", value: "loss" }, { label: "Robotic Lag", value: "robotic" }, { label: "Delay", value: "delay" }, { label: "Glitch", value: "glitch" }] },
     intensity: { type: OptionType.SLIDER, description: "Effect intensity.", markers: [0, 0.25, 0.5, 0.75, 1], default: 0.5 },

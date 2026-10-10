@@ -19,6 +19,22 @@ let voice = () => ({ enabled: false } as VoiceEffect);
 let lag = () => ({ enabled: false } as LagEffect);
 let restore: (() => void)[] = [];
 let freezeRevision = 0;
+const counters = { captures: 0, audioBlocks: 0, effectedBlocks: 0, graphInputs: 0, senderAttachments: 0, captureFailures: 0 };
+let lastFailure = "none";
+/** Local counters only: no audio, account identifiers, device names or call data. */
+export function diagnostics() {
+    return {
+        ...counters, lastFailure,
+        enabledPlugins: [...owners], voiceEffectOn: !!voice().enabled, lagEffectOn: !!lag().enabled,
+        microphones: [...audio.values()].map(pipe => ({
+            captureLive: pipe.source.readyState === "live", captureEnabled: pipe.source.enabled,
+            outputLive: pipe.output.readyState === "live", graphInput: !!pipe.downstream,
+            observedSenders: pipe.senders.size
+        })),
+        cameras: cameras.size,
+        remoteDiscordTransmission: "Not verified"
+    };
+}
 export const subscribe = (listener: () => void) => { listeners.add(listener); return () => listeners.delete(listener); };
 export const snapshot = () => [...audio.values(), ...cameras.values()].filter(p => p.source.readyState === "live" && (p.senders.size || p.downstream)).map(p => p.source.kind).sort().join(",");
 const notify = () => listeners.forEach(f => f());
@@ -43,7 +59,12 @@ async function processAudio(source: MediaStreamTrack): Promise<Pipe> {
     const processor = ctx.createScriptProcessor(2048, 1, 1);
     const output = ctx.createMediaStreamDestination();
     const dsp = new VoiceDSP(ctx.sampleRate);
-    processor.onaudioprocess = event => dsp.process(event.inputBuffer.getChannelData(0), event.outputBuffer.getChannelData(0), voice(), lag());
+    processor.onaudioprocess = event => {
+        counters.audioBlocks++;
+        const voiceConfig = voice(), lagConfig = lag();
+        if (voiceConfig.enabled || lagConfig.enabled) counters.effectedBlocks++;
+        dsp.process(event.inputBuffer.getChannelData(0), event.outputBuffer.getChannelData(0), voiceConfig, lagConfig);
+    };
     input.connect(processor); processor.connect(output);
     const track = output.stream.getAudioTracks()[0];
     let closed = false;
@@ -72,6 +93,7 @@ async function processCamera(source: MediaStreamTrack): Promise<Pipe> {
 }
 function pipeFor(track: MediaStreamTrack) { return audio.get(track) ?? cameras.get(track) ?? [...audio.values(), ...cameras.values()].find(p => p.output === track); }
 function attach(sender: RTCRtpSender, track: MediaStreamTrack | null) {
+    if (track) counters.senderAttachments++;
     for (const pipe of [...audio.values(), ...cameras.values()]) pipe.senders.delete(sender);
     if (track) pipeFor(track)?.senders.add(sender);
     notify();
@@ -86,6 +108,7 @@ export function acquire(owner: string) {
     const original = media.getUserMedia;
     const get = async function (this: MediaDevices, constraints: MediaStreamConstraints) {
         const stream = await original.call(this, constraints);
+        counters.captures++;
         for (const source of stream.getTracks()) {
             captured.add(source);
             if (epoch !== generation) continue;
@@ -97,7 +120,7 @@ export function acquire(owner: string) {
                 const map = source.kind === "audio" ? audio : cameras;
                 map.set(source, pipe);
                 source.addEventListener("ended", () => { map.delete(source); pipe.close(); notify(); }, { once: true });
-            } catch { /* Keep the original media if processing is unsupported or permission is denied. */ }
+            } catch (error) { counters.captureFailures++; lastFailure = error instanceof Error ? error.name : "UnknownError"; /* Leave original capture untouched. */ }
         }
         return stream;
     };
@@ -112,7 +135,7 @@ export function acquire(owner: string) {
         const result = createSource.call(this, pipes.some(Boolean)
             ? new MediaStream(tracks.map((track, index) => pipes[index]?.output ?? track))
             : stream);
-        for (const pipe of pipes) if (pipe) pipe.downstream = true;
+        for (const pipe of pipes) if (pipe) { pipe.downstream = true; counters.graphInputs++; }
         notify();
         return result;
     };
