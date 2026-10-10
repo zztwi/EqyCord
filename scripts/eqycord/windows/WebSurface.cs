@@ -237,7 +237,7 @@ public sealed class MeshSetupWindow : SetupWindow {
         await Task.Delay(250);
         if (json.Deserialize<double>(await surface.ExecuteScriptAsync("meshStatus.intensity")) >= intensity)
             throw new IOException("Pointer intensity did not relax after leaving.");
-        await surface.ExecuteScriptAsync("setState('ready','Ready when you are.');meshTest.reduce(true)");
+        await surface.ExecuteScriptAsync("setState('ready','');meshTest.reduce(true)");
         await Task.Delay(120);
         string before = await surface.ExecuteScriptAsync("meshStatus.frames");
         await Task.Delay(160);

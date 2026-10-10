@@ -122,7 +122,7 @@ public class SetupWindow : Form {
             ShowLicenses();
         };
         Controls.Add(licenses);
-        AddLabel("Unofficial client mod. May conflict with Discord's Terms. Windows x64.", 26, 392, 548, 24, 9);
+        AddLabel("Unofficial client mod. May conflict with Discord's Terms.", 26, 392, 548, 24, 9);
     }
     protected override void OnFormClosing(FormClosingEventArgs args) {
         if (busy) {

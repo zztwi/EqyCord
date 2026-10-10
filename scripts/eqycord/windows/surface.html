@@ -13,21 +13,20 @@
 .shell{position:relative;height:100%;display:flex;flex-direction:column;padding:30px 38px 22px;isolation:isolate}
 header,footer{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .brand{display:flex;gap:10px;align-items:center;font-weight:650;font-size:17px;letter-spacing:-.5px}.mark{width:29px;height:29px;border-radius:9px;background:#27282b;color:#fff;display:grid;place-items:center}.mark svg{width:19px;height:19px}
-.edition{font-size:11px;letter-spacing:1.6px;font-weight:600;opacity:.58}
 .window-actions{display:flex;align-items:center;gap:18px}.window-actions button{background:transparent;border-radius:6px;padding:6px;display:grid;place-items:center}.window-actions button:hover:not(:disabled){background:#ffffff65}.window-actions svg{width:15px;height:15px}
 main{flex:1;display:grid;grid-template-columns:1fr 358px;gap:38px;align-items:center;min-height:0}
 .intro{padding-bottom:14px}.eyebrow{font-size:11px;letter-spacing:2.2px;font-weight:650;margin-bottom:21px;color:#535455}
 h1{font-size:52px;line-height:1.06;font-weight:650;letter-spacing:-2.8px;margin:0 0 22px}h1 span{color:#55565a;font-weight:400}
 .intro p{font-size:15px;line-height:1.7;color:#55565a;max-width:300px;margin:0}
-.meta{margin-top:31px;display:flex;gap:9px;align-items:center;font-size:11px;color:#525459}.meta svg{width:14px;height:14px;opacity:.6}
 .card{border:1px solid #ffffff9c;background:#ffffff54;box-shadow:0 20px 55px #49454010,inset 0 1px 0 #ffffff5c;border-radius:24px;padding:27px;backdrop-filter:blur(22px)}
-.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}h2{font-size:20px;letter-spacing:-.5px;font-weight:600;margin:0}.step{font-size:10px;letter-spacing:1.4px;color:#626266}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}h2{font-size:20px;letter-spacing:-.5px;font-weight:600;margin:0}
 .field-label{font-size:12px;font-weight:600;display:block;margin-bottom:10px}.channels{display:flex;border:1px solid #55555d16;border-radius:12px;background:#ffffff38;padding:4px;gap:4px}
 button{font:inherit;cursor:pointer;border:0;transition:background .16s,box-shadow .16s,transform .16s;color:inherit}button:focus-visible{outline:2px solid #33363f;outline-offset:3px}button:disabled{cursor:wait;opacity:.52}.channel{flex:1;border-radius:8px;background:transparent;font-size:12px;padding:10px 0;color:#616167}.channel[aria-checked=true]{background:#ffffffd9;box-shadow:0 2px 8px #3333330c;color:#242529;font-weight:600}.channel:hover:not(:disabled){background:#ffffff88}
 .hint{font-size:12px;line-height:1.65;color:#636368;margin:14px 0 22px;min-height:39px}
 .primary{width:100%;display:flex;align-items:center;justify-content:space-between;border-radius:12px;background:#27282b;color:#fff;padding:15px 17px;font-size:13px;font-weight:600;box-shadow:0 5px 16px #24242416}.primary:hover:not(:disabled){background:#3c3d42;transform:translateY(-1px)}.primary svg{width:18px;height:18px}
 .secondary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.secondary button{border:1px solid #55555d18;background:#ffffff38;padding:11px 8px;border-radius:10px;font-size:12px}.secondary button:hover:not(:disabled){background:#ffffffa0}.secondary svg{width:13px;height:13px;vertical-align:-2px;margin-right:5px}
 .status{margin-top:22px;border-top:1px solid #55555d17;padding-top:16px;display:flex;gap:9px;align-items:flex-start;min-height:35px}.dot{width:6px;height:6px;background:#717876;border-radius:50%;flex-shrink:0;margin-top:5px}.status div{min-width:0}.status strong{font-size:11px;font-weight:500;display:block}.status p{font-size:11px;line-height:1.65;color:#616167;margin:5px 0 0;white-space:pre-line;max-height:98px;overflow:auto;overflow-wrap:anywhere;scrollbar-width:thin}.status[data-state=success] .dot{background:#377756}.status[data-state=error] .dot{background:#a74935}.status[data-state=busy] .dot{background:#353840;animation:pulse 1s ease-in-out infinite}.status[data-state=error] strong{color:#8a382a}
+.status[hidden]{display:none}
 footer{gap:18px;font-size:10px;color:#616367;border-top:1px solid #4d4d5519;padding-top:17px}footer p{margin:0;max-width:540px;line-height:1.5}footer button{background:none;padding:3px 0;white-space:nowrap;font-size:10px;color:#47494c;border-bottom:1px solid #47494c50}
 @keyframes pulse{50%{opacity:.3}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 @media(max-height:540px){.shell{padding-top:20px}h1{font-size:44px}.card{padding:20px}.card-head{margin-bottom:17px}.hint{margin-bottom:15px}.status{margin-top:16px}}
@@ -36,17 +35,17 @@ footer{gap:18px;font-size:10px;color:#616367;border-top:1px solid #4d4d5519;padd
 <body>
 <div class="ground" aria-hidden="true"></div><canvas id="mesh" aria-hidden="true"></canvas>
 <div class="shell">
-<header><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 5H7v14h10M7 12h8"/></svg></div>EqyCord</div><div class="window-actions"><span class="edition">WINDOWS SETUP</span><button data-action="minimize" aria-label="Minimize window"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 10h12"/></svg></button><button data-action="close" aria-label="Close setup"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></header>
+<header><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 5H7v14h10M7 12h8"/></svg></div>EqyCord</div><div class="window-actions"><button data-action="minimize" aria-label="Minimize window"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 10h12"/></svg></button><button data-action="close" aria-label="Close setup"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3"><path d="m5 5 10 10M15 5 5 15"/></svg></button></div></header>
 <main>
-<section class="intro"><div class="eyebrow">YOUR DISCORD. YOUR WAY.</div><h1>A little more<br><span>possibility.</span></h1><p>Your favorite client, with more room<br>to make it your own.</p><div class="meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Windows 10 / 11 &nbsp;·&nbsp; 64-bit</div></section>
+<section class="intro"><div class="eyebrow">YOUR DISCORD. YOUR WAY.</div><h1>A little more<br><span>possibility.</span></h1><p>Your favorite client, with more room<br>to make it your own.</p></section>
 <section class="card" aria-label="Installation">
-<div class="card-head"><h2>Make yourself at home.</h2><span class="step">01 / SETUP</span></div>
+<div class="card-head"><h2>Make yourself at home.</h2></div>
 <div id="channel-label" class="field-label">Choose your Discord</div>
 <div class="channels" role="radiogroup" aria-labelledby="channel-label"><button class="channel" role="radio" aria-checked="true" data-channel="stable" tabindex="0">Stable</button><button class="channel" role="radio" aria-checked="false" data-channel="ptb" tabindex="-1">PTB</button><button class="channel" role="radio" aria-checked="false" data-channel="canary" tabindex="-1">Canary</button></div>
 <p class="hint">Close Discord completely, including its tray icon,<br>before installing or restoring.</p>
 <button class="primary" data-action="install"><span>Install EqyCord</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
 <div class="secondary"><button data-action="verify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m12 3 8 4v6c0 5-8 8-8 8s-8-3-8-8V7z"/><path d="m8 12 3 3 5-6"/></svg>Verify installation</button><button data-action="uninstall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></svg>Restore Discord</button></div>
-<div class="status" id="status" data-state="ready" role="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><div><strong id="status-title">Ready when you are.</strong><p id="status-message" hidden></p></div></div>
+<div class="status" id="status" data-state="ready" role="status" aria-live="polite" hidden><span class="dot" aria-hidden="true"></span><div><strong id="status-title"></strong><p id="status-message" hidden></p></div></div>
 </section>
 </main>
 <footer><p>Independent client mod. May conflict with Discord’s Terms.<br>Original project credits and licenses are included.</p><button data-action="licenses">Licenses &amp; source ↗</button></footer>
@@ -87,7 +86,8 @@ footer{gap:18px;font-size:10px;color:#616367;border-top:1px solid #4d4d5519;padd
         document.querySelectorAll('button').forEach(button => { button.disabled = busy; });
         document.querySelector('.card').setAttribute('aria-busy', String(busy));
         document.getElementById('status').dataset.state = state;
-        document.getElementById('status-title').textContent = title;
+        document.getElementById('status').hidden = state === 'ready';
+        document.getElementById('status-title').textContent = state === 'ready' ? '' : title;
         const detail = document.getElementById('status-message');
         detail.textContent = message; detail.hidden = !message;
         document.querySelector('.primary span').textContent = busy ? 'Working…' : 'Install EqyCord';
